@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  sessionVersion: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
+  sessionVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type UserMinAggregateOutputType = {
   password: string | null
   role: $Enums.UserRole | null
   isActive: boolean | null
+  sessionVersion: number | null
   lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +56,7 @@ export type UserMaxAggregateOutputType = {
   password: string | null
   role: $Enums.UserRole | null
   isActive: boolean | null
+  sessionVersion: number | null
   lastLoginAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +69,7 @@ export type UserCountAggregateOutputType = {
   password: number
   role: number
   isActive: number
+  sessionVersion: number
   lastLoginAt: number
   createdAt: number
   updatedAt: number
@@ -74,10 +79,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   id?: true
+  sessionVersion?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  sessionVersion?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -87,6 +94,7 @@ export type UserMinAggregateInputType = {
   password?: true
   role?: true
   isActive?: true
+  sessionVersion?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +107,7 @@ export type UserMaxAggregateInputType = {
   password?: true
   role?: true
   isActive?: true
+  sessionVersion?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -111,6 +120,7 @@ export type UserCountAggregateInputType = {
   password?: true
   role?: true
   isActive?: true
+  sessionVersion?: true
   lastLoginAt?: true
   createdAt?: true
   updatedAt?: true
@@ -210,6 +220,7 @@ export type UserGroupByOutputType = {
   password: string
   role: $Enums.UserRole
   isActive: boolean
+  sessionVersion: number
   lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -245,6 +256,7 @@ export type UserWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -266,6 +278,7 @@ export type UserWhereInput = {
   requestedDocuments?: Prisma.PayslipDocumentListRelationFilter
   deliveryBatches?: Prisma.PayslipDeliveryBatchListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  passwordResets?: Prisma.PasswordResetListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -275,6 +288,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -296,6 +310,7 @@ export type UserOrderByWithRelationInput = {
   requestedDocuments?: Prisma.PayslipDocumentOrderByRelationAggregateInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  passwordResets?: Prisma.PasswordResetOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +323,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -329,6 +345,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   requestedDocuments?: Prisma.PayslipDocumentListRelationFilter
   deliveryBatches?: Prisma.PayslipDeliveryBatchListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  passwordResets?: Prisma.PasswordResetListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -338,6 +355,7 @@ export type UserOrderByWithAggregationInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -358,6 +376,7 @@ export type UserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -368,6 +387,7 @@ export type UserCreateInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -389,6 +409,7 @@ export type UserCreateInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -398,6 +419,7 @@ export type UserUncheckedCreateInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -418,6 +440,7 @@ export type UserUncheckedCreateInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -425,6 +448,7 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -446,6 +470,7 @@ export type UserUpdateInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -455,6 +480,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -475,6 +501,7 @@ export type UserUncheckedUpdateInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -484,6 +511,7 @@ export type UserCreateManyInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -494,6 +522,7 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -506,6 +535,7 @@ export type UserUncheckedUpdateManyInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -518,6 +548,7 @@ export type UserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -525,6 +556,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -534,6 +566,7 @@ export type UserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -546,6 +579,7 @@ export type UserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -553,6 +587,12 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserListRelationFilter = {
@@ -570,11 +610,6 @@ export type UserNullableScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput | null
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
-}
-
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -585,6 +620,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
+}
+
+export type UserCreateNestedOneWithoutPasswordResetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetsInput, Prisma.UserUncheckedCreateWithoutPasswordResetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetsInput, Prisma.UserUncheckedCreateWithoutPasswordResetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetsInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetsInput, Prisma.UserUpdateWithoutPasswordResetsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetsInput>
 }
 
 export type UserCreateNestedManyWithoutAssignedRoleInput = {
@@ -883,14 +932,16 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>
 }
 
-export type UserCreateWithoutAssignedRoleInput = {
+export type UserCreateWithoutPasswordResetsInput = {
   name: string
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignedRole?: Prisma.RoleCreateNestedOneWithoutUsersInput
   employee?: Prisma.EmployeeCreateNestedOneWithoutUserInput
   attendanceEntries?: Prisma.AttendanceCreateNestedManyWithoutCreatedByInput
   attendanceCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutCorrectedByInput
@@ -910,12 +961,14 @@ export type UserCreateWithoutAssignedRoleInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
 }
 
-export type UserUncheckedCreateWithoutAssignedRoleInput = {
+export type UserUncheckedCreateWithoutPasswordResetsInput = {
   id?: number
   name: string
   email: string
   password: string
+  role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -936,6 +989,140 @@ export type UserUncheckedCreateWithoutAssignedRoleInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetsInput, Prisma.UserUncheckedCreateWithoutPasswordResetsInput>
+}
+
+export type UserUpsertWithoutPasswordResetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetsInput, Prisma.UserUncheckedCreateWithoutPasswordResetsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetsInput>
+}
+
+export type UserUpdateWithoutPasswordResetsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedRole?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  employee?: Prisma.EmployeeUpdateOneWithoutUserNestedInput
+  attendanceEntries?: Prisma.AttendanceUpdateManyWithoutCreatedByNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutCorrectedByNestedInput
+  resolvedExceptions?: Prisma.AttendanceExceptionUpdateManyWithoutResolvedByNestedInput
+  employmentEvents?: Prisma.EmploymentHistoryUpdateManyWithoutChangedByNestedInput
+  submittedLeaveRequests?: Prisma.LeaveRequestUpdateManyWithoutRequestedByNestedInput
+  createdAllocations?: Prisma.LeaveAllocationUpdateManyWithoutCreatedByNestedInput
+  leaveApprovals?: Prisma.LeaveRequestApprovalUpdateManyWithoutApproverNestedInput
+  allocationApprovals?: Prisma.LeaveAllocationApprovalUpdateManyWithoutApproverNestedInput
+  createdPayruns?: Prisma.PayrunUpdateManyWithoutCreatedByNestedInput
+  validatedPayruns?: Prisma.PayrunUpdateManyWithoutValidatedByNestedInput
+  validatedPayslips?: Prisma.PayslipUpdateManyWithoutValidatedByNestedInput
+  resolvedWarnings?: Prisma.PayrollWarningUpdateManyWithoutResolvedByNestedInput
+  recordedPayments?: Prisma.PayrollPaymentUpdateManyWithoutRecordedByNestedInput
+  requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
+  deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employee?: Prisma.EmployeeUncheckedUpdateOneWithoutUserNestedInput
+  attendanceEntries?: Prisma.AttendanceUncheckedUpdateManyWithoutCreatedByNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutCorrectedByNestedInput
+  resolvedExceptions?: Prisma.AttendanceExceptionUncheckedUpdateManyWithoutResolvedByNestedInput
+  employmentEvents?: Prisma.EmploymentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  submittedLeaveRequests?: Prisma.LeaveRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  createdAllocations?: Prisma.LeaveAllocationUncheckedUpdateManyWithoutCreatedByNestedInput
+  leaveApprovals?: Prisma.LeaveRequestApprovalUncheckedUpdateManyWithoutApproverNestedInput
+  allocationApprovals?: Prisma.LeaveAllocationApprovalUncheckedUpdateManyWithoutApproverNestedInput
+  createdPayruns?: Prisma.PayrunUncheckedUpdateManyWithoutCreatedByNestedInput
+  validatedPayruns?: Prisma.PayrunUncheckedUpdateManyWithoutValidatedByNestedInput
+  validatedPayslips?: Prisma.PayslipUncheckedUpdateManyWithoutValidatedByNestedInput
+  resolvedWarnings?: Prisma.PayrollWarningUncheckedUpdateManyWithoutResolvedByNestedInput
+  recordedPayments?: Prisma.PayrollPaymentUncheckedUpdateManyWithoutRecordedByNestedInput
+  requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
+  deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutAssignedRoleInput = {
+  name: string
+  email: string
+  password: string
+  isActive?: boolean
+  sessionVersion?: number
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employee?: Prisma.EmployeeCreateNestedOneWithoutUserInput
+  attendanceEntries?: Prisma.AttendanceCreateNestedManyWithoutCreatedByInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutCorrectedByInput
+  resolvedExceptions?: Prisma.AttendanceExceptionCreateNestedManyWithoutResolvedByInput
+  employmentEvents?: Prisma.EmploymentHistoryCreateNestedManyWithoutChangedByInput
+  submittedLeaveRequests?: Prisma.LeaveRequestCreateNestedManyWithoutRequestedByInput
+  createdAllocations?: Prisma.LeaveAllocationCreateNestedManyWithoutCreatedByInput
+  leaveApprovals?: Prisma.LeaveRequestApprovalCreateNestedManyWithoutApproverInput
+  allocationApprovals?: Prisma.LeaveAllocationApprovalCreateNestedManyWithoutApproverInput
+  createdPayruns?: Prisma.PayrunCreateNestedManyWithoutCreatedByInput
+  validatedPayruns?: Prisma.PayrunCreateNestedManyWithoutValidatedByInput
+  validatedPayslips?: Prisma.PayslipCreateNestedManyWithoutValidatedByInput
+  resolvedWarnings?: Prisma.PayrollWarningCreateNestedManyWithoutResolvedByInput
+  recordedPayments?: Prisma.PayrollPaymentCreateNestedManyWithoutRecordedByInput
+  requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
+  deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAssignedRoleInput = {
+  id?: number
+  name: string
+  email: string
+  password: string
+  isActive?: boolean
+  sessionVersion?: number
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employee?: Prisma.EmployeeUncheckedCreateNestedOneWithoutUserInput
+  attendanceEntries?: Prisma.AttendanceUncheckedCreateNestedManyWithoutCreatedByInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutCorrectedByInput
+  resolvedExceptions?: Prisma.AttendanceExceptionUncheckedCreateNestedManyWithoutResolvedByInput
+  employmentEvents?: Prisma.EmploymentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  submittedLeaveRequests?: Prisma.LeaveRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  createdAllocations?: Prisma.LeaveAllocationUncheckedCreateNestedManyWithoutCreatedByInput
+  leaveApprovals?: Prisma.LeaveRequestApprovalUncheckedCreateNestedManyWithoutApproverInput
+  allocationApprovals?: Prisma.LeaveAllocationApprovalUncheckedCreateNestedManyWithoutApproverInput
+  createdPayruns?: Prisma.PayrunUncheckedCreateNestedManyWithoutCreatedByInput
+  validatedPayruns?: Prisma.PayrunUncheckedCreateNestedManyWithoutValidatedByInput
+  validatedPayslips?: Prisma.PayslipUncheckedCreateNestedManyWithoutValidatedByInput
+  resolvedWarnings?: Prisma.PayrollWarningUncheckedCreateNestedManyWithoutResolvedByInput
+  recordedPayments?: Prisma.PayrollPaymentUncheckedCreateNestedManyWithoutRecordedByInput
+  requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
+  deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAssignedRoleInput = {
@@ -974,6 +1161,7 @@ export type UserScalarWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -984,6 +1172,7 @@ export type UserCreateWithoutEmployeeInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1004,6 +1193,7 @@ export type UserCreateWithoutEmployeeInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmployeeInput = {
@@ -1013,6 +1203,7 @@ export type UserUncheckedCreateWithoutEmployeeInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1032,6 +1223,7 @@ export type UserUncheckedCreateWithoutEmployeeInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmployeeInput = {
@@ -1055,6 +1247,7 @@ export type UserUpdateWithoutEmployeeInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1075,6 +1268,7 @@ export type UserUpdateWithoutEmployeeInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmployeeInput = {
@@ -1084,6 +1278,7 @@ export type UserUncheckedUpdateWithoutEmployeeInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1103,6 +1298,7 @@ export type UserUncheckedUpdateWithoutEmployeeInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmploymentEventsInput = {
@@ -1110,6 +1306,7 @@ export type UserCreateWithoutEmploymentEventsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1130,6 +1327,7 @@ export type UserCreateWithoutEmploymentEventsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmploymentEventsInput = {
@@ -1139,6 +1337,7 @@ export type UserUncheckedCreateWithoutEmploymentEventsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1158,6 +1357,7 @@ export type UserUncheckedCreateWithoutEmploymentEventsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmploymentEventsInput = {
@@ -1181,6 +1381,7 @@ export type UserUpdateWithoutEmploymentEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1201,6 +1402,7 @@ export type UserUpdateWithoutEmploymentEventsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmploymentEventsInput = {
@@ -1210,6 +1412,7 @@ export type UserUncheckedUpdateWithoutEmploymentEventsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1229,6 +1432,7 @@ export type UserUncheckedUpdateWithoutEmploymentEventsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendanceEntriesInput = {
@@ -1236,6 +1440,7 @@ export type UserCreateWithoutAttendanceEntriesInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1256,6 +1461,7 @@ export type UserCreateWithoutAttendanceEntriesInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceEntriesInput = {
@@ -1265,6 +1471,7 @@ export type UserUncheckedCreateWithoutAttendanceEntriesInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1284,6 +1491,7 @@ export type UserUncheckedCreateWithoutAttendanceEntriesInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceEntriesInput = {
@@ -1307,6 +1515,7 @@ export type UserUpdateWithoutAttendanceEntriesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1327,6 +1536,7 @@ export type UserUpdateWithoutAttendanceEntriesInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceEntriesInput = {
@@ -1336,6 +1546,7 @@ export type UserUncheckedUpdateWithoutAttendanceEntriesInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1355,6 +1566,7 @@ export type UserUncheckedUpdateWithoutAttendanceEntriesInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendanceCorrectionsInput = {
@@ -1362,6 +1574,7 @@ export type UserCreateWithoutAttendanceCorrectionsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1382,6 +1595,7 @@ export type UserCreateWithoutAttendanceCorrectionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceCorrectionsInput = {
@@ -1391,6 +1605,7 @@ export type UserUncheckedCreateWithoutAttendanceCorrectionsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1410,6 +1625,7 @@ export type UserUncheckedCreateWithoutAttendanceCorrectionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceCorrectionsInput = {
@@ -1433,6 +1649,7 @@ export type UserUpdateWithoutAttendanceCorrectionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1453,6 +1670,7 @@ export type UserUpdateWithoutAttendanceCorrectionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceCorrectionsInput = {
@@ -1462,6 +1680,7 @@ export type UserUncheckedUpdateWithoutAttendanceCorrectionsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1481,6 +1700,7 @@ export type UserUncheckedUpdateWithoutAttendanceCorrectionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutResolvedExceptionsInput = {
@@ -1488,6 +1708,7 @@ export type UserCreateWithoutResolvedExceptionsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1508,6 +1729,7 @@ export type UserCreateWithoutResolvedExceptionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutResolvedExceptionsInput = {
@@ -1517,6 +1739,7 @@ export type UserUncheckedCreateWithoutResolvedExceptionsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1536,6 +1759,7 @@ export type UserUncheckedCreateWithoutResolvedExceptionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutResolvedExceptionsInput = {
@@ -1559,6 +1783,7 @@ export type UserUpdateWithoutResolvedExceptionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1579,6 +1804,7 @@ export type UserUpdateWithoutResolvedExceptionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedExceptionsInput = {
@@ -1588,6 +1814,7 @@ export type UserUncheckedUpdateWithoutResolvedExceptionsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1607,6 +1834,7 @@ export type UserUncheckedUpdateWithoutResolvedExceptionsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedAllocationsInput = {
@@ -1614,6 +1842,7 @@ export type UserCreateWithoutCreatedAllocationsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1634,6 +1863,7 @@ export type UserCreateWithoutCreatedAllocationsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedAllocationsInput = {
@@ -1643,6 +1873,7 @@ export type UserUncheckedCreateWithoutCreatedAllocationsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1662,6 +1893,7 @@ export type UserUncheckedCreateWithoutCreatedAllocationsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedAllocationsInput = {
@@ -1685,6 +1917,7 @@ export type UserUpdateWithoutCreatedAllocationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1705,6 +1938,7 @@ export type UserUpdateWithoutCreatedAllocationsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedAllocationsInput = {
@@ -1714,6 +1948,7 @@ export type UserUncheckedUpdateWithoutCreatedAllocationsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1733,6 +1968,7 @@ export type UserUncheckedUpdateWithoutCreatedAllocationsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAllocationApprovalsInput = {
@@ -1740,6 +1976,7 @@ export type UserCreateWithoutAllocationApprovalsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1760,6 +1997,7 @@ export type UserCreateWithoutAllocationApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAllocationApprovalsInput = {
@@ -1769,6 +2007,7 @@ export type UserUncheckedCreateWithoutAllocationApprovalsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1788,6 +2027,7 @@ export type UserUncheckedCreateWithoutAllocationApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAllocationApprovalsInput = {
@@ -1811,6 +2051,7 @@ export type UserUpdateWithoutAllocationApprovalsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1831,6 +2072,7 @@ export type UserUpdateWithoutAllocationApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAllocationApprovalsInput = {
@@ -1840,6 +2082,7 @@ export type UserUncheckedUpdateWithoutAllocationApprovalsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1859,6 +2102,7 @@ export type UserUncheckedUpdateWithoutAllocationApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSubmittedLeaveRequestsInput = {
@@ -1866,6 +2110,7 @@ export type UserCreateWithoutSubmittedLeaveRequestsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1886,6 +2131,7 @@ export type UserCreateWithoutSubmittedLeaveRequestsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmittedLeaveRequestsInput = {
@@ -1895,6 +2141,7 @@ export type UserUncheckedCreateWithoutSubmittedLeaveRequestsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1914,6 +2161,7 @@ export type UserUncheckedCreateWithoutSubmittedLeaveRequestsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmittedLeaveRequestsInput = {
@@ -1937,6 +2185,7 @@ export type UserUpdateWithoutSubmittedLeaveRequestsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1957,6 +2206,7 @@ export type UserUpdateWithoutSubmittedLeaveRequestsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmittedLeaveRequestsInput = {
@@ -1966,6 +2216,7 @@ export type UserUncheckedUpdateWithoutSubmittedLeaveRequestsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1985,6 +2236,7 @@ export type UserUncheckedUpdateWithoutSubmittedLeaveRequestsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLeaveApprovalsInput = {
@@ -1992,6 +2244,7 @@ export type UserCreateWithoutLeaveApprovalsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2012,6 +2265,7 @@ export type UserCreateWithoutLeaveApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLeaveApprovalsInput = {
@@ -2021,6 +2275,7 @@ export type UserUncheckedCreateWithoutLeaveApprovalsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2040,6 +2295,7 @@ export type UserUncheckedCreateWithoutLeaveApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLeaveApprovalsInput = {
@@ -2063,6 +2319,7 @@ export type UserUpdateWithoutLeaveApprovalsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2083,6 +2340,7 @@ export type UserUpdateWithoutLeaveApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLeaveApprovalsInput = {
@@ -2092,6 +2350,7 @@ export type UserUncheckedUpdateWithoutLeaveApprovalsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2111,6 +2370,7 @@ export type UserUncheckedUpdateWithoutLeaveApprovalsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedPayrunsInput = {
@@ -2118,6 +2378,7 @@ export type UserCreateWithoutCreatedPayrunsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2138,6 +2399,7 @@ export type UserCreateWithoutCreatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedPayrunsInput = {
@@ -2147,6 +2409,7 @@ export type UserUncheckedCreateWithoutCreatedPayrunsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2166,6 +2429,7 @@ export type UserUncheckedCreateWithoutCreatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedPayrunsInput = {
@@ -2178,6 +2442,7 @@ export type UserCreateWithoutValidatedPayrunsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2198,6 +2463,7 @@ export type UserCreateWithoutValidatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutValidatedPayrunsInput = {
@@ -2207,6 +2473,7 @@ export type UserUncheckedCreateWithoutValidatedPayrunsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2226,6 +2493,7 @@ export type UserUncheckedCreateWithoutValidatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutValidatedPayrunsInput = {
@@ -2249,6 +2517,7 @@ export type UserUpdateWithoutCreatedPayrunsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2269,6 +2538,7 @@ export type UserUpdateWithoutCreatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedPayrunsInput = {
@@ -2278,6 +2548,7 @@ export type UserUncheckedUpdateWithoutCreatedPayrunsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2297,6 +2568,7 @@ export type UserUncheckedUpdateWithoutCreatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutValidatedPayrunsInput = {
@@ -2315,6 +2587,7 @@ export type UserUpdateWithoutValidatedPayrunsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2335,6 +2608,7 @@ export type UserUpdateWithoutValidatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutValidatedPayrunsInput = {
@@ -2344,6 +2618,7 @@ export type UserUncheckedUpdateWithoutValidatedPayrunsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2363,6 +2638,7 @@ export type UserUncheckedUpdateWithoutValidatedPayrunsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutValidatedPayslipsInput = {
@@ -2370,6 +2646,7 @@ export type UserCreateWithoutValidatedPayslipsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2390,6 +2667,7 @@ export type UserCreateWithoutValidatedPayslipsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutValidatedPayslipsInput = {
@@ -2399,6 +2677,7 @@ export type UserUncheckedCreateWithoutValidatedPayslipsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2418,6 +2697,7 @@ export type UserUncheckedCreateWithoutValidatedPayslipsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutValidatedPayslipsInput = {
@@ -2441,6 +2721,7 @@ export type UserUpdateWithoutValidatedPayslipsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2461,6 +2742,7 @@ export type UserUpdateWithoutValidatedPayslipsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutValidatedPayslipsInput = {
@@ -2470,6 +2752,7 @@ export type UserUncheckedUpdateWithoutValidatedPayslipsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2489,6 +2772,7 @@ export type UserUncheckedUpdateWithoutValidatedPayslipsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutResolvedWarningsInput = {
@@ -2496,6 +2780,7 @@ export type UserCreateWithoutResolvedWarningsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2516,6 +2801,7 @@ export type UserCreateWithoutResolvedWarningsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutResolvedWarningsInput = {
@@ -2525,6 +2811,7 @@ export type UserUncheckedCreateWithoutResolvedWarningsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2544,6 +2831,7 @@ export type UserUncheckedCreateWithoutResolvedWarningsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutResolvedWarningsInput = {
@@ -2567,6 +2855,7 @@ export type UserUpdateWithoutResolvedWarningsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2587,6 +2876,7 @@ export type UserUpdateWithoutResolvedWarningsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedWarningsInput = {
@@ -2596,6 +2886,7 @@ export type UserUncheckedUpdateWithoutResolvedWarningsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2615,6 +2906,7 @@ export type UserUncheckedUpdateWithoutResolvedWarningsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordedPaymentsInput = {
@@ -2622,6 +2914,7 @@ export type UserCreateWithoutRecordedPaymentsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2642,6 +2935,7 @@ export type UserCreateWithoutRecordedPaymentsInput = {
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordedPaymentsInput = {
@@ -2651,6 +2945,7 @@ export type UserUncheckedCreateWithoutRecordedPaymentsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2670,6 +2965,7 @@ export type UserUncheckedCreateWithoutRecordedPaymentsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordedPaymentsInput = {
@@ -2693,6 +2989,7 @@ export type UserUpdateWithoutRecordedPaymentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2713,6 +3010,7 @@ export type UserUpdateWithoutRecordedPaymentsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordedPaymentsInput = {
@@ -2722,6 +3020,7 @@ export type UserUncheckedUpdateWithoutRecordedPaymentsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2741,6 +3040,7 @@ export type UserUncheckedUpdateWithoutRecordedPaymentsInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRequestedDocumentsInput = {
@@ -2748,6 +3048,7 @@ export type UserCreateWithoutRequestedDocumentsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2768,6 +3069,7 @@ export type UserCreateWithoutRequestedDocumentsInput = {
   recordedPayments?: Prisma.PayrollPaymentCreateNestedManyWithoutRecordedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRequestedDocumentsInput = {
@@ -2777,6 +3079,7 @@ export type UserUncheckedCreateWithoutRequestedDocumentsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2796,6 +3099,7 @@ export type UserUncheckedCreateWithoutRequestedDocumentsInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedCreateNestedManyWithoutRecordedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRequestedDocumentsInput = {
@@ -2819,6 +3123,7 @@ export type UserUpdateWithoutRequestedDocumentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2839,6 +3144,7 @@ export type UserUpdateWithoutRequestedDocumentsInput = {
   recordedPayments?: Prisma.PayrollPaymentUpdateManyWithoutRecordedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRequestedDocumentsInput = {
@@ -2848,6 +3154,7 @@ export type UserUncheckedUpdateWithoutRequestedDocumentsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2867,6 +3174,7 @@ export type UserUncheckedUpdateWithoutRequestedDocumentsInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedUpdateManyWithoutRecordedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDeliveryBatchesInput = {
@@ -2874,6 +3182,7 @@ export type UserCreateWithoutDeliveryBatchesInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2894,6 +3203,7 @@ export type UserCreateWithoutDeliveryBatchesInput = {
   recordedPayments?: Prisma.PayrollPaymentCreateNestedManyWithoutRecordedByInput
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDeliveryBatchesInput = {
@@ -2903,6 +3213,7 @@ export type UserUncheckedCreateWithoutDeliveryBatchesInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2922,6 +3233,7 @@ export type UserUncheckedCreateWithoutDeliveryBatchesInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedCreateNestedManyWithoutRecordedByInput
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDeliveryBatchesInput = {
@@ -2945,6 +3257,7 @@ export type UserUpdateWithoutDeliveryBatchesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2965,6 +3278,7 @@ export type UserUpdateWithoutDeliveryBatchesInput = {
   recordedPayments?: Prisma.PayrollPaymentUpdateManyWithoutRecordedByNestedInput
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDeliveryBatchesInput = {
@@ -2974,6 +3288,7 @@ export type UserUncheckedUpdateWithoutDeliveryBatchesInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2993,6 +3308,7 @@ export type UserUncheckedUpdateWithoutDeliveryBatchesInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedUpdateManyWithoutRecordedByNestedInput
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -3000,6 +3316,7 @@ export type UserCreateWithoutAuditLogsInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3020,6 +3337,7 @@ export type UserCreateWithoutAuditLogsInput = {
   recordedPayments?: Prisma.PayrollPaymentCreateNestedManyWithoutRecordedByInput
   requestedDocuments?: Prisma.PayslipDocumentCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchCreateNestedManyWithoutRequestedByInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -3029,6 +3347,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   password: string
   role?: $Enums.UserRole
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3048,6 +3367,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedCreateNestedManyWithoutRecordedByInput
   requestedDocuments?: Prisma.PayslipDocumentUncheckedCreateNestedManyWithoutRequestedByInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedCreateNestedManyWithoutRequestedByInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -3071,6 +3391,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3091,6 +3412,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   recordedPayments?: Prisma.PayrollPaymentUpdateManyWithoutRecordedByNestedInput
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -3100,6 +3422,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3119,6 +3442,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   recordedPayments?: Prisma.PayrollPaymentUncheckedUpdateManyWithoutRecordedByNestedInput
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyAssignedRoleInput = {
@@ -3127,6 +3451,7 @@ export type UserCreateManyAssignedRoleInput = {
   email: string
   password: string
   isActive?: boolean
+  sessionVersion?: number
   lastLoginAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3137,6 +3462,7 @@ export type UserUpdateWithoutAssignedRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3157,6 +3483,7 @@ export type UserUpdateWithoutAssignedRoleInput = {
   requestedDocuments?: Prisma.PayslipDocumentUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedRoleInput = {
@@ -3165,6 +3492,7 @@ export type UserUncheckedUpdateWithoutAssignedRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3185,6 +3513,7 @@ export type UserUncheckedUpdateWithoutAssignedRoleInput = {
   requestedDocuments?: Prisma.PayslipDocumentUncheckedUpdateManyWithoutRequestedByNestedInput
   deliveryBatches?: Prisma.PayslipDeliveryBatchUncheckedUpdateManyWithoutRequestedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutAssignedRoleInput = {
@@ -3193,6 +3522,7 @@ export type UserUncheckedUpdateManyWithoutAssignedRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3220,6 +3550,7 @@ export type UserCountOutputType = {
   requestedDocuments: number
   deliveryBatches: number
   auditLogs: number
+  passwordResets: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3239,6 +3570,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   requestedDocuments?: boolean | UserCountOutputTypeCountRequestedDocumentsArgs
   deliveryBatches?: boolean | UserCountOutputTypeCountDeliveryBatchesArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  passwordResets?: boolean | UserCountOutputTypeCountPasswordResetsArgs
 }
 
 /**
@@ -3363,6 +3695,13 @@ export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AuditLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3371,6 +3710,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   role?: boolean
   isActive?: boolean
+  sessionVersion?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3392,6 +3732,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   requestedDocuments?: boolean | Prisma.User$requestedDocumentsArgs<ExtArgs>
   deliveryBatches?: boolean | Prisma.User$deliveryBatchesArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3402,6 +3743,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   role?: boolean
   isActive?: boolean
+  sessionVersion?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3415,6 +3757,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   role?: boolean
   isActive?: boolean
+  sessionVersion?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3428,12 +3771,13 @@ export type UserSelectScalar = {
   password?: boolean
   role?: boolean
   isActive?: boolean
+  sessionVersion?: boolean
   lastLoginAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "isActive" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "isActive" | "sessionVersion" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignedRole?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   employee?: boolean | Prisma.User$employeeArgs<ExtArgs>
@@ -3453,6 +3797,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   requestedDocuments?: boolean | Prisma.User$requestedDocumentsArgs<ExtArgs>
   deliveryBatches?: boolean | Prisma.User$deliveryBatchesArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3483,6 +3828,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     requestedDocuments: Prisma.$PayslipDocumentPayload<ExtArgs>[]
     deliveryBatches: Prisma.$PayslipDeliveryBatchPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    passwordResets: Prisma.$PasswordResetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -3494,6 +3840,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     password: string
     role: $Enums.UserRole
     isActive: boolean
+    sessionVersion: number
     lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -3909,6 +4256,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   requestedDocuments<T extends Prisma.User$requestedDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$requestedDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PayslipDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   deliveryBatches<T extends Prisma.User$deliveryBatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$deliveryBatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PayslipDeliveryBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResets<T extends Prisma.User$passwordResetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3944,6 +4292,7 @@ export interface UserFieldRefs {
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly sessionVersion: Prisma.FieldRef<"User", 'Int'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -4748,6 +5097,30 @@ export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResets
+ */
+export type User$passwordResetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordReset
+   */
+  select?: Prisma.PasswordResetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordReset
+   */
+  omit?: Prisma.PasswordResetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetWhereInput
+  orderBy?: Prisma.PasswordResetOrderByWithRelationInput | Prisma.PasswordResetOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetScalarFieldEnum | Prisma.PasswordResetScalarFieldEnum[]
 }
 
 /**

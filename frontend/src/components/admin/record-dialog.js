@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Plus, ShieldCheck, UserRoundPlus, X } from "lucide-react";
-import { createAccount, createEmployee, updateAccount, errorMessage } from "@/services/admin.service";
+import { createAccount, createEmployee, updateAccount, fetchWorkspace, errorMessage } from "@/services/admin.service";
 
 export const roleLabels = { USER: "Employee (legacy)", MANAGER: "HR manager (legacy)", EMPLOYEE: "Employee", HR_MANAGER: "HR manager", HR_PAYROLL_USER: "Payroll user", HR_PAYROLL_MANAGER: "Payroll manager", ADMIN: "Administrator" };
 const roles = ["EMPLOYEE", "HR_MANAGER", "HR_PAYROLL_USER", "HR_PAYROLL_MANAGER", "ADMIN"];
@@ -11,9 +11,22 @@ export default function RecordDialog({ kind, account, currentUserId, departments
   const ref = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [availableRoles, setAvailableRoles] = useState(null);
   const [form, setForm] = useState(kind === "employee" ? { firstName: "", lastName: "", employeeCode: "", workEmail: "", hireDate: localDate(), employeeType: "FULL_TIME", departmentId: "" } : kind === "access" ? { role: account.role, isActive: account.isActive } : { name: "", email: "", password: "", role: "EMPLOYEE" });
   const isSelf = kind === "access" && account.id === currentUserId;
   const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
+
+  useEffect(() => {
+    if (kind === "employee") return;
+    let active = true;
+    fetchWorkspace("roles").then(result => {
+      if (!active) return;
+      const options = result.items.filter(r => roles.includes(r.code) || r.code === account?.role);
+      setAvailableRoles(options);
+      setForm(previous => options.some(r => r.code === previous.role) ? previous : { ...previous, role: "" });
+    }).catch(e => { if (active) setError(errorMessage(e)); });
+    return () => { active = false; };
+  }, [kind, account?.role]);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -49,7 +62,7 @@ export default function RecordDialog({ kind, account, currentUserId, departments
         <p className="pp-field-note">This creates an employee profile. Workspace login accounts are managed separately in User access.</p>
       </> : <>
         {kind !== "access" && <><label htmlFor="account-name">Full name</label><input id="account-name" value={form.name} onChange={set("name")} minLength={2} maxLength={80} autoFocus required /><label htmlFor="account-email">Email address</label><input id="account-email" type="email" value={form.email} onChange={set("email")} required /><label htmlFor="account-password">Initial password</label><input id="account-password" type="password" autoComplete="new-password" value={form.password} onChange={set("password")} minLength={12} maxLength={72} required /><p className="pp-field-note">At least 12 characters. Share this password securely with the account owner; no email is sent.</p></>}
-        <label htmlFor="account-role">Workspace role</label><select id="account-role" value={form.role} onChange={set("role")} disabled={isSelf}>{[...new Set([...roles, form.role])].map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select>
+        <label htmlFor="account-role">Workspace role</label><select id="account-role" value={form.role} onChange={set("role")} required disabled={isSelf || !availableRoles}><option value="">{availableRoles ? "Choose a role" : "Loading roles…"}</option>{(availableRoles || []).map(role => <option key={role.code} value={role.code}>{role.name || roleLabels[role.code]}</option>)}</select>
         {kind === "access" && <label className="pp-switch-row" htmlFor="account-active"><span><strong>Account enabled</strong><small>Disabled accounts cannot sign in or continue an existing session.</small></span><input id="account-active" type="checkbox" checked={form.isActive} disabled={isSelf} onChange={(event) => setForm((previous) => ({ ...previous, isActive: event.target.checked }))} /></label>}
         {isSelf && <p className="pp-field-note">Your own administrator access cannot be disabled or removed.</p>}
       </>}

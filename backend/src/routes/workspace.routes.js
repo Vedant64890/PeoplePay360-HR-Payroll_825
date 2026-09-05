@@ -5,6 +5,7 @@ import { resource, resourceId, listResource, detailResource, saveResource, archi
 import { saveAttendance, createAllocation, createLeave, decideLeave } from "../services/time.service.js";
 import { createPayrun, payrunAction, savePayslipInputs } from "../services/payroll.service.js";
 import { fail } from "../lib/workspace.js";
+import { deleteRole } from "../services/admin.service.js";
 
 const router = Router();
 const route = fn => async (req, res, next) => {
@@ -24,6 +25,7 @@ function parse(schema, body) {
   return result.data;
 }
 router.get("/lookups", route(async (req, res) => res.json({ success: true, data: await lookups() })));
+router.delete("/roles/:id", route(async (req, res) => res.json({ success: true, data: await deleteRole(resourceId("roles", req.params.id), req.user.id) })));
 router.get("/settings", route(async (req, res) => res.json({ success: true, data: await getSettings() })));
 router.put("/settings", route(async (req, res) => res.json({ success: true, data: await saveSettings(parse(settingsSchema, req.body), req.user.id) })));
 router.get("/reports", route(async (req, res) => res.json({ success: true, data: await reports(parse(reportQuery, req.query)) })));

@@ -42,7 +42,7 @@ export async function authenticate(
       decoded.userId
     );
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || (decoded.sessionVersion ?? 0) !== user.sessionVersion) {
       return res.status(401).json({
         success: false,
         message: "Your account is unavailable. Contact an administrator.",

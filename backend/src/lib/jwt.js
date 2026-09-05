@@ -10,9 +10,9 @@ function getJwtSecret() {
   return secret;
 }
 
-export function generateToken(userId) {
+export function generateToken(userId, sessionVersion = 0) {
   return jwt.sign(
-    { userId },
+    { userId, sessionVersion },
     getJwtSecret(),
     {
       expiresIn:

@@ -10,6 +10,7 @@
  */
 export type * from './models/WorkspaceSettings.ts'
 export type * from './models/User.ts'
+export type * from './models/PasswordReset.ts'
 export type * from './models/Role.ts'
 export type * from './models/Permission.ts'
 export type * from './models/RolePermission.ts'

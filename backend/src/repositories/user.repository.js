@@ -28,6 +28,7 @@ export function findPublicUserById(id) {
       email: true,
       role: true,
       isActive: true,
+      sessionVersion: true,
       lastLoginAt: true,
       createdAt: true,
       updatedAt: true,

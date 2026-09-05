@@ -6,6 +6,8 @@ export const fetchAccounts = async (params) => (await api.get("/admin/users", { 
 export const fetchEmployees = async (params) => (await api.get("/admin/employees", { params })).data.data;
 export const createAccount = async (data) => (await api.post("/admin/users", data)).data;
 export const updateAccount = async (id, data) => (await api.patch(`/admin/users/${id}`, data)).data;
+export const deleteAccount = async id => (await api.delete(`/admin/users/${id}`)).data;
+export const deleteWorkspaceRole = async code => (await api.delete(`/admin/workspace/roles/${code}`)).data.data;
 export const createEmployee = async (data) => (await api.post("/admin/employees", data)).data;
 export const fetchWorkspace = async (resource, params) => (await api.get(`/admin/workspace/${resource}`, { params })).data.data;
 export const fetchWorkspaceRecord = async (resource, id) => (await api.get(`/admin/workspace/${resource}/${id}`)).data.data;

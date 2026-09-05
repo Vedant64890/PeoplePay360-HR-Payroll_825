@@ -36,7 +36,7 @@ export async function hrDashboard({ month }) {
     prisma.leaveRequest.count({ where: { ...leaveWhere, status: { in: ["SUBMITTED", "FIRST_APPROVED"] } } }),
     prisma.leaveRequestDay.findMany({ where: { date: today, leaveRequest: { status: "APPROVED" } }, select: { leaveRequest: { select: { employeeId: true } } } }),
     prisma.attendanceDay.findMany({ where: dayWhere, select: { workDate: true, status: true, lateMinutes: true, overtimeMinutes: true, workedMinutes: true } }),
-    prisma.department.findMany({ where: { isActive: true }, select: { id: true, name: true, _count: { select: { employees: { where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } } } } }, orderBy: { name: "asc" } }),
+    prisma.department.findMany({ where: { isActive: true }, select: { id: true, name: true, _count: { select: { employees: { where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } } } } } }, orderBy: { name: "asc" } }),
     prisma.leaveRequest.findMany({ where: { ...leaveWhere, status: { in: ["SUBMITTED", "FIRST_APPROVED"] } }, include: { employee: person, leaveType: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.attendanceDay.findMany({ where: dayWhere, include: { employee: person }, orderBy: { workDate: "desc" }, take: 6 }),
     prisma.attendance.count({ where: { day: dayWhere, checkOut: null, voidedAt: null } }),
@@ -56,7 +56,10 @@ export async function hrDetail(name, id) {
       prisma.employeeScheduleAssignment.findMany({ where: { employeeId: id }, include: { workingSchedule: { select: { name: true } } }, orderBy: { startDate: "desc" } }),
       prisma.employmentHistory.findMany({ where: { employeeId: id }, select: { id: true, eventType: true, effectiveDate: true, reason: true }, orderBy: { effectiveDate: "desc" } }),
     ]);
-    return hrData({ ...result, contracts, assignments, history });
+    const settings = await getSettings();
+    const today = date(new Date().toLocaleDateString("en-CA", { timeZone: settings.timezone }));
+    const currentSchedule = await applicableSchedule(prisma, id, today);
+    return hrData({ ...result, contracts, assignments, history, currentSchedule: currentSchedule ? { id: currentSchedule.id, name: currentSchedule.name } : null });
   }
   return hrData(result);
 }

@@ -8,6 +8,7 @@ import WorkspaceReports from "@/components/admin/workspace-reports";
 import WorkspaceSettings from "@/components/admin/workspace-settings";
 import { ThemeToggle } from "@/components/admin/theme-provider";
 import Brand from "@/components/admin/brand";
+import DeleteAccountDialog from "@/components/admin/delete-account-dialog";
 import RecordDialog, { roleLabels } from "@/components/admin/record-dialog";
 import { fetchWorkspace, fetchDashboard, fetchAccounts, fetchEmployees, errorMessage } from "@/services/admin.service";
 import { getCurrentUser, logoutUser } from "@/services/auth.service";
@@ -98,7 +99,7 @@ export default function AdminDashboardPage() {
   function settingsSaved(value) { setSettings(value); setCurrency(value.defaultCurrency); setToast("Workspace settings saved."); }
 
   const reportError = useCallback((failure) => {
-    if ([401, 403].includes(failure.response?.status)) { router.replace("/admin/login"); return; }
+    if ([401, 403].includes(failure.response?.status)) { router.replace("/login"); return; }
     setError(errorMessage(failure));
   }, [router]);
 
@@ -106,9 +107,9 @@ export default function AdminDashboardPage() {
     let active = true;
     getCurrentUser().then(({ user: current }) => {
       if (!active) return;
-      if (current.role !== "ADMIN") router.replace("/admin/login");
+      if (current.role !== "ADMIN") router.replace("/login");
       else setUser(current);
-    }).catch((failure) => { if (active) { if (failure.response?.status === 401) router.replace("/admin/login"); else { setError(errorMessage(failure)); setLoading(false); } } });
+    }).catch((failure) => { if (active) { if (failure.response?.status === 401) router.replace("/login"); else { setError(errorMessage(failure)); setLoading(false); } } });
     return () => { active = false; };
   }, [router, revision]);
 
@@ -146,7 +147,7 @@ export default function AdminDashboardPage() {
   }
   async function signOut() {
     setSigningOut(true);
-    try { await logoutUser(); router.replace("/admin/login"); } catch (failure) { setError(errorMessage(failure)); setSigningOut(false); }
+    try { await logoutUser(); router.replace("/login"); } catch (failure) { setError(errorMessage(failure)); setSigningOut(false); }
   }
   function saved(message) { setDialog(null); setToast(message); setRevision((value) => value + 1); }
   function exportOverview() {
@@ -158,7 +159,7 @@ export default function AdminDashboardPage() {
     setToast("Your workspace report has been exported.");
   }
 
-  if (!user) return <main className="pp-access-loading"><Brand href="/admin/login" />{error ? <div className="pp-panel pp-access-error"><p role="alert">{error}</p><button className="pp-button pp-button-primary" onClick={() => setRevision((value) => value + 1)}>Try again</button></div> : <Loading text="Checking your workspace access…" />}</main>;
+  if (!user) return <main className="pp-access-loading"><Brand href="/login" />{error ? <div className="pp-panel pp-access-error"><p role="alert">{error}</p><button className="pp-button pp-button-primary" onClick={() => setRevision((value) => value + 1)}>Try again</button></div> : <Loading text="Checking your workspace access…" />}</main>;
 
   const metric = data?.metrics;
   const actions = <button className="pp-button pp-button-primary" onClick={() => setDialog({ kind: section === "users" ? "account" : "employee" })}><Plus size={17} />{section === "users" ? "Create account" : "Add employee"}</button>;
@@ -220,7 +221,7 @@ export default function AdminDashboardPage() {
             <section className="pp-overview-grid pp-lower-grid"><div className="pp-panel"><div className="pp-panel-heading"><div><h2>Recent payruns</h2><p>A quick check on this month’s payroll</p></div><button className="pp-text-button" onClick={() => navigate("payruns")}>View all <ArrowUpRight size={15} /></button></div>{data.payruns.length ? <div className="pp-mini-runs">{data.payruns.slice(0, 4).map((run) => <div key={run.id}><span className="pp-icon-box pp-tone-green"><Wallet size={18} /></span><div><strong>{run.name}</strong><small>{run._count.payslips} payslips · {run.currency}</small></div><Badge value={run.status} /></div>)}</div> : <Empty icon={Wallet} title="Your next payday belongs here" text="Payruns will appear when your payroll team creates a batch for this month." />}</div><div className="pp-panel"><div className="pp-panel-heading"><div><h2>Around the workspace</h2><p>The latest changes, all in one place</p></div><button className="pp-icon-button" aria-label="Open activity log" onClick={() => navigate("reports")}><MoreHorizontal size={20} /></button></div><ActivityList events={data.activity.slice(0, 4)} /></div></section>
           </>}
 
-          {section === "users" && <section className="pp-panel pp-directory"><div className="pp-panel-heading"><div><h2>{section === "employees" ? "Employee directory" : "Workspace accounts"} <span className="pp-count">{records.total}</span></h2><p>{section === "employees" ? "Active, onboarding and other current employee profiles" : "Manage roles and account access. Only administrators can access this page."}</p></div><div className="pp-search"><Search size={17} /><input aria-label={section === "employees" ? "Search employees" : "Search accounts"} placeholder={section === "employees" ? "Search name, code or email…" : "Search name or email…"} value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></div></div>{listLoading ? <Loading text="Loading records…" /> : records.items.length ? <div className="pp-table-scroll"><table className="pp-table"><thead><tr>{(section === "employees" ? ["Employee", "Department", "Employment", "Joined", "Status"] : ["Account", "Role", "Last sign in", "Status", "Access"]).map((label) => <th key={label}>{label}</th>)}</tr></thead><tbody>{records.items.map((record) => section === "employees" ? <tr key={record.id}><td><div className="pp-person"><span className="pp-avatar">{initials(`${record.firstName} ${record.lastName}`)}</span><div><strong>{record.firstName} {record.lastName}</strong><small>{record.employeeCode} · {record.workEmail || "No email yet"}</small></div></div></td><td>{record.department?.name || <span className="pp-muted">Unassigned</span>}</td><td>{humanize(record.employeeType)}</td><td>{dateLabel(record.hireDate)}</td><td><Badge value={record.status} /></td></tr> : <tr key={record.id}><td><div className="pp-person"><span className="pp-avatar">{initials(record.name)}</span><div><strong>{record.name}{record.id === user.id && <span className="pp-you">You</span>}</strong><small>{record.email}</small></div></div></td><td>{roleLabels[record.role]}</td><td>{record.lastLoginAt ? dateLabel(record.lastLoginAt) : <span className="pp-muted">Not signed in yet</span>}</td><td><Badge value={record.isActive ? "ENABLED" : "DISABLED"} /></td><td><button className="pp-text-button" aria-label={`Manage access for ${record.name}`} onClick={() => setDialog({ kind: "access", account: record })}>Manage <ArrowUpRight size={14} /></button></td></tr>)}</tbody></table></div> : <Empty icon={section === "employees" ? Users : ShieldCheck} title={search ? "No matches this time" : section === "employees" ? "Your people will feel at home here" : "No accounts yet"} text={search ? "Try another name, email or employee code." : "Add the first record to start building your workspace."} action={!search ? actions : undefined} />}
+          {section === "users" && <section className="pp-panel pp-directory"><div className="pp-panel-heading"><div><h2>{section === "employees" ? "Employee directory" : "Workspace accounts"} <span className="pp-count">{records.total}</span></h2><p>{section === "employees" ? "Active, onboarding and other current employee profiles" : "Manage roles and account access. Only administrators can access this page."}</p></div><div className="pp-search"><Search size={17} /><input aria-label={section === "employees" ? "Search employees" : "Search accounts"} placeholder={section === "employees" ? "Search name, code or email…" : "Search name or email…"} value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></div></div>{listLoading ? <Loading text="Loading records…" /> : records.items.length ? <div className="pp-table-scroll"><table className="pp-table"><thead><tr>{(section === "employees" ? ["Employee", "Department", "Employment", "Joined", "Status"] : ["Account", "Role", "Last sign in", "Status", "Access"]).map((label) => <th key={label}>{label}</th>)}</tr></thead><tbody>{records.items.map((record) => section === "employees" ? <tr key={record.id}><td><div className="pp-person"><span className="pp-avatar">{initials(`${record.firstName} ${record.lastName}`)}</span><div><strong>{record.firstName} {record.lastName}</strong><small>{record.employeeCode} · {record.workEmail || "No email yet"}</small></div></div></td><td>{record.department?.name || <span className="pp-muted">Unassigned</span>}</td><td>{humanize(record.employeeType)}</td><td>{dateLabel(record.hireDate)}</td><td><Badge value={record.status} /></td></tr> : <tr key={record.id}><td><div className="pp-person"><span className="pp-avatar">{initials(record.name)}</span><div><strong>{record.name}{record.id === user.id && <span className="pp-you">You</span>}</strong><small>{record.email}</small></div></div></td><td>{roleLabels[record.role]}</td><td>{record.lastLoginAt ? dateLabel(record.lastLoginAt) : <span className="pp-muted">Not signed in yet</span>}</td><td><Badge value={record.isActive ? "ENABLED" : "DISABLED"} /></td><td><div className="pp-row-actions"><button className="pp-text-button" aria-label={`Manage access for ${record.name}`} onClick={() => setDialog({ kind: "access", account: record })}>Manage <ArrowUpRight size={14} /></button><button className="pp-text-button pp-text-danger" aria-label={`Delete account for ${record.name}`} disabled={record.id === user.id} title={record.id === user.id ? "You cannot delete your own account" : "Delete account"} onClick={() => setDialog({ kind: "delete", account: record })}>Delete</button></div></td></tr>)}</tbody></table></div> : <Empty icon={section === "employees" ? Users : ShieldCheck} title={search ? "No matches this time" : section === "employees" ? "Your people will feel at home here" : "No accounts yet"} text={search ? "Try another name, email or employee code." : "Add the first record to start building your workspace."} action={!search ? actions : undefined} />}
             <div className="pp-pagination"><span>{records.total ? `${(records.page - 1) * records.pageSize + 1}–${Math.min(records.page * records.pageSize, records.total)} of ${records.total}` : "0 records"}</span><div><button className="pp-icon-button" aria-label="Previous page" disabled={page <= 1 || listLoading} onClick={() => setPage(page - 1)}><ChevronLeft size={18} /></button><span>Page {page}</span><button className="pp-icon-button" aria-label="Next page" disabled={page * records.pageSize >= records.total || listLoading} onClick={() => setPage(page + 1)}><ChevronRight size={18} /></button></div></div>
           </section>}
 
@@ -234,6 +235,7 @@ export default function AdminDashboardPage() {
       </main>
     </div>
     {toast && <div className="pp-toast" role="status"><span><Check size={17} /></span>{toast}<button className="pp-icon-button" aria-label="Dismiss message" onClick={() => setToast("")}><X size={16} /></button></div>}
-    {dialog && <RecordDialog {...dialog} currentUserId={user.id} departments={data?.departments || []} onClose={() => setDialog(null)} onSaved={saved} />}
+    {dialog?.kind === "delete" && <DeleteAccountDialog account={dialog.account} onClose={() => setDialog(null)} onSaved={message => { setPage(1); saved(message); }} />}
+    {dialog && dialog.kind !== "delete" && <RecordDialog {...dialog} currentUserId={user.id} departments={data?.departments || []} onClose={() => setDialog(null)} onSaved={saved} />}
   </div>;
 }

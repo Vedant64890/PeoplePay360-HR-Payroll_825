@@ -94,8 +94,10 @@ async function validateRelations(tx, name, data, id, before) {
     }
   }
   if (name === "assignments") {
-    if (before) fail("Schedule assignments are historical. Create a new dated assignment.", 409);
-    const overlaps = await tx.employeeScheduleAssignment.count({ where: { employeeId: data.employeeId, ...(data.endDate ? { startDate: { lte: data.endDate } } : {}), OR: [{ endDate: null }, { endDate: { gte: data.startDate } }] } });
+    if (before && before.employeeId !== data.employeeId) fail("Keep the same employee when editing a schedule assignment.", 409);
+    if (before && await tx.attendanceDay.count({ where: { employeeId: before.employeeId, workDate: { gte: before.startDate, ...(before.endDate ? { lte: before.endDate } : {}) } } })) fail("This assignment is part of attendance history. Create a new dated assignment.", 409);
+    if (!(await tx.workingSchedule.findUnique({ where: { id: data.workingScheduleId } }))?.isActive) fail("Choose an active working schedule.");
+    const overlaps = await tx.employeeScheduleAssignment.count({ where: { id: { not: id || 0 }, employeeId: data.employeeId, ...(data.endDate ? { startDate: { lte: data.endDate } } : {}), OR: [{ endDate: null }, { endDate: { gte: data.startDate } }] } });
     if (overlaps) fail("Schedule assignments cannot overlap.", 409);
   }
   if (name === "schedules") {

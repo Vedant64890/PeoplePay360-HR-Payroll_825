@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
+import { removeRole } from "../src/services/admin.service.js";
 import { hashPassword } from "../src/lib/password.js";
 
 test("admin authentication, authorization and workspace actions", async (t) => {
@@ -71,6 +72,43 @@ test("admin authentication, authorization and workspace actions", async (t) => {
       assert.equal(result.status, 201); employeeId = result.json.employee.id;
       assert.equal((await request(`/admin/employees?q=${tag}`, { cookie: adminCookie })).json.data.total, 1);
       assert.equal(await prisma.employmentHistory.count({ where: { employeeId } }), 1);
+    });
+    await t.test("account deletion is authorized, audited and protects linked history", async () => {
+      const disposable = await prisma.user.create({ data: { name: "Deletion fixture", email: `${tag}-delete@example.test`, password: hash, role: "EMPLOYEE" } }); fixtureIds.push(disposable.id);
+      const login = await request("/auth/login", { method: "POST", body: { email: disposable.email, password } });
+      const path = `/admin/users/${disposable.id}`;
+      assert.equal((await request(path, { method: "DELETE" })).status, 401);
+      assert.equal((await request(path, { method: "DELETE", cookie: employeeCookie })).status, 403);
+      assert.equal((await request(path, { method: "DELETE", cookie: adminCookie, origin: "https://untrusted.example" })).status, 403);
+      assert.equal((await request(`/admin/users/${admin.id}`, { method: "DELETE", cookie: adminCookie })).status, 409);
+      assert.equal((await request("/admin/users/not-an-id", { method: "DELETE", cookie: adminCookie })).status, 400);
+      await prisma.employee.update({ where: { id: employeeId }, data: { userId: disposable.id } });
+      assert.equal((await request(path, { method: "DELETE", cookie: adminCookie })).status, 409);
+      await prisma.employee.update({ where: { id: employeeId }, data: { userId: null } });
+      const deletion = await request(path, { method: "DELETE", cookie: adminCookie }); assert.equal(deletion.status, 200, JSON.stringify(deletion.json));
+      assert.equal(await prisma.user.findUnique({ where: { id: disposable.id } }), null);
+      assert.equal((await request("/users/me", { cookie: login.cookie })).status, 401);
+      assert.equal((await request(path, { method: "DELETE", cookie: adminCookie })).status, 404);
+      const logged = await prisma.auditLog.findFirst({ where: { action: "USER_DELETED", entityId: String(disposable.id), actorId: admin.id } }); assert.ok(logged); assert.equal("password" in logged.before, false);
+      const historical = await prisma.user.create({ data: { name: "History fixture", email: `${tag}-history@example.test`, password: hash, role: "EMPLOYEE" } }); fixtureIds.push(historical.id);
+      await prisma.auditLog.create({ data: { actorId: historical.id, action: "TEST_HISTORY", entityType: "User", entityId: String(historical.id) } });
+      assert.equal((await request(`/admin/users/${historical.id}`, { method: "DELETE", cookie: adminCookie })).status, 409);
+    });
+    await t.test("role deletion protects system and assigned roles and removes grants atomically", async () => {
+      assert.equal((await request("/admin/workspace/roles/HR_MANAGER", { method: "DELETE", cookie: employeeCookie })).status, 403);
+      for (const code of ["ADMIN", "USER", "EMPLOYEE"]) assert.equal((await request(`/admin/workspace/roles/${code}`, { method: "DELETE", cookie: adminCookie })).status, 409);
+      assert.equal((await request("/admin/workspace/roles/INVALID", { method: "DELETE", cookie: adminCookie })).status, 400);
+      const unused = await prisma.role.findFirst({ where: { code: { notIn: ["ADMIN", "USER"] }, users: { none: {} } } });
+      assert.ok(unused, "An unused role is required for the rollback-only deletion test");
+      const rollback = new Error("Rollback role deletion test");
+      await assert.rejects(prisma.$transaction(async tx => {
+        const result = await removeRole(tx, unused.code, admin.id); assert.equal(result.code, unused.code);
+        assert.equal(await tx.role.findUnique({ where: { code: unused.code } }), null);
+        assert.equal(await tx.rolePermission.count({ where: { role: unused.code } }), 0);
+        assert.ok(await tx.auditLog.findFirst({ where: { action: "ROLE_DELETED", entityId: unused.code, actorId: admin.id } }));
+        throw rollback;
+      }), error => error === rollback);
+      assert.ok(await prisma.role.findUnique({ where: { code: unused.code } }));
     });
     await t.test("disabling an account blocks its existing session and further login", async () => {
       assert.equal((await request(`/admin/users/${employee.id}`, { method: "PATCH", cookie: adminCookie, body: { isActive: false } })).status, 200);

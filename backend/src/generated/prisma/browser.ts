@@ -28,6 +28,11 @@ export type WorkspaceSettings = Prisma.WorkspaceSettingsModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model PasswordReset
+ * 
+ */
+export type PasswordReset = Prisma.PasswordResetModel
+/**
  * Model Role
  * Seed canonical and legacy codes before creating users or permission grants.
  * Using the existing enum as the key preserves User.role and existing auth payloads.

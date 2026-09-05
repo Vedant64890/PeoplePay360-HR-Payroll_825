@@ -300,7 +300,6 @@ export type AttendanceOrderByWithRelationInput = {
 
 export type AttendanceWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  attendanceDayId_checkIn?: Prisma.AttendanceAttendanceDayIdCheckInCompoundUniqueInput
   AND?: Prisma.AttendanceWhereInput | Prisma.AttendanceWhereInput[]
   OR?: Prisma.AttendanceWhereInput[]
   NOT?: Prisma.AttendanceWhereInput | Prisma.AttendanceWhereInput[]
@@ -317,7 +316,7 @@ export type AttendanceWhereUniqueInput = Prisma.AtLeast<{
   day?: Prisma.XOR<Prisma.AttendanceDayScalarRelationFilter, Prisma.AttendanceDayWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   corrections?: Prisma.AttendanceCorrectionListRelationFilter
-}, "id" | "attendanceDayId_checkIn">
+}, "id">
 
 export type AttendanceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -460,11 +459,6 @@ export type AttendanceListRelationFilter = {
 
 export type AttendanceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AttendanceAttendanceDayIdCheckInCompoundUniqueInput = {
-  attendanceDayId: number
-  checkIn: Date | string
 }
 
 export type AttendanceCountOrderByAggregateInput = {

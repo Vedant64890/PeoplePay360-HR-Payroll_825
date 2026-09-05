@@ -45,7 +45,7 @@ export async function registerUser({
 export async function loginUser({
   email,
   password,
-}, { adminOnly = false } = {}) {
+}, { adminOnly = false, hrOnly = false } = {}) {
   const user = await findUserByEmail(email);
 
   if (!user) {
@@ -73,10 +73,11 @@ export async function loginUser({
   if (adminOnly && user.role !== "ADMIN") {
     throw new AppError("This account does not have administrator access.", 403);
   }
+  if (hrOnly && !["HR_MANAGER", "ADMIN"].includes(user.role)) throw new AppError("This account does not have HR Manager access.", 403);
 
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
 
-  const token = generateToken(user.id);
+  const token = generateToken(user.id, user.sessionVersion);
 
   return {
     token,

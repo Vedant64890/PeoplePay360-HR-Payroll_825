@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +24,10 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Script id="peoplepay360-theme" strategy="beforeInteractive">{`(function(){try{var p=localStorage.getItem('peoplepay360-theme');document.documentElement.dataset.ppTheme=(p==='light'||p==='dark')?p:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){document.documentElement.dataset.ppTheme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}})();`}</Script>
+        {children}
+      </body>
     </html>
   );
 }

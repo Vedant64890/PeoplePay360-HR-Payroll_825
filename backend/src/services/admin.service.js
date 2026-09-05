@@ -74,6 +74,7 @@ export async function createAccount(data, actorId) {
   const password = await hashPassword(data.password);
   try {
     return await prisma.$transaction(async (tx) => {
+      if (!await tx.role.findUnique({ where: { code: data.role } })) throw new AppError("This role is no longer available. Choose another role.", 409);
       const user = await tx.user.create({ data: { ...data, password }, select: accountSelect });
       await tx.auditLog.create({ data: audit(actorId, "USER_CREATED", "User", user.id, null, { name: user.name, role: user.role }) });
       return user;
@@ -91,11 +92,42 @@ export async function updateAccount(id, changes, actorId) {
   return prisma.$transaction(async (tx) => {
     const before = await tx.user.findUnique({ where: { id }, select: accountSelect });
     if (!before) throw new AppError("Account not found.", 404);
+    if (changes.role && !await tx.role.findUnique({ where: { code: changes.role } })) throw new AppError("This role is no longer available. Choose another role.", 409);
     const user = await tx.user.update({ where: { id }, data: changes, select: accountSelect });
     await tx.auditLog.create({ data: audit(actorId, "USER_ACCESS_UPDATED", "User", id, { role: before.role, isActive: before.isActive }, { role: user.role, isActive: user.isActive }) });
     return user;
   });
 }
+
+export async function deleteAccount(id, actorId) {
+  if (id === actorId) throw new AppError("You cannot delete your own account.", 409);
+  try {
+    return await prisma.$transaction(async tx => {
+      const before = await tx.user.findUnique({ where: { id }, select: accountSelect });
+      if (!before) throw new AppError("Account not found.", 404);
+      if (await tx.employee.count({ where: { userId: id } })) throw new AppError("This account is linked to an employee. Disable its access instead to preserve the employee record.", 409);
+      await tx.user.delete({ where: { id } });
+      await tx.auditLog.create({ data: audit(actorId, "USER_DELETED", "User", id, { name: before.name, email: before.email, role: before.role }, { deleted: true }) });
+      return { id };
+    }, { isolationLevel: "Serializable" });
+  } catch (error) {
+    if (error.code === "P2003") throw new AppError("This account has recorded activity or approvals. Disable its access instead to preserve history.", 409);
+    if (error.code === "P2034") throw new AppError("The account changed during deletion. Refresh and try again.", 409);
+    throw error;
+  }
+}
+
+export async function removeRole(tx, code, actorId) {
+  if (["ADMIN", "USER"].includes(code)) throw new AppError("The Administrator and default registration roles are required by the application and cannot be deleted.", 409);
+  const before = await tx.role.findUnique({ where: { code } });
+  if (!before) throw new AppError("Role not found.", 404);
+  if (await tx.user.count({ where: { role: code } })) throw new AppError("This role is assigned to accounts. Reassign those accounts before deleting it.", 409);
+  await tx.rolePermission.deleteMany({ where: { role: code } });
+  await tx.role.delete({ where: { code } });
+  await tx.auditLog.create({ data: audit(actorId, "ROLE_DELETED", "Role", code, { name: before.name, code }, { deleted: true }) });
+  return { code };
+}
+export const deleteRole = (code, actorId) => prisma.$transaction(tx => removeRole(tx, code, actorId), { isolationLevel: "Serializable" });
 
 export async function createEmployee(data, actorId) {
   try {

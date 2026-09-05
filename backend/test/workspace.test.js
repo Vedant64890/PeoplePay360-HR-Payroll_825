@@ -152,6 +152,97 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       for (const name of ["departments", "positions", "employees", "contracts", "schedules", "assignments", "categories", "structures", "rules", "leave-types", "allocations", "leave", "attendance", "payruns", "payslips", "roles", "activity"]) assert.equal((await request(root + name)).status, 200, name);
       assert.equal((await request(root + "reports?month=wrong")).status, 400);
     });
+    await t.test("HR Manager permissions and connected HR operations", async t => {
+      const hrUser = await prisma.user.create({ data: { name: tag + " HR", email: `${tag.toLowerCase()}-hr@example.test`, password: await hashPassword(password), role: "HR_MANAGER" } }); ids.users.push(hrUser.id);
+      assert.equal((await request("/auth/hr/login", "POST", { email: low.email, password })).status, 403);
+      const hrLogin = await request("/auth/hr/login", "POST", { email: hrUser.email, password }); assert.equal(hrLogin.status, 200);
+      const hroot = "/hr/workspace/";
+      const hr = (path, method = "GET", body) => request(path, method, body, { Cookie: hrLogin.cookie });
+      const hcreate = async (name, body, bucket) => { const r = await hr(hroot + name, "POST", body); assert.equal(r.status, 201, JSON.stringify(r.data)); if (bucket) ids[bucket].push(r.data.data.id); return r.data.data; };
+      let he, hs, hc, ht, ha, hl, at;
+      await t.test("blocks every payroll/admin route and removes sensitive lookup fields", async () => {
+        assert.equal((await request("/hr/dashboard?month=2026-09", "GET", undefined, { Cookie: "" })).status, 401);
+        const lowLogin = await request("/auth/login", "POST", { email: low.email, password });
+        assert.equal((await request(hroot + "employees", "GET", undefined, { Cookie: lowLogin.cookie })).status, 403);
+        for (const name of ["payruns", "payslips", "structures", "rules", "categories", "users", "roles", "activity", "settings", "reports"]) {
+          for (const method of ["GET", "POST", "PUT", "DELETE"]) assert.equal((await hr(hroot + name + (method === "PUT" || method === "DELETE" ? "/1" : ""), method, method === "GET" ? undefined : {})).status, 403, `${method} ${name}`);
+          assert.equal((await hr(root + name)).status, 403);
+        }
+        assert.equal((await hr(`/admin/workspace/payslips/${slip.id}/inputs`, "PUT", { inputs: [] })).status, 403);
+        assert.equal((await hr(`/admin/workspace/payruns/${run.id}/actions`, "POST", { action: "pay" })).status, 403);
+        const catalog = (await hr(hroot + "lookups")).data.data;
+        for (const key of ["users", "structures", "rules", "categories"]) assert.equal(key in catalog, false);
+        const contractView = (await hr(hroot + `contracts/${contract.id}`)).data.data;
+        assert.equal("salaryStructure" in contractView, false); assert.equal("salaryStructureId" in contractView, false);
+        const dashboard = await hr("/hr/dashboard?month=2026-09"); assert.equal(dashboard.status, 200, JSON.stringify(dashboard.data));
+        assert.equal("paidSalary" in dashboard.data.data.metrics, false); assert.equal("payruns" in dashboard.data.data, false);
+        assert.equal((await request(hroot + "departments", "POST", { code: tag + "HR", name: "Cross origin" }, { Cookie: hrLogin.cookie, Origin: "https://invalid.test" })).status, 403);
+      });
+      await t.test("creates and edits employees, schedules, assignments and contracts without payroll setup", async () => {
+        const employeeBody = { employeeCode: tag + "HR", firstName: "HR", lastName: tag, employeeType: "FULL_TIME", hireDate: "2026-09-01", departmentId: department.id, jobPositionId: position.id, managerId: employee.id };
+        he = await hcreate("employees", employeeBody, "employees");
+        assert.equal((await hr(hroot + `employees/${he.id}`, "PUT", { ...employeeBody, workLocation: "Chennai" })).status, 200);
+        assert.equal((await hr(hroot + `employees/${he.id}`, "PUT", { ...employeeBody, userId: admin.id })).status, 403);
+        hs = await hcreate("schedules", { ...schedulePayload, code: tag + "HR", name: tag + " HR" }, "schedules");
+        assert.equal((await hr(hroot + `schedules/${hs.id}`, "PUT", { ...schedulePayload, code: tag + "HR", name: tag + " HR edited" })).status, 200);
+        const assignment = await hcreate("assignments", { employeeId: he.id, workingScheduleId: hs.id, startDate: "2026-09-01" });
+        assert.equal((await hr(hroot + `assignments/${assignment.id}`, "PUT", { employeeId: he.id, workingScheduleId: hs.id, startDate: "2026-09-01", endDate: "2026-09-30" })).status, 200);
+        const contractBody = { reference: tag + "HR", name: "HR employment agreement", employeeId: he.id, departmentId: department.id, jobPositionId: position.id, employeeType: "FULL_TIME", startDate: "2026-09-01", wage: "25000", currency: "INR", workingScheduleId: hs.id, status: "OPEN" };
+        hc = await hcreate("contracts", contractBody);
+        assert.equal((await prisma.contract.findUnique({ where: { id: hc.id } })).salaryStructureId, null);
+        assert.equal((await hr(hroot + `contracts/${hc.id}`, "PUT", { ...contractBody, wage: "28000" })).status, 200);
+        assert.equal((await hr(hroot + `contracts/${hc.id}`, "PUT", { ...contractBody, salaryStructureId: structure.id })).status, 403);
+        const profile = (await hr(hroot + `employees/${he.id}`)).data.data;
+        assert.equal(profile.contracts.length, 1); assert.equal(profile.assignments.length, 1); assert.ok(profile.history.length >= 2); assert.equal(profile.currentSchedule.id, hs.id); assert.equal(profile.workLocation, "Chennai");
+      });
+      await t.test("records late/overtime, corrects and removes attendance without deleting its audit history", async () => {
+        const body = { employeeId: he.id, checkIn: "2026-09-02T03:45:00Z", checkOut: "2026-09-02T13:00:00Z", breakMinutes: 60 };
+        at = await hcreate("attendance", body);
+        let detail = (await hr(hroot + `attendance/${at.id}`)).data.data;
+        assert.equal(detail.day.workedMinutes, 495); assert.equal(detail.day.lateMinutes, 15); assert.equal(detail.day.overtimeMinutes, 15);
+        assert.equal((await hr(hroot + `attendance/${at.id}`, "PUT", { ...body, checkOut: "2026-09-02T13:15:00Z", reason: "HR timesheet correction" })).status, 200);
+        assert.equal((await hr(hroot + `attendance/${at.id}`, "DELETE", { reason: "Duplicate manual entry" })).status, 200);
+        detail = (await hr(hroot + `attendance/${at.id}`)).data.data;
+        assert.ok(detail.voidedAt); assert.equal(detail.corrections.length, 1); assert.equal(detail.day.status, "ABSENT");
+        assert.equal((await hr(hroot + `attendance?employeeId=${he.id}`)).data.data.total, 0);
+        await hcreate("attendance", body);
+      });
+      await t.test("edits pending leave, approves/refuses and restores balances on cancellation", async () => {
+        ht = await hcreate("leave-types", { code: tag + "HR", name: "HR paid leave", requiresAllocation: true }, "leaveTypes");
+        const allocationBody = { employeeId: he.id, leaveTypeId: ht.id, name: "HR allocation", amount: "2", validFrom: "2026-09-01", validUntil: "2026-09-30" };
+        ha = await hcreate("allocations", allocationBody);
+        assert.equal((await hr(hroot + `allocations/${ha.id}`, "PUT", { ...allocationBody, amount: "3" })).status, 200);
+        assert.equal((await hr(hroot + `allocations/${ha.id}/actions`, "POST", { action: "approve" })).status, 200);
+        const leaveBody = { employeeId: he.id, leaveTypeId: ht.id, startDate: "2026-09-03", endDate: "2026-09-03" };
+        hl = await hcreate("leave", leaveBody);
+        assert.equal((await hr(hroot + `leave/${hl.id}`, "PUT", { ...leaveBody, startDate: "2026-09-04", endDate: "2026-09-04" })).status, 200);
+        assert.equal((await hr(hroot + `leave/${hl.id}/actions`, "POST", { action: "approve" })).status, 200);
+        assert.equal((await hr(hroot + `allocations?employeeId=${he.id}`)).data.data.items[0].remaining, "2");
+        assert.equal((await hr(hroot + `leave/${hl.id}`, "PUT", leaveBody)).status, 409);
+        assert.equal((await hr(hroot + `leave/${hl.id}/actions`, "POST", { action: "cancel", reason: "Travel cancelled" })).status, 200);
+        assert.equal((await hr(hroot + `allocations?employeeId=${he.id}`)).data.data.items[0].remaining, "3");
+        const refused = await hcreate("leave", leaveBody);
+        assert.equal((await hr(hroot + `leave/${refused.id}/actions`, "POST", { action: "refuse", reason: "Discuss alternate dates" })).status, 200);
+        assert.equal((await hr(hroot + `leave?employeeId=${he.id}&status=REFUSED`)).data.data.total, 1);
+        assert.equal((await hr(hroot + `leave/${refused.id}/actions`, "POST", { action: "approve" })).status, 409);
+        const twoType = await hcreate("leave-types", { code: tag + "HRTWO", name: "Two approvals", requiresAllocation: false, requestApprovalPolicy: "TWO_LEVEL_APPROVAL" }, "leaveTypes");
+        const two = await hcreate("leave", { ...leaveBody, leaveTypeId: twoType.id });
+        assert.equal((await hr(hroot + `leave/${two.id}/actions`, "POST", { action: "approve" })).data.data.status, "FIRST_APPROVED");
+        assert.equal((await hr(hroot + `leave/${two.id}/actions`, "POST", { action: "approve" })).status, 409);
+        assert.equal((await request(hroot + `leave/${two.id}/actions`, "POST", { action: "approve" })).data.data.status, "APPROVED");
+      });
+      await t.test("refreshes daily absence summaries, archives HR records and revokes disabled sessions", async () => {
+        const rebuilt = await hr(hroot + "attendance-days/recalculate", "POST", { month: "2026-09", employeeId: he.id }); assert.equal(rebuilt.status, 200, JSON.stringify(rebuilt.data));
+        const days = await hr(hroot + `attendance-days?month=2026-09&employeeId=${he.id}`); assert.equal(days.status, 200); assert.ok(days.data.data.items.some(d => d.status === "ABSENT"));
+        const summary = await hr("/hr/dashboard?month=2026-09"); assert.equal(summary.status, 200); assert.equal(summary.data.data.trend.length, 30); assert.ok(summary.data.data.metrics.activeContracts >= 1);
+        assert.equal((await hr(hroot + `contracts/${hc.id}`, "DELETE", { reason: "Agreement replaced" })).status, 200);
+        assert.equal((await hr(hroot + `employees/${he.id}`, "DELETE", { reason: "Archived employee" })).status, 200);
+        assert.equal((await hr(hroot + `employees/${he.id}`)).data.data.status, "ARCHIVED");
+        assert.equal((await hr(hroot + `schedules/${hs.id}/actions`, "POST", { action: "archive" })).status, 200);
+        await prisma.user.update({ where: { id: hrUser.id }, data: { isActive: false } });
+        assert.equal((await hr(hroot + "employees")).status, 401);
+      });
+    });
   } finally {
     if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
     const employees = { employeeId: { in: ids.employees } }, runs = { payrunId: { in: ids.runs } }, slips = { payslip: runs };

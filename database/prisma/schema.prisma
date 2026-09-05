@@ -427,6 +427,7 @@ model User {
   password    String
   role        UserRole  @default(USER)
   isActive    Boolean   @default(true)
+  sessionVersion Int    @default(0)
   lastLoginAt DateTime? @db.Timestamptz(3)
   // Preserve the original timestamp column types for existing User records.
   createdAt   DateTime  @default(now())
@@ -450,8 +451,22 @@ model User {
   requestedDocuments     PayslipDocument[]
   deliveryBatches        PayslipDeliveryBatch[]
   auditLogs              AuditLog[]
+  passwordResets         PasswordReset[]
 
   @@index([role, isActive])
+  @@schema("auth")
+}
+
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String    @unique @db.Char(64)
+  expiresAt DateTime  @db.Timestamptz(3)
+  usedAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
   @@schema("auth")
 }
 
@@ -804,7 +819,8 @@ model Attendance {
   createdBy       User                   @relation("AttendanceCreator", fields: [createdById], references: [id], onDelete: Restrict)
   corrections     AttendanceCorrection[]
 
-  @@unique([attendanceDayId, checkIn])
+  /// Active-session uniqueness is enforced by a partial index in add-hr-workspace.sql.
+  @@index([attendanceDayId, checkIn])
   @@index([checkIn, checkOut])
   @@index([createdById])
   @@schema("attendance")
