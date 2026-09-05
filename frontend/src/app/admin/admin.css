@@ -78,6 +78,7 @@
 .pp-edit-table th, .pp-edit-table td { padding: 8px; }
 .pp-edit-table input[type="number"] { min-width: 70px; }
 .pp-edit-table input[type="time"] { min-width: 115px; }
+.pp-edit-table select[aria-label$=" day"] { min-width: 180px; width: 180px; padding-right: 32px; }
 .pp-array-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
 .pp-array-row > label { flex: 1; }
 .pp-array-row > input { flex: 1; min-width: 0; }

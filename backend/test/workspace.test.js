@@ -79,6 +79,43 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       assert.equal((await request(root + `schedules/${schedule.id}`, "PUT", schedulePayload)).status, 409);
       assert.equal((await request(root + `employees/${employee.id}`, "PUT", { employeeCode: tag, firstName: "Test", lastName: tag, employeeType: "FULL_TIME", hireDate: "2026-09-01", managerId: employee.id })).status, 400);
     });
+    await t.test("concurrent contract creation and activation cannot approve overlapping dates", async () => {
+      const e = await create("employees", { employeeCode: tag + "CONCURRENT", firstName: "Contract", lastName: tag, employeeType: "FULL_TIME", hireDate: "2026-08-01" }, "employees");
+      const payload = { name: tag, employeeId: e.id, departmentId: department.id, jobPositionId: position.id, employeeType: "FULL_TIME", startDate: "2026-08-01", endDate: "2026-08-31", wage: "31000", currency: "INR", salaryStructureId: structure.id, workingScheduleId: schedule.id, status: "OPEN" };
+      const results = await Promise.all(["A", "B"].map(suffix => request(root + "contracts", "POST", { ...payload, reference: tag + "RACE" + suffix })));
+      assert.deepEqual(results.map(r => r.status).sort(), [201, 409], JSON.stringify(results));
+      assert.equal(await prisma.contract.count({ where: { employeeId: e.id, status: "OPEN" } }), 1);
+      const draft = await create("contracts", { ...payload, reference: tag + "DRAFT", status: "DRAFT" });
+      assert.equal((await request(root + `contracts/${draft.id}`, "PUT", { ...payload, reference: draft.reference })).status, 409);
+      assert.equal((await request(root + `contracts/${draft.id}`, "PUT", { ...payload, reference: draft.reference, status: "DRAFT", employeeId: employee.id })).status, 409);
+      assert.equal((await request(root + "contracts", "POST", { ...payload, reference: tag + "BOUNDARY", startDate: "2026-08-31", endDate: "2026-09-30" })).status, 409);
+      await create("contracts", { ...payload, reference: tag + "NEXT", startDate: "2026-09-01", endDate: null });
+    });
+    await t.test("payroll selects historical contracts and blocks uncovered or multiple-contract periods", async () => {
+      const cases = [
+        { key: "HISTORY", status: "EXPIRED", endDate: "2026-08-31", expected: "COMPUTED", successor: true },
+        { key: "TERMINATED", status: "TERMINATED", endDate: null, terminationDate: "2026-08-01", expected: "COMPUTED" },
+        { key: "GAP", status: "TERMINATED", endDate: "2026-08-01", terminationDate: "2026-08-02", periodEnd: "2026-08-02", expected: "DRAFT", warning: /ends inside/ },
+        { key: "CHANGE", status: "EXPIRED", endDate: "2026-08-31", successor: true, periodEnd: "2026-09-01", expected: "DRAFT", warning: /Multiple contracts/ },
+        { key: "UNAPPROVED", status: "DRAFT", endDate: null, expected: "DRAFT", warning: /No approved contract/ },
+      ];
+      for (const c of cases) {
+        const e = await create("employees", { employeeCode: tag + c.key, firstName: "Period", lastName: tag, employeeType: "FULL_TIME", hireDate: "2026-08-01" }, "employees");
+        const payload = { reference: tag + c.key, name: tag, employeeId: e.id, departmentId: department.id, jobPositionId: position.id, employeeType: "FULL_TIME", startDate: "2026-08-01", endDate: c.endDate, terminationDate: c.terminationDate || null, terminationReason: c.terminationDate ? "Contract completed" : null, wage: "31000", currency: "INR", salaryStructureId: structure.id, workingScheduleId: schedule.id, status: c.status };
+        const historical = await create("contracts", payload);
+        if (c.successor) await create("contracts", { ...payload, reference: payload.reference + "NEW", startDate: "2026-09-01", endDate: null, wage: "62000", status: "OPEN" });
+        const periodRun = await create("payruns", { name: tag + c.key, startDate: "2026-08-01", endDate: c.periodEnd || "2026-08-01", salaryStructureId: structure.id, employeeIds: [e.id], idempotencyKey: randomUUID() }, "runs");
+        const result = await request(root + `payruns/${periodRun.id}/actions`, "POST", { action: "compute", version: periodRun.version });
+        assert.equal(result.status, 200, JSON.stringify(result.data));
+        assert.equal(result.data.data.status, c.expected, JSON.stringify(result.data));
+        if (c.warning) assert.match(result.data.data.warnings[0].message, c.warning);
+        else {
+          const calculated = await prisma.payslip.findUnique({ where: { payrunId_employeeId: { payrunId: periodRun.id, employeeId: e.id } } });
+          assert.equal(calculated.contractId, historical.id);
+          assert.equal(calculated.grossAmount.toString(), "1000");
+        }
+      }
+    });
     await t.test("attendance records actual hours and audits corrections", async () => {
       const payload = { employeeId: employee.id, checkIn: "2026-09-01T03:30:00Z", checkOut: "2026-09-01T12:30:00Z", breakMinutes: 60 };
       attendance = await create("attendance", payload);

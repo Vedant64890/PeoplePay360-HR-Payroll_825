@@ -51,17 +51,22 @@ export async function createPayrun(input, actorId) {
 }
 async function computeEmployee(tx, run, selection) {
   const employee = selection.employee;
-  const contracts = await tx.contract.findMany({ where: { employeeId: employee.id, status: { in: ["OPEN", "EXPIRED", "TERMINATED"] }, startDate: { lte: run.period.endDate }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: run.period.startDate } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: run.period.startDate } }] }] }, include: { workingSchedule: { include: { lines: true, holidays: true } } } });
+  const employmentStart = new Date(Math.max(+run.period.startDate, +employee.hireDate));
+  const employmentEnd = new Date(Math.min(+run.period.endDate, employee.terminationDate ? +employee.terminationDate : Infinity));
+  if (employmentStart > employmentEnd) fail("The employee was not employed in this payroll period.");
+  // Historical approved contracts remain applicable to their effective dates.
+  const contracts = await tx.contract.findMany({ where: { employeeId: employee.id, status: { in: ["OPEN", "EXPIRED", "TERMINATED"] }, startDate: { lte: employmentEnd }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: employmentStart } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: employmentStart } }] }] }, include: { workingSchedule: { include: { lines: true, holidays: true } } } });
   if (contracts.length !== 1) fail(contracts.length ? "Multiple contracts intersect this payroll period. Split the period at the contract change." : "No approved contract covers this payroll period.");
   const contract = contracts[0];
-  if (contract.salaryStructureId !== run.salaryStructureId || contract.currency !== run.currency) fail("Contract salary structure or currency does not match this payrun.");
+  if (contract.salaryStructureId !== run.salaryStructureId || contract.currency !== run.currency || contract.payFrequency !== run.period.frequency) fail("Contract salary structure, currency or pay frequency does not match this payrun.");
   const schedule = contract.workingSchedule;
   if (!schedule) fail("The contract needs a working schedule before payroll can be computed.");
   const start = new Date(Math.max(+run.period.startDate, +employee.hireDate, +contract.startDate));
   const end = new Date(Math.min(+run.period.endDate, ...[contract.endDate, contract.terminationDate, employee.terminationDate].filter(Boolean).map(Number)));
   if (start > end) fail("The employee was not employed in this payroll period.");
-  if (contract.startDate > run.period.startDate && employee.hireDate < contract.startDate) fail("Contract coverage has a gap. Split or correct the payroll period.");
-  if (contract.endDate && contract.endDate < run.period.endDate && !contract.terminationDate && (!employee.terminationDate || employee.terminationDate > contract.endDate)) fail("Contract ends inside the period. Split or correct the payroll period.");
+  if (contract.startDate > employmentStart) fail("Contract coverage has a gap. Split or correct the payroll period.");
+  const requiredEnd = new Date(Math.min(+employmentEnd, contract.terminationDate ? +contract.terminationDate : Infinity));
+  if (contract.endDate && contract.endDate < requiredEnd) fail("Contract ends inside the period. Split or correct the payroll period.");
   const previous = await tx.payslip.findUnique({ where: { payrunId_employeeId: { payrunId: run.id, employeeId: employee.id } }, include: { inputs: true } });
   if (previous && !["DRAFT", "COMPUTED"].includes(previous.status)) fail("A finalized payslip cannot be recomputed.", 409);
   const leaveDays = await tx.leaveRequestDay.findMany({ where: { date: { gte: start, lte: end }, leaveRequest: { employeeId: employee.id, status: "APPROVED" } }, include: { leaveRequest: true } });

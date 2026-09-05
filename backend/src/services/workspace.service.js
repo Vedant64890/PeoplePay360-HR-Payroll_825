@@ -74,6 +74,7 @@ async function validateRelations(tx, name, data, id, before) {
     if (data.status === "ARCHIVED") data.archivedAt = new Date();
   }
   if (name === "contracts") {
+    if (before && before.employeeId !== data.employeeId) fail("Keep the same employee when editing a contract. Create a new contract for another employee.", 409);
     const computed = id ? await tx.payslip.findMany({ where: { contractId: id, status: { notIn: ["DRAFT", "CANCELLED"] } }, select: { periodEnd: true } }) : [];
     if (computed.length) {
       const lifecycle = ["status", "endDate", "terminationDate", "terminationReason"];

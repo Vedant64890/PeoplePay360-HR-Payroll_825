@@ -147,6 +147,7 @@ export default function AdminDashboardPage() {
   }
   async function signOut() {
     setSigningOut(true);
+    debugger;
     try { await logoutUser(); router.replace("/login"); } catch (failure) { setError(errorMessage(failure)); setSigningOut(false); }
   }
   function saved(message) { setDialog(null); setToast(message); setRevision((value) => value + 1); }

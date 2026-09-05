@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-  "dev": "concurrently -n frontend,backend \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
-
-  "db:sync": "npm --prefix backend run prisma:sync"
-},
+    "dev": "concurrently -n frontend,backend \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
+    "db:sync": "npm --prefix backend run prisma:sync"
+  },
   "devDependencies": {
     "concurrently": "^9.2.4"
+  },
+  "dependencies": {
+    "nodemailer": "^10.0.0"
   }
 }
