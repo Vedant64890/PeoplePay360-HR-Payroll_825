@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js";
+import { getSettings } from "./settings.service.js";
 import { audit, date, dayKey, fail, json, lockEmployee, validateSchedule, expression, D } from "../lib/workspace.js";
 
 const person = { select: { id: true, firstName: true, lastName: true, employeeCode: true } };
@@ -145,7 +146,7 @@ export async function archiveResource(name, id, actorId) {
 }
 
 export async function lookups() {
-  const [employees, departments, positions, schedules, structures, rules, categories, leaveTypes, users] = await Promise.all([
+  const [employees, departments, positions, schedules, structures, rules, categories, leaveTypes, users, settings] = await Promise.all([
     prisma.employee.findMany({ where: { status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true, departmentId: true, jobPositionId: true, employeeType: true }, orderBy: { firstName: "asc" } }),
     prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }), prisma.jobPosition.findMany({ where: { isActive: true }, orderBy: { title: "asc" } }),
     prisma.workingSchedule.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
@@ -153,25 +154,9 @@ export async function lookups() {
     prisma.salaryRule.findMany({ where: { isActive: true }, select: { id: true, code: true, name: true }, orderBy: { sequence: "asc" } }),
     prisma.salaryRuleCategory.findMany({ orderBy: { name: "asc" } }), prisma.leaveType.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.user.findMany({ select: { id: true, name: true, email: true }, orderBy: { name: "asc" } }),
+    getSettings(),
   ]);
-  return json({ employees, departments, positions, schedules, structures, rules, categories, leaveTypes, users });
+  return json({ employees, departments, positions, schedules, structures, rules, categories, leaveTypes, users, settings });
 }
 
-export async function reports({ month, currency = "INR" }) {
-  const start = date(`${month || dayKey(new Date()).slice(0, 7)}-01`), end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
-  const [slips, attendance, leaves, payments, contracts] = await Promise.all([
-    prisma.payslip.findMany({ where: { currency, periodStart: { lt: end }, periodEnd: { gte: start }, status: { in: ["VALIDATED", "PARTIALLY_PAID", "PAID"] } }, include: { department: true } }),
-    prisma.attendanceDay.groupBy({ by: ["status"], where: { workDate: { gte: start, lt: end } }, _count: { _all: true }, _sum: { workedMinutes: true, lateMinutes: true, overtimeMinutes: true } }),
-    prisma.leaveRequestDay.findMany({ where: { date: { gte: start, lt: end }, leaveRequest: { status: "APPROVED" } }, include: { leaveRequest: { include: { leaveType: true } } } }),
-    prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", paidAt: { gte: start, lt: end } }, _sum: { amount: true } }),
-    prisma.contract.count({ where: { status: "OPEN", endDate: { gte: start, lt: end } } }),
-  ]);
-  const sum = field => slips.reduce((v, s) => v.plus(s[field]), D()).toFixed(2);
-  const departments = new Map();
-  for (const slip of slips) { const key = slip.departmentId || 0; const row = departments.get(key) || { department: slip.department?.name || "Unassigned", payslips: 0, net: D(), cost: D() }; row.payslips++; row.net = row.net.plus(slip.netAmount); row.cost = row.cost.plus(slip.employerCostAmount); departments.set(key, row); }
-  return json({ month: dayKey(start).slice(0, 7), currency, totals: { finalizedPayslips: slips.length, gross: sum("grossAmount"), deductions: sum("deductionAmount"), net: sum("netAmount"), employerCost: sum("employerCostAmount"), averageNetPerPayslip: slips.length ? D(sum("netAmount")).div(slips.length).toFixed(2) : "0.00", paymentsRecorded: payments._sum.amount || "0", contractsExpiring: contracts }, departments: [...departments.values()], attendance: attendance.map(r => ({ status: r.status, days: r._count._all, ...r._sum })), leave: [...new Set(leaves.map(l => l.leaveRequest.leaveType.name))].map(name => ({ type: name, days: leaves.filter(l => l.leaveRequest.leaveType.name === name).reduce((v, l) => v.plus(l.durationDays), D()), hours: leaves.filter(l => l.leaveRequest.leaveType.name === name).reduce((v, l) => v.plus(l.durationHours), D()) })) });
-}
-export function reportCsv(report) {
-  const rows = [["Report month", report.month], ["Currency", report.currency], ...Object.entries(report.totals), [], ["Department", "Finalized payslips", "Net salary", "Employer cost"], ...report.departments.map(d => [d.department, d.payslips, d.net, d.cost]), [], ["Attendance", "Recorded days", "Worked minutes", "Late minutes", "Overtime minutes"], ...report.attendance.map(a => [a.status, a.days, a.workedMinutes, a.lateMinutes, a.overtimeMinutes]), [], ["Leave type", "Approved days", "Approved hours"], ...report.leave.map(l => [l.type, l.days, l.hours])];
-  return "\uFEFF" + rows.map(row => row.map(v => { const text = String(v ?? ""); return `"${(/^[=+@\-\t\r]/.test(text) ? "'" : "") + text.replaceAll('"', '""')}"`; }).join(",")).join("\r\n");
-}
+export { reports, reportCsv } from "./reports.service.js";

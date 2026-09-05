@@ -7,6 +7,8 @@ import app from "../src/app.js";
 import prisma from "../src/lib/prisma.js";
 import { hashPassword } from "../src/lib/password.js";
 import { expression, validateSchedule } from "../src/lib/workspace.js";
+import { getSettings, writeSettings } from "../src/services/settings.service.js";
+import { settingsSchema } from "../src/validators/workspace.validator.js";
 
 test("restricted salary arithmetic and overnight schedule validation", () => {
   assert.equal(expression("WAGE * 0.1 + (BONUS / 2)", { WAGE: "123.45", BONUS: "10" }).toString(), "17.345");
@@ -53,6 +55,22 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       structure = await create("structures", { code: tag, name: tag, currency: "INR", rules: [{ salaryRuleId: basic.id, sequence: 10 }, { salaryRuleId: deduction.id, sequence: 20 }] }, "structures");
       const catalog = await request(root + "lookups"); assert.ok(catalog.data.data.employees.some(e => e.id === employee.id)); assert.ok(catalog.data.data.users.every(u => !u.password));
       assert.equal((await request(root + "employees?q=" + tag)).data.data.total, 1);
+    });
+    await t.test("workspace settings validate, persist and reject stale saves", async () => {
+      assert.equal((await request(root + "settings", "GET", undefined, { Cookie: "" })).status, 401);
+      const current = (await request(root + "settings")).data.data;
+      assert.equal((await request(root + "settings", "PUT", { organizationName: tag, supportEmail: null, defaultCurrency: "INR", timezone: "Not/AZone", reportMonths: 6, version: current.version })).status, 400);
+      const rollback = new Error("Rollback isolated settings test");
+      await assert.rejects(prisma.$transaction(async tx => {
+        const before = await getSettings(tx);
+        const payload = settingsSchema.parse({ organizationName: tag, supportEmail: "help@example.test", defaultCurrency: "USD", timezone: "UTC", reportMonths: 12, version: before.version });
+        const saved = await writeSettings(tx, payload, admin.id);
+        assert.equal(saved.version, before.version + 1);
+        assert.equal((await getSettings(tx)).organizationName, tag);
+        await assert.rejects(writeSettings(tx, payload, admin.id), /updated elsewhere/);
+        throw rollback;
+      }), error => error === rollback);
+      assert.equal((await request(root + "settings")).data.data.organizationName, current.organizationName);
     });
     await t.test("approved contracts reject overlaps and preserve referenced schedules", async () => {
       const payload = { reference: tag, name: tag, employeeId: employee.id, departmentId: department.id, jobPositionId: position.id, employeeType: "FULL_TIME", startDate: "2026-09-01", wage: "30000", currency: "INR", salaryStructureId: structure.id, workingScheduleId: schedule.id, status: "OPEN" };
@@ -122,6 +140,14 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       const computed = await request(root + `payruns/${duplicate.id}/actions`, "POST", { action: "compute", version: duplicate.version });
       assert.equal(computed.status, 200); assert.equal((await request(root + `payruns/${duplicate.id}/actions`, "POST", { action: "validate", version: computed.data.data.version })).status, 409);
       const report = await request(root + "reports?month=2026-09&currency=INR"); assert.equal(report.status, 200); assert.ok(report.data.data.departments.some(d => d.department === tag && d.net === "900"));
+      const filtered = (await request(root + `reports?month=2026-09&currency=INR&departmentId=${department.id}&trendMonths=3`)).data.data;
+      assert.equal(filtered.totals.net, "900.00"); assert.equal(filtered.payrollTrend.length, 3); assert.deepEqual(filtered.payrollTrend.map(p => p.month), ["2026-07", "2026-08", "2026-09"]);
+      assert.equal(filtered.payrollTrend[0].net, "0.00"); assert.equal(filtered.payrollTrend[2].net, "900.00");
+      assert.equal(filtered.attendanceTrend.length, 30); assert.equal(filtered.attendanceTrend[0].present, 1);
+      assert.equal(filtered.attendanceTrend[0].workedHours, 8);
+      const otherCurrency = (await request(root + `reports?month=2026-09&currency=USD&departmentId=${department.id}`)).data.data;
+      assert.equal(otherCurrency.totals.net, "0.00"); assert.equal(otherCurrency.totals.paymentsRecorded, "0");
+      assert.equal((await request(root + "reports?trendMonths=500")).status, 400);
       const csv = await request(root + "reports/export?month=2026-09&currency=INR"); assert.equal(csv.status, 200); assert.match(csv.data, /Employer cost/);
       for (const name of ["departments", "positions", "employees", "contracts", "schedules", "assignments", "categories", "structures", "rules", "leave-types", "allocations", "leave", "attendance", "payruns", "payslips", "roles", "activity"]) assert.equal((await request(root + name)).status, 200, name);
       assert.equal((await request(root + "reports?month=wrong")).status, 400);

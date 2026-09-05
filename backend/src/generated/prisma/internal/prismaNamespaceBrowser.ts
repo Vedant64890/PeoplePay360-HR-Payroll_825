@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  WorkspaceSettings: 'WorkspaceSettings',
   User: 'User',
   Role: 'Role',
   Permission: 'Permission',
@@ -111,6 +112,20 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const WorkspaceSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationName: 'organizationName',
+  supportEmail: 'supportEmail',
+  defaultCurrency: 'defaultCurrency',
+  timezone: 'timezone',
+  reportMonths: 'reportMonths',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkspaceSettingsScalarFieldEnum = (typeof WorkspaceSettingsScalarFieldEnum)[keyof typeof WorkspaceSettingsScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

@@ -397,6 +397,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  WorkspaceSettings: 'WorkspaceSettings',
   User: 'User',
   Role: 'Role',
   Permission: 'Permission',
@@ -456,10 +457,84 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "rolePermission" | "department" | "jobPosition" | "employee" | "employeeBankAccount" | "employmentHistory" | "contract" | "workingSchedule" | "workingScheduleLine" | "scheduleHoliday" | "employeeScheduleAssignment" | "attendanceDay" | "attendance" | "attendanceCorrection" | "attendanceException" | "leaveType" | "leaveAllocation" | "leaveAllocationApproval" | "leaveRequest" | "leaveRequestDay" | "leaveRequestApproval" | "leaveAllocationConsumption" | "salaryRuleCategory" | "salaryStructure" | "salaryRule" | "salaryStructureRule" | "salaryRuleDependency" | "payrollPeriod" | "payrun" | "payrunEmployee" | "payslip" | "payslipLine" | "payslipWorkedTime" | "payslipInput" | "payrollWarning" | "payrollPayment" | "payslipDocument" | "payslipDeliveryBatch" | "payslipDelivery" | "payslipDeliveryAttempt" | "auditLog"
+    modelProps: "workspaceSettings" | "user" | "role" | "permission" | "rolePermission" | "department" | "jobPosition" | "employee" | "employeeBankAccount" | "employmentHistory" | "contract" | "workingSchedule" | "workingScheduleLine" | "scheduleHoliday" | "employeeScheduleAssignment" | "attendanceDay" | "attendance" | "attendanceCorrection" | "attendanceException" | "leaveType" | "leaveAllocation" | "leaveAllocationApproval" | "leaveRequest" | "leaveRequestDay" | "leaveRequestApproval" | "leaveAllocationConsumption" | "salaryRuleCategory" | "salaryStructure" | "salaryRule" | "salaryStructureRule" | "salaryRuleDependency" | "payrollPeriod" | "payrun" | "payrunEmployee" | "payslip" | "payslipLine" | "payslipWorkedTime" | "payslipInput" | "payrollWarning" | "payrollPayment" | "payslipDocument" | "payslipDeliveryBatch" | "payslipDelivery" | "payslipDeliveryAttempt" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    WorkspaceSettings: {
+      payload: Prisma.$WorkspaceSettingsPayload<ExtArgs>
+      fields: Prisma.WorkspaceSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WorkspaceSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WorkspaceSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.WorkspaceSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WorkspaceSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.WorkspaceSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.WorkspaceSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.WorkspaceSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WorkspaceSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.WorkspaceSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        update: {
+          args: Prisma.WorkspaceSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.WorkspaceSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WorkspaceSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WorkspaceSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.WorkspaceSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.WorkspaceSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWorkspaceSettings>
+        }
+        groupBy: {
+          args: Prisma.WorkspaceSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkspaceSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WorkspaceSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkspaceSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -3755,6 +3830,20 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const WorkspaceSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationName: 'organizationName',
+  supportEmail: 'supportEmail',
+  defaultCurrency: 'defaultCurrency',
+  timezone: 'timezone',
+  reportMonths: 'reportMonths',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkspaceSettingsScalarFieldEnum = (typeof WorkspaceSettingsScalarFieldEnum)[keyof typeof WorkspaceSettingsScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -4645,6 +4734,20 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
  * Reference to a field of type 'UserRole'
  */
 export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
@@ -4662,20 +4765,6 @@ export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -5403,6 +5492,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
+  workspaceSettings?: Prisma.WorkspaceSettingsOmit
   user?: Prisma.UserOmit
   role?: Prisma.RoleOmit
   permission?: Prisma.PermissionOmit
