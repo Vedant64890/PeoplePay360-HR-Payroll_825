@@ -2,7 +2,6 @@
 // PostgreSQL namespaces: auth, hr, attendance, leave, payroll, configuration.
 // Connection: backend/prisma.config.ts. Design and workflow rules: ../SCHEMA_GUIDE.md.
 
-
 generator client {
   provider = "prisma-client"
   output   = "../../backend/src/generated/prisma"
@@ -420,18 +419,18 @@ enum DeliveryBatchStatus {
 // -----------------------------------------------------------------------------
 
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
   /// Password hash only; field name retained for existing auth code.
-  password    String
-  role        UserRole  @default(USER)
-  isActive    Boolean   @default(true)
-  sessionVersion Int    @default(0)
-  lastLoginAt DateTime? @db.Timestamptz(3)
+  password       String
+  role           UserRole  @default(USER)
+  isActive       Boolean   @default(true)
+  sessionVersion Int       @default(0)
+  lastLoginAt    DateTime? @db.Timestamptz(3)
   // Preserve the original timestamp column types for existing User records.
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   assignedRole           Role                      @relation(fields: [role], references: [code], onDelete: Restrict)
   employee               Employee?
@@ -1055,6 +1054,7 @@ model SalaryRuleCategory {
   type        SalaryCategoryType
   description String?
   rules       SalaryRule[]
+  structures  SalaryStructure[]
 
   @@schema("configuration")
 }
@@ -1066,15 +1066,19 @@ model SalaryStructure {
   description  String?
   currency     String                @db.Char(3)
   payFrequency PayFrequency          @default(MONTHLY)
+  sequence     Int                   @default(10)
+  categoryId   Int?
   isActive     Boolean               @default(true)
   revision     Int                   @default(1)
   createdAt    DateTime              @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime              @updatedAt @db.Timestamptz(3)
+  category     SalaryRuleCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   rules        SalaryStructureRule[]
   contracts    Contract[]
   payruns      Payrun[]
   payslips     Payslip[]
 
+  @@index([categoryId])
   @@schema("configuration")
 }
 

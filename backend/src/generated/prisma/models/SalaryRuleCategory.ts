@@ -217,6 +217,7 @@ export type SalaryRuleCategoryWhereInput = {
   type?: Prisma.EnumSalaryCategoryTypeFilter<"SalaryRuleCategory"> | $Enums.SalaryCategoryType
   description?: Prisma.StringNullableFilter<"SalaryRuleCategory"> | string | null
   rules?: Prisma.SalaryRuleListRelationFilter
+  structures?: Prisma.SalaryStructureListRelationFilter
 }
 
 export type SalaryRuleCategoryOrderByWithRelationInput = {
@@ -226,6 +227,7 @@ export type SalaryRuleCategoryOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   rules?: Prisma.SalaryRuleOrderByRelationAggregateInput
+  structures?: Prisma.SalaryStructureOrderByRelationAggregateInput
 }
 
 export type SalaryRuleCategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -238,6 +240,7 @@ export type SalaryRuleCategoryWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.EnumSalaryCategoryTypeFilter<"SalaryRuleCategory"> | $Enums.SalaryCategoryType
   description?: Prisma.StringNullableFilter<"SalaryRuleCategory"> | string | null
   rules?: Prisma.SalaryRuleListRelationFilter
+  structures?: Prisma.SalaryStructureListRelationFilter
 }, "id" | "code">
 
 export type SalaryRuleCategoryOrderByWithAggregationInput = {
@@ -270,6 +273,7 @@ export type SalaryRuleCategoryCreateInput = {
   type: $Enums.SalaryCategoryType
   description?: string | null
   rules?: Prisma.SalaryRuleCreateNestedManyWithoutCategoryInput
+  structures?: Prisma.SalaryStructureCreateNestedManyWithoutCategoryInput
 }
 
 export type SalaryRuleCategoryUncheckedCreateInput = {
@@ -279,6 +283,7 @@ export type SalaryRuleCategoryUncheckedCreateInput = {
   type: $Enums.SalaryCategoryType
   description?: string | null
   rules?: Prisma.SalaryRuleUncheckedCreateNestedManyWithoutCategoryInput
+  structures?: Prisma.SalaryStructureUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type SalaryRuleCategoryUpdateInput = {
@@ -287,6 +292,7 @@ export type SalaryRuleCategoryUpdateInput = {
   type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.SalaryRuleUpdateManyWithoutCategoryNestedInput
+  structures?: Prisma.SalaryStructureUpdateManyWithoutCategoryNestedInput
 }
 
 export type SalaryRuleCategoryUncheckedUpdateInput = {
@@ -296,6 +302,7 @@ export type SalaryRuleCategoryUncheckedUpdateInput = {
   type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rules?: Prisma.SalaryRuleUncheckedUpdateManyWithoutCategoryNestedInput
+  structures?: Prisma.SalaryStructureUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type SalaryRuleCategoryCreateManyInput = {
@@ -353,6 +360,11 @@ export type SalaryRuleCategorySumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
+export type SalaryRuleCategoryNullableScalarRelationFilter = {
+  is?: Prisma.SalaryRuleCategoryWhereInput | null
+  isNot?: Prisma.SalaryRuleCategoryWhereInput | null
+}
+
 export type SalaryRuleCategoryScalarRelationFilter = {
   is?: Prisma.SalaryRuleCategoryWhereInput
   isNot?: Prisma.SalaryRuleCategoryWhereInput
@@ -360,6 +372,22 @@ export type SalaryRuleCategoryScalarRelationFilter = {
 
 export type EnumSalaryCategoryTypeFieldUpdateOperationsInput = {
   set?: $Enums.SalaryCategoryType
+}
+
+export type SalaryRuleCategoryCreateNestedOneWithoutStructuresInput = {
+  create?: Prisma.XOR<Prisma.SalaryRuleCategoryCreateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedCreateWithoutStructuresInput>
+  connectOrCreate?: Prisma.SalaryRuleCategoryCreateOrConnectWithoutStructuresInput
+  connect?: Prisma.SalaryRuleCategoryWhereUniqueInput
+}
+
+export type SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput = {
+  create?: Prisma.XOR<Prisma.SalaryRuleCategoryCreateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedCreateWithoutStructuresInput>
+  connectOrCreate?: Prisma.SalaryRuleCategoryCreateOrConnectWithoutStructuresInput
+  upsert?: Prisma.SalaryRuleCategoryUpsertWithoutStructuresInput
+  disconnect?: Prisma.SalaryRuleCategoryWhereInput | boolean
+  delete?: Prisma.SalaryRuleCategoryWhereInput | boolean
+  connect?: Prisma.SalaryRuleCategoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SalaryRuleCategoryUpdateToOneWithWhereWithoutStructuresInput, Prisma.SalaryRuleCategoryUpdateWithoutStructuresInput>, Prisma.SalaryRuleCategoryUncheckedUpdateWithoutStructuresInput>
 }
 
 export type SalaryRuleCategoryCreateNestedOneWithoutRulesInput = {
@@ -376,11 +404,62 @@ export type SalaryRuleCategoryUpdateOneRequiredWithoutRulesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SalaryRuleCategoryUpdateToOneWithWhereWithoutRulesInput, Prisma.SalaryRuleCategoryUpdateWithoutRulesInput>, Prisma.SalaryRuleCategoryUncheckedUpdateWithoutRulesInput>
 }
 
+export type SalaryRuleCategoryCreateWithoutStructuresInput = {
+  code: string
+  name: string
+  type: $Enums.SalaryCategoryType
+  description?: string | null
+  rules?: Prisma.SalaryRuleCreateNestedManyWithoutCategoryInput
+}
+
+export type SalaryRuleCategoryUncheckedCreateWithoutStructuresInput = {
+  id?: number
+  code: string
+  name: string
+  type: $Enums.SalaryCategoryType
+  description?: string | null
+  rules?: Prisma.SalaryRuleUncheckedCreateNestedManyWithoutCategoryInput
+}
+
+export type SalaryRuleCategoryCreateOrConnectWithoutStructuresInput = {
+  where: Prisma.SalaryRuleCategoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalaryRuleCategoryCreateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedCreateWithoutStructuresInput>
+}
+
+export type SalaryRuleCategoryUpsertWithoutStructuresInput = {
+  update: Prisma.XOR<Prisma.SalaryRuleCategoryUpdateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedUpdateWithoutStructuresInput>
+  create: Prisma.XOR<Prisma.SalaryRuleCategoryCreateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedCreateWithoutStructuresInput>
+  where?: Prisma.SalaryRuleCategoryWhereInput
+}
+
+export type SalaryRuleCategoryUpdateToOneWithWhereWithoutStructuresInput = {
+  where?: Prisma.SalaryRuleCategoryWhereInput
+  data: Prisma.XOR<Prisma.SalaryRuleCategoryUpdateWithoutStructuresInput, Prisma.SalaryRuleCategoryUncheckedUpdateWithoutStructuresInput>
+}
+
+export type SalaryRuleCategoryUpdateWithoutStructuresInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.SalaryRuleUpdateManyWithoutCategoryNestedInput
+}
+
+export type SalaryRuleCategoryUncheckedUpdateWithoutStructuresInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rules?: Prisma.SalaryRuleUncheckedUpdateManyWithoutCategoryNestedInput
+}
+
 export type SalaryRuleCategoryCreateWithoutRulesInput = {
   code: string
   name: string
   type: $Enums.SalaryCategoryType
   description?: string | null
+  structures?: Prisma.SalaryStructureCreateNestedManyWithoutCategoryInput
 }
 
 export type SalaryRuleCategoryUncheckedCreateWithoutRulesInput = {
@@ -389,6 +468,7 @@ export type SalaryRuleCategoryUncheckedCreateWithoutRulesInput = {
   name: string
   type: $Enums.SalaryCategoryType
   description?: string | null
+  structures?: Prisma.SalaryStructureUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type SalaryRuleCategoryCreateOrConnectWithoutRulesInput = {
@@ -412,6 +492,7 @@ export type SalaryRuleCategoryUpdateWithoutRulesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  structures?: Prisma.SalaryStructureUpdateManyWithoutCategoryNestedInput
 }
 
 export type SalaryRuleCategoryUncheckedUpdateWithoutRulesInput = {
@@ -420,6 +501,7 @@ export type SalaryRuleCategoryUncheckedUpdateWithoutRulesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumSalaryCategoryTypeFieldUpdateOperationsInput | $Enums.SalaryCategoryType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  structures?: Prisma.SalaryStructureUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 
@@ -429,10 +511,12 @@ export type SalaryRuleCategoryUncheckedUpdateWithoutRulesInput = {
 
 export type SalaryRuleCategoryCountOutputType = {
   rules: number
+  structures: number
 }
 
 export type SalaryRuleCategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rules?: boolean | SalaryRuleCategoryCountOutputTypeCountRulesArgs
+  structures?: boolean | SalaryRuleCategoryCountOutputTypeCountStructuresArgs
 }
 
 /**
@@ -452,6 +536,13 @@ export type SalaryRuleCategoryCountOutputTypeCountRulesArgs<ExtArgs extends runt
   where?: Prisma.SalaryRuleWhereInput
 }
 
+/**
+ * SalaryRuleCategoryCountOutputType without action
+ */
+export type SalaryRuleCategoryCountOutputTypeCountStructuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalaryStructureWhereInput
+}
+
 
 export type SalaryRuleCategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -460,6 +551,7 @@ export type SalaryRuleCategorySelect<ExtArgs extends runtime.Types.Extensions.In
   type?: boolean
   description?: boolean
   rules?: boolean | Prisma.SalaryRuleCategory$rulesArgs<ExtArgs>
+  structures?: boolean | Prisma.SalaryRuleCategory$structuresArgs<ExtArgs>
   _count?: boolean | Prisma.SalaryRuleCategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salaryRuleCategory"]>
 
@@ -490,6 +582,7 @@ export type SalaryRuleCategorySelectScalar = {
 export type SalaryRuleCategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "type" | "description", ExtArgs["result"]["salaryRuleCategory"]>
 export type SalaryRuleCategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rules?: boolean | Prisma.SalaryRuleCategory$rulesArgs<ExtArgs>
+  structures?: boolean | Prisma.SalaryRuleCategory$structuresArgs<ExtArgs>
   _count?: boolean | Prisma.SalaryRuleCategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SalaryRuleCategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -499,6 +592,7 @@ export type $SalaryRuleCategoryPayload<ExtArgs extends runtime.Types.Extensions.
   name: "SalaryRuleCategory"
   objects: {
     rules: Prisma.$SalaryRulePayload<ExtArgs>[]
+    structures: Prisma.$SalaryStructurePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -901,6 +995,7 @@ readonly fields: SalaryRuleCategoryFieldRefs;
 export interface Prisma__SalaryRuleCategoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   rules<T extends Prisma.SalaryRuleCategory$rulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryRuleCategory$rulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  structures<T extends Prisma.SalaryRuleCategory$structuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryRuleCategory$structuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryStructurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1349,6 +1444,30 @@ export type SalaryRuleCategory$rulesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.SalaryRuleScalarFieldEnum | Prisma.SalaryRuleScalarFieldEnum[]
+}
+
+/**
+ * SalaryRuleCategory.structures
+ */
+export type SalaryRuleCategory$structuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalaryStructure
+   */
+  select?: Prisma.SalaryStructureSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalaryStructure
+   */
+  omit?: Prisma.SalaryStructureOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalaryStructureInclude<ExtArgs> | null
+  where?: Prisma.SalaryStructureWhereInput
+  orderBy?: Prisma.SalaryStructureOrderByWithRelationInput | Prisma.SalaryStructureOrderByWithRelationInput[]
+  cursor?: Prisma.SalaryStructureWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalaryStructureScalarFieldEnum | Prisma.SalaryStructureScalarFieldEnum[]
 }
 
 /**

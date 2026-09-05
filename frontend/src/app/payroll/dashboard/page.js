@@ -16,7 +16,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const groups = [
   ["PAYROLL WORKSPACE", [["overview", "Dashboard", LayoutDashboard]]],
   ["PEOPLE", [["employees", "Employees", Users], ["contracts", "Contracts", FileCheck2], ["schedules", "Working schedules", CalendarDays], ["attendance", "Attendance", Clock3]]],
-  ["TIME OFF", [["leave", "Requests", Leaf], ["allocations", "Allocations", CalendarDays], ["leave-types", "Time off types", ShieldCheck]]],
+  ["TIME OFF", [["leave", "Time-off requests", Leaf], ["allocations", "Allocations", CalendarDays], ["leave-types", "Time off types", ShieldCheck]]],
   ["PAYROLL", [["payruns", "Payruns", Wallet], ["payslips", "Payslips", FileCheck2]]],
   ["PAYROLL CONFIGURATION", [["structures", "Salary structures", LayoutDashboard], ["rules", "Salary rules", Activity]]],
   ["INSIGHTS & ACCOUNT", [["reports", "Reports & analytics", Activity], ["profile", "My profile", Users]]],

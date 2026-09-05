@@ -28,11 +28,15 @@ export type AggregateSalaryStructure = {
 
 export type SalaryStructureAvgAggregateOutputType = {
   id: number | null
+  sequence: number | null
+  categoryId: number | null
   revision: number | null
 }
 
 export type SalaryStructureSumAggregateOutputType = {
   id: number | null
+  sequence: number | null
+  categoryId: number | null
   revision: number | null
 }
 
@@ -43,6 +47,8 @@ export type SalaryStructureMinAggregateOutputType = {
   description: string | null
   currency: string | null
   payFrequency: $Enums.PayFrequency | null
+  sequence: number | null
+  categoryId: number | null
   isActive: boolean | null
   revision: number | null
   createdAt: Date | null
@@ -56,6 +62,8 @@ export type SalaryStructureMaxAggregateOutputType = {
   description: string | null
   currency: string | null
   payFrequency: $Enums.PayFrequency | null
+  sequence: number | null
+  categoryId: number | null
   isActive: boolean | null
   revision: number | null
   createdAt: Date | null
@@ -69,6 +77,8 @@ export type SalaryStructureCountAggregateOutputType = {
   description: number
   currency: number
   payFrequency: number
+  sequence: number
+  categoryId: number
   isActive: number
   revision: number
   createdAt: number
@@ -79,11 +89,15 @@ export type SalaryStructureCountAggregateOutputType = {
 
 export type SalaryStructureAvgAggregateInputType = {
   id?: true
+  sequence?: true
+  categoryId?: true
   revision?: true
 }
 
 export type SalaryStructureSumAggregateInputType = {
   id?: true
+  sequence?: true
+  categoryId?: true
   revision?: true
 }
 
@@ -94,6 +108,8 @@ export type SalaryStructureMinAggregateInputType = {
   description?: true
   currency?: true
   payFrequency?: true
+  sequence?: true
+  categoryId?: true
   isActive?: true
   revision?: true
   createdAt?: true
@@ -107,6 +123,8 @@ export type SalaryStructureMaxAggregateInputType = {
   description?: true
   currency?: true
   payFrequency?: true
+  sequence?: true
+  categoryId?: true
   isActive?: true
   revision?: true
   createdAt?: true
@@ -120,6 +138,8 @@ export type SalaryStructureCountAggregateInputType = {
   description?: true
   currency?: true
   payFrequency?: true
+  sequence?: true
+  categoryId?: true
   isActive?: true
   revision?: true
   createdAt?: true
@@ -220,6 +240,8 @@ export type SalaryStructureGroupByOutputType = {
   description: string | null
   currency: string
   payFrequency: $Enums.PayFrequency
+  sequence: number
+  categoryId: number | null
   isActive: boolean
   revision: number
   createdAt: Date
@@ -256,10 +278,13 @@ export type SalaryStructureWhereInput = {
   description?: Prisma.StringNullableFilter<"SalaryStructure"> | string | null
   currency?: Prisma.StringFilter<"SalaryStructure"> | string
   payFrequency?: Prisma.EnumPayFrequencyFilter<"SalaryStructure"> | $Enums.PayFrequency
+  sequence?: Prisma.IntFilter<"SalaryStructure"> | number
+  categoryId?: Prisma.IntNullableFilter<"SalaryStructure"> | number | null
   isActive?: Prisma.BoolFilter<"SalaryStructure"> | boolean
   revision?: Prisma.IntFilter<"SalaryStructure"> | number
   createdAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
+  category?: Prisma.XOR<Prisma.SalaryRuleCategoryNullableScalarRelationFilter, Prisma.SalaryRuleCategoryWhereInput> | null
   rules?: Prisma.SalaryStructureRuleListRelationFilter
   contracts?: Prisma.ContractListRelationFilter
   payruns?: Prisma.PayrunListRelationFilter
@@ -273,10 +298,13 @@ export type SalaryStructureOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   payFrequency?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  category?: Prisma.SalaryRuleCategoryOrderByWithRelationInput
   rules?: Prisma.SalaryStructureRuleOrderByRelationAggregateInput
   contracts?: Prisma.ContractOrderByRelationAggregateInput
   payruns?: Prisma.PayrunOrderByRelationAggregateInput
@@ -293,10 +321,13 @@ export type SalaryStructureWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"SalaryStructure"> | string | null
   currency?: Prisma.StringFilter<"SalaryStructure"> | string
   payFrequency?: Prisma.EnumPayFrequencyFilter<"SalaryStructure"> | $Enums.PayFrequency
+  sequence?: Prisma.IntFilter<"SalaryStructure"> | number
+  categoryId?: Prisma.IntNullableFilter<"SalaryStructure"> | number | null
   isActive?: Prisma.BoolFilter<"SalaryStructure"> | boolean
   revision?: Prisma.IntFilter<"SalaryStructure"> | number
   createdAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
+  category?: Prisma.XOR<Prisma.SalaryRuleCategoryNullableScalarRelationFilter, Prisma.SalaryRuleCategoryWhereInput> | null
   rules?: Prisma.SalaryStructureRuleListRelationFilter
   contracts?: Prisma.ContractListRelationFilter
   payruns?: Prisma.PayrunListRelationFilter
@@ -310,6 +341,8 @@ export type SalaryStructureOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   payFrequency?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -331,6 +364,8 @@ export type SalaryStructureScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"SalaryStructure"> | string | null
   currency?: Prisma.StringWithAggregatesFilter<"SalaryStructure"> | string
   payFrequency?: Prisma.EnumPayFrequencyWithAggregatesFilter<"SalaryStructure"> | $Enums.PayFrequency
+  sequence?: Prisma.IntWithAggregatesFilter<"SalaryStructure"> | number
+  categoryId?: Prisma.IntNullableWithAggregatesFilter<"SalaryStructure"> | number | null
   isActive?: Prisma.BoolWithAggregatesFilter<"SalaryStructure"> | boolean
   revision?: Prisma.IntWithAggregatesFilter<"SalaryStructure"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SalaryStructure"> | Date | string
@@ -343,10 +378,12 @@ export type SalaryStructureCreateInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  category?: Prisma.SalaryRuleCategoryCreateNestedOneWithoutStructuresInput
   rules?: Prisma.SalaryStructureRuleCreateNestedManyWithoutSalaryStructureInput
   contracts?: Prisma.ContractCreateNestedManyWithoutSalaryStructureInput
   payruns?: Prisma.PayrunCreateNestedManyWithoutSalaryStructureInput
@@ -360,6 +397,8 @@ export type SalaryStructureUncheckedCreateInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -376,10 +415,12 @@ export type SalaryStructureUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput
   rules?: Prisma.SalaryStructureRuleUpdateManyWithoutSalaryStructureNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutSalaryStructureNestedInput
   payruns?: Prisma.PayrunUpdateManyWithoutSalaryStructureNestedInput
@@ -393,6 +434,8 @@ export type SalaryStructureUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -410,6 +453,8 @@ export type SalaryStructureCreateManyInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -422,6 +467,7 @@ export type SalaryStructureUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,6 +481,8 @@ export type SalaryStructureUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -446,6 +494,16 @@ export type SalaryStructureNullableScalarRelationFilter = {
   isNot?: Prisma.SalaryStructureWhereInput | null
 }
 
+export type SalaryStructureListRelationFilter = {
+  every?: Prisma.SalaryStructureWhereInput
+  some?: Prisma.SalaryStructureWhereInput
+  none?: Prisma.SalaryStructureWhereInput
+}
+
+export type SalaryStructureOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type SalaryStructureCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
@@ -453,6 +511,8 @@ export type SalaryStructureCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   payFrequency?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -461,6 +521,8 @@ export type SalaryStructureCountOrderByAggregateInput = {
 
 export type SalaryStructureAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrder
   revision?: Prisma.SortOrder
 }
 
@@ -471,6 +533,8 @@ export type SalaryStructureMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   payFrequency?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -484,6 +548,8 @@ export type SalaryStructureMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   payFrequency?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -492,6 +558,8 @@ export type SalaryStructureMinOrderByAggregateInput = {
 
 export type SalaryStructureSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  sequence?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrder
   revision?: Prisma.SortOrder
 }
 
@@ -514,6 +582,48 @@ export type SalaryStructureUpdateOneWithoutContractsNestedInput = {
   delete?: Prisma.SalaryStructureWhereInput | boolean
   connect?: Prisma.SalaryStructureWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.SalaryStructureUpdateToOneWithWhereWithoutContractsInput, Prisma.SalaryStructureUpdateWithoutContractsInput>, Prisma.SalaryStructureUncheckedUpdateWithoutContractsInput>
+}
+
+export type SalaryStructureCreateNestedManyWithoutCategoryInput = {
+  create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput> | Prisma.SalaryStructureCreateWithoutCategoryInput[] | Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput[]
+  connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput | Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput[]
+  createMany?: Prisma.SalaryStructureCreateManyCategoryInputEnvelope
+  connect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+}
+
+export type SalaryStructureUncheckedCreateNestedManyWithoutCategoryInput = {
+  create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput> | Prisma.SalaryStructureCreateWithoutCategoryInput[] | Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput[]
+  connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput | Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput[]
+  createMany?: Prisma.SalaryStructureCreateManyCategoryInputEnvelope
+  connect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+}
+
+export type SalaryStructureUpdateManyWithoutCategoryNestedInput = {
+  create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput> | Prisma.SalaryStructureCreateWithoutCategoryInput[] | Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput[]
+  connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput | Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput[]
+  upsert?: Prisma.SalaryStructureUpsertWithWhereUniqueWithoutCategoryInput | Prisma.SalaryStructureUpsertWithWhereUniqueWithoutCategoryInput[]
+  createMany?: Prisma.SalaryStructureCreateManyCategoryInputEnvelope
+  set?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  disconnect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  delete?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  connect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  update?: Prisma.SalaryStructureUpdateWithWhereUniqueWithoutCategoryInput | Prisma.SalaryStructureUpdateWithWhereUniqueWithoutCategoryInput[]
+  updateMany?: Prisma.SalaryStructureUpdateManyWithWhereWithoutCategoryInput | Prisma.SalaryStructureUpdateManyWithWhereWithoutCategoryInput[]
+  deleteMany?: Prisma.SalaryStructureScalarWhereInput | Prisma.SalaryStructureScalarWhereInput[]
+}
+
+export type SalaryStructureUncheckedUpdateManyWithoutCategoryNestedInput = {
+  create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput> | Prisma.SalaryStructureCreateWithoutCategoryInput[] | Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput[]
+  connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput | Prisma.SalaryStructureCreateOrConnectWithoutCategoryInput[]
+  upsert?: Prisma.SalaryStructureUpsertWithWhereUniqueWithoutCategoryInput | Prisma.SalaryStructureUpsertWithWhereUniqueWithoutCategoryInput[]
+  createMany?: Prisma.SalaryStructureCreateManyCategoryInputEnvelope
+  set?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  disconnect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  delete?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  connect?: Prisma.SalaryStructureWhereUniqueInput | Prisma.SalaryStructureWhereUniqueInput[]
+  update?: Prisma.SalaryStructureUpdateWithWhereUniqueWithoutCategoryInput | Prisma.SalaryStructureUpdateWithWhereUniqueWithoutCategoryInput[]
+  updateMany?: Prisma.SalaryStructureUpdateManyWithWhereWithoutCategoryInput | Prisma.SalaryStructureUpdateManyWithWhereWithoutCategoryInput[]
+  deleteMany?: Prisma.SalaryStructureScalarWhereInput | Prisma.SalaryStructureScalarWhereInput[]
 }
 
 export type SalaryStructureCreateNestedOneWithoutRulesInput = {
@@ -564,10 +674,12 @@ export type SalaryStructureCreateWithoutContractsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  category?: Prisma.SalaryRuleCategoryCreateNestedOneWithoutStructuresInput
   rules?: Prisma.SalaryStructureRuleCreateNestedManyWithoutSalaryStructureInput
   payruns?: Prisma.PayrunCreateNestedManyWithoutSalaryStructureInput
   payslips?: Prisma.PayslipCreateNestedManyWithoutSalaryStructureInput
@@ -580,6 +692,8 @@ export type SalaryStructureUncheckedCreateWithoutContractsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -611,10 +725,12 @@ export type SalaryStructureUpdateWithoutContractsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput
   rules?: Prisma.SalaryStructureRuleUpdateManyWithoutSalaryStructureNestedInput
   payruns?: Prisma.PayrunUpdateManyWithoutSalaryStructureNestedInput
   payslips?: Prisma.PayslipUpdateManyWithoutSalaryStructureNestedInput
@@ -627,6 +743,8 @@ export type SalaryStructureUncheckedUpdateWithoutContractsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -636,16 +754,97 @@ export type SalaryStructureUncheckedUpdateWithoutContractsInput = {
   payslips?: Prisma.PayslipUncheckedUpdateManyWithoutSalaryStructureNestedInput
 }
 
+export type SalaryStructureCreateWithoutCategoryInput = {
+  code: string
+  name: string
+  description?: string | null
+  currency: string
+  payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  isActive?: boolean
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rules?: Prisma.SalaryStructureRuleCreateNestedManyWithoutSalaryStructureInput
+  contracts?: Prisma.ContractCreateNestedManyWithoutSalaryStructureInput
+  payruns?: Prisma.PayrunCreateNestedManyWithoutSalaryStructureInput
+  payslips?: Prisma.PayslipCreateNestedManyWithoutSalaryStructureInput
+}
+
+export type SalaryStructureUncheckedCreateWithoutCategoryInput = {
+  id?: number
+  code: string
+  name: string
+  description?: string | null
+  currency: string
+  payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  isActive?: boolean
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rules?: Prisma.SalaryStructureRuleUncheckedCreateNestedManyWithoutSalaryStructureInput
+  contracts?: Prisma.ContractUncheckedCreateNestedManyWithoutSalaryStructureInput
+  payruns?: Prisma.PayrunUncheckedCreateNestedManyWithoutSalaryStructureInput
+  payslips?: Prisma.PayslipUncheckedCreateNestedManyWithoutSalaryStructureInput
+}
+
+export type SalaryStructureCreateOrConnectWithoutCategoryInput = {
+  where: Prisma.SalaryStructureWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput>
+}
+
+export type SalaryStructureCreateManyCategoryInputEnvelope = {
+  data: Prisma.SalaryStructureCreateManyCategoryInput | Prisma.SalaryStructureCreateManyCategoryInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalaryStructureUpsertWithWhereUniqueWithoutCategoryInput = {
+  where: Prisma.SalaryStructureWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalaryStructureUpdateWithoutCategoryInput, Prisma.SalaryStructureUncheckedUpdateWithoutCategoryInput>
+  create: Prisma.XOR<Prisma.SalaryStructureCreateWithoutCategoryInput, Prisma.SalaryStructureUncheckedCreateWithoutCategoryInput>
+}
+
+export type SalaryStructureUpdateWithWhereUniqueWithoutCategoryInput = {
+  where: Prisma.SalaryStructureWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalaryStructureUpdateWithoutCategoryInput, Prisma.SalaryStructureUncheckedUpdateWithoutCategoryInput>
+}
+
+export type SalaryStructureUpdateManyWithWhereWithoutCategoryInput = {
+  where: Prisma.SalaryStructureScalarWhereInput
+  data: Prisma.XOR<Prisma.SalaryStructureUpdateManyMutationInput, Prisma.SalaryStructureUncheckedUpdateManyWithoutCategoryInput>
+}
+
+export type SalaryStructureScalarWhereInput = {
+  AND?: Prisma.SalaryStructureScalarWhereInput | Prisma.SalaryStructureScalarWhereInput[]
+  OR?: Prisma.SalaryStructureScalarWhereInput[]
+  NOT?: Prisma.SalaryStructureScalarWhereInput | Prisma.SalaryStructureScalarWhereInput[]
+  id?: Prisma.IntFilter<"SalaryStructure"> | number
+  code?: Prisma.StringFilter<"SalaryStructure"> | string
+  name?: Prisma.StringFilter<"SalaryStructure"> | string
+  description?: Prisma.StringNullableFilter<"SalaryStructure"> | string | null
+  currency?: Prisma.StringFilter<"SalaryStructure"> | string
+  payFrequency?: Prisma.EnumPayFrequencyFilter<"SalaryStructure"> | $Enums.PayFrequency
+  sequence?: Prisma.IntFilter<"SalaryStructure"> | number
+  categoryId?: Prisma.IntNullableFilter<"SalaryStructure"> | number | null
+  isActive?: Prisma.BoolFilter<"SalaryStructure"> | boolean
+  revision?: Prisma.IntFilter<"SalaryStructure"> | number
+  createdAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"SalaryStructure"> | Date | string
+}
+
 export type SalaryStructureCreateWithoutRulesInput = {
   code: string
   name: string
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  category?: Prisma.SalaryRuleCategoryCreateNestedOneWithoutStructuresInput
   contracts?: Prisma.ContractCreateNestedManyWithoutSalaryStructureInput
   payruns?: Prisma.PayrunCreateNestedManyWithoutSalaryStructureInput
   payslips?: Prisma.PayslipCreateNestedManyWithoutSalaryStructureInput
@@ -658,6 +857,8 @@ export type SalaryStructureUncheckedCreateWithoutRulesInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -689,10 +890,12 @@ export type SalaryStructureUpdateWithoutRulesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutSalaryStructureNestedInput
   payruns?: Prisma.PayrunUpdateManyWithoutSalaryStructureNestedInput
   payslips?: Prisma.PayslipUpdateManyWithoutSalaryStructureNestedInput
@@ -705,6 +908,8 @@ export type SalaryStructureUncheckedUpdateWithoutRulesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -720,10 +925,12 @@ export type SalaryStructureCreateWithoutPayrunsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  category?: Prisma.SalaryRuleCategoryCreateNestedOneWithoutStructuresInput
   rules?: Prisma.SalaryStructureRuleCreateNestedManyWithoutSalaryStructureInput
   contracts?: Prisma.ContractCreateNestedManyWithoutSalaryStructureInput
   payslips?: Prisma.PayslipCreateNestedManyWithoutSalaryStructureInput
@@ -736,6 +943,8 @@ export type SalaryStructureUncheckedCreateWithoutPayrunsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -767,10 +976,12 @@ export type SalaryStructureUpdateWithoutPayrunsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput
   rules?: Prisma.SalaryStructureRuleUpdateManyWithoutSalaryStructureNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutSalaryStructureNestedInput
   payslips?: Prisma.PayslipUpdateManyWithoutSalaryStructureNestedInput
@@ -783,6 +994,8 @@ export type SalaryStructureUncheckedUpdateWithoutPayrunsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -798,10 +1011,12 @@ export type SalaryStructureCreateWithoutPayslipsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  category?: Prisma.SalaryRuleCategoryCreateNestedOneWithoutStructuresInput
   rules?: Prisma.SalaryStructureRuleCreateNestedManyWithoutSalaryStructureInput
   contracts?: Prisma.ContractCreateNestedManyWithoutSalaryStructureInput
   payruns?: Prisma.PayrunCreateNestedManyWithoutSalaryStructureInput
@@ -814,6 +1029,8 @@ export type SalaryStructureUncheckedCreateWithoutPayslipsInput = {
   description?: string | null
   currency: string
   payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  categoryId?: number | null
   isActive?: boolean
   revision?: number
   createdAt?: Date | string
@@ -845,10 +1062,12 @@ export type SalaryStructureUpdateWithoutPayslipsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.SalaryRuleCategoryUpdateOneWithoutStructuresNestedInput
   rules?: Prisma.SalaryStructureRuleUpdateManyWithoutSalaryStructureNestedInput
   contracts?: Prisma.ContractUpdateManyWithoutSalaryStructureNestedInput
   payruns?: Prisma.PayrunUpdateManyWithoutSalaryStructureNestedInput
@@ -861,6 +1080,8 @@ export type SalaryStructureUncheckedUpdateWithoutPayslipsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -868,6 +1089,69 @@ export type SalaryStructureUncheckedUpdateWithoutPayslipsInput = {
   rules?: Prisma.SalaryStructureRuleUncheckedUpdateManyWithoutSalaryStructureNestedInput
   contracts?: Prisma.ContractUncheckedUpdateManyWithoutSalaryStructureNestedInput
   payruns?: Prisma.PayrunUncheckedUpdateManyWithoutSalaryStructureNestedInput
+}
+
+export type SalaryStructureCreateManyCategoryInput = {
+  id?: number
+  code: string
+  name: string
+  description?: string | null
+  currency: string
+  payFrequency?: $Enums.PayFrequency
+  sequence?: number
+  isActive?: boolean
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SalaryStructureUpdateWithoutCategoryInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rules?: Prisma.SalaryStructureRuleUpdateManyWithoutSalaryStructureNestedInput
+  contracts?: Prisma.ContractUpdateManyWithoutSalaryStructureNestedInput
+  payruns?: Prisma.PayrunUpdateManyWithoutSalaryStructureNestedInput
+  payslips?: Prisma.PayslipUpdateManyWithoutSalaryStructureNestedInput
+}
+
+export type SalaryStructureUncheckedUpdateWithoutCategoryInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rules?: Prisma.SalaryStructureRuleUncheckedUpdateManyWithoutSalaryStructureNestedInput
+  contracts?: Prisma.ContractUncheckedUpdateManyWithoutSalaryStructureNestedInput
+  payruns?: Prisma.PayrunUncheckedUpdateManyWithoutSalaryStructureNestedInput
+  payslips?: Prisma.PayslipUncheckedUpdateManyWithoutSalaryStructureNestedInput
+}
+
+export type SalaryStructureUncheckedUpdateManyWithoutCategoryInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  payFrequency?: Prisma.EnumPayFrequencyFieldUpdateOperationsInput | $Enums.PayFrequency
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -935,10 +1219,13 @@ export type SalaryStructureSelect<ExtArgs extends runtime.Types.Extensions.Inter
   description?: boolean
   currency?: boolean
   payFrequency?: boolean
+  sequence?: boolean
+  categoryId?: boolean
   isActive?: boolean
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
   rules?: boolean | Prisma.SalaryStructure$rulesArgs<ExtArgs>
   contracts?: boolean | Prisma.SalaryStructure$contractsArgs<ExtArgs>
   payruns?: boolean | Prisma.SalaryStructure$payrunsArgs<ExtArgs>
@@ -953,10 +1240,13 @@ export type SalaryStructureSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   description?: boolean
   currency?: boolean
   payFrequency?: boolean
+  sequence?: boolean
+  categoryId?: boolean
   isActive?: boolean
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
 }, ExtArgs["result"]["salaryStructure"]>
 
 export type SalaryStructureSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -966,10 +1256,13 @@ export type SalaryStructureSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   description?: boolean
   currency?: boolean
   payFrequency?: boolean
+  sequence?: boolean
+  categoryId?: boolean
   isActive?: boolean
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
 }, ExtArgs["result"]["salaryStructure"]>
 
 export type SalaryStructureSelectScalar = {
@@ -979,26 +1272,34 @@ export type SalaryStructureSelectScalar = {
   description?: boolean
   currency?: boolean
   payFrequency?: boolean
+  sequence?: boolean
+  categoryId?: boolean
   isActive?: boolean
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SalaryStructureOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "description" | "currency" | "payFrequency" | "isActive" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["salaryStructure"]>
+export type SalaryStructureOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "description" | "currency" | "payFrequency" | "sequence" | "categoryId" | "isActive" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["salaryStructure"]>
 export type SalaryStructureInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
   rules?: boolean | Prisma.SalaryStructure$rulesArgs<ExtArgs>
   contracts?: boolean | Prisma.SalaryStructure$contractsArgs<ExtArgs>
   payruns?: boolean | Prisma.SalaryStructure$payrunsArgs<ExtArgs>
   payslips?: boolean | Prisma.SalaryStructure$payslipsArgs<ExtArgs>
   _count?: boolean | Prisma.SalaryStructureCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type SalaryStructureIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type SalaryStructureIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SalaryStructureIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
+}
+export type SalaryStructureIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  category?: boolean | Prisma.SalaryStructure$categoryArgs<ExtArgs>
+}
 
 export type $SalaryStructurePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalaryStructure"
   objects: {
+    category: Prisma.$SalaryRuleCategoryPayload<ExtArgs> | null
     rules: Prisma.$SalaryStructureRulePayload<ExtArgs>[]
     contracts: Prisma.$ContractPayload<ExtArgs>[]
     payruns: Prisma.$PayrunPayload<ExtArgs>[]
@@ -1011,6 +1312,8 @@ export type $SalaryStructurePayload<ExtArgs extends runtime.Types.Extensions.Int
     description: string | null
     currency: string
     payFrequency: $Enums.PayFrequency
+    sequence: number
+    categoryId: number | null
     isActive: boolean
     revision: number
     createdAt: Date
@@ -1409,6 +1712,7 @@ readonly fields: SalaryStructureFieldRefs;
  */
 export interface Prisma__SalaryStructureClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  category<T extends Prisma.SalaryStructure$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryStructure$categoryArgs<ExtArgs>>): Prisma.Prisma__SalaryRuleCategoryClient<runtime.Types.Result.GetResult<Prisma.$SalaryRuleCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   rules<T extends Prisma.SalaryStructure$rulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryStructure$rulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryStructureRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contracts<T extends Prisma.SalaryStructure$contractsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryStructure$contractsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payruns<T extends Prisma.SalaryStructure$payrunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalaryStructure$payrunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PayrunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1448,6 +1752,8 @@ export interface SalaryStructureFieldRefs {
   readonly description: Prisma.FieldRef<"SalaryStructure", 'String'>
   readonly currency: Prisma.FieldRef<"SalaryStructure", 'String'>
   readonly payFrequency: Prisma.FieldRef<"SalaryStructure", 'PayFrequency'>
+  readonly sequence: Prisma.FieldRef<"SalaryStructure", 'Int'>
+  readonly categoryId: Prisma.FieldRef<"SalaryStructure", 'Int'>
   readonly isActive: Prisma.FieldRef<"SalaryStructure", 'Boolean'>
   readonly revision: Prisma.FieldRef<"SalaryStructure", 'Int'>
   readonly createdAt: Prisma.FieldRef<"SalaryStructure", 'DateTime'>
@@ -1706,6 +2012,10 @@ export type SalaryStructureCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.SalaryStructureCreateManyInput | Prisma.SalaryStructureCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalaryStructureIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1776,6 +2086,10 @@ export type SalaryStructureUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many SalaryStructures to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalaryStructureIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1842,6 +2156,25 @@ export type SalaryStructureDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many SalaryStructures to delete.
    */
   limit?: number
+}
+
+/**
+ * SalaryStructure.category
+ */
+export type SalaryStructure$categoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalaryRuleCategory
+   */
+  select?: Prisma.SalaryRuleCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalaryRuleCategory
+   */
+  omit?: Prisma.SalaryRuleCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalaryRuleCategoryInclude<ExtArgs> | null
+  where?: Prisma.SalaryRuleCategoryWhereInput
 }
 
 /**

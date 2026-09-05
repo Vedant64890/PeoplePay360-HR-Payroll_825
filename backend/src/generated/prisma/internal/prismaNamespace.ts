@@ -4392,6 +4392,8 @@ export const SalaryStructureScalarFieldEnum = {
   description: 'description',
   currency: 'currency',
   payFrequency: 'payFrequency',
+  sequence: 'sequence',
+  categoryId: 'categoryId',
   isActive: 'isActive',
   revision: 'revision',
   createdAt: 'createdAt',

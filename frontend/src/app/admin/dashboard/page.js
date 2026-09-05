@@ -19,7 +19,7 @@ const navigation = [
   { id: "contracts", label: "Contracts", icon: ShieldCheck },
   { id: "schedules", label: "Working schedules", icon: CalendarDays },
   { id: "attendance", label: "Attendance", icon: Clock3 },
-  { id: "leave", label: "Time off", icon: Leaf },
+  { id: "leave", label: "Time-off requests", icon: Leaf },
   { id: "payruns", label: "Payruns", icon: Wallet },
   { id: "payslips", label: "Payslips", icon: ArrowDownToLine },
   { id: "structures", label: "Salary structures", icon: LayoutDashboard },
