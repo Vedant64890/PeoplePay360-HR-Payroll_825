@@ -9,7 +9,424 @@
 * 🟢 You can import this file directly.
 */
 
+export const UserRole = {
+  USER: 'USER',
+  MANAGER: 'MANAGER',
+  EMPLOYEE: 'EMPLOYEE',
+  HR_MANAGER: 'HR_MANAGER',
+  HR_PAYROLL_USER: 'HR_PAYROLL_USER',
+  HR_PAYROLL_MANAGER: 'HR_PAYROLL_MANAGER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const PermissionAction = {
+  CREATE: 'CREATE',
+  READ: 'READ',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE',
+  APPROVE: 'APPROVE',
+  REFUSE: 'REFUSE',
+  COMPUTE: 'COMPUTE',
+  VALIDATE: 'VALIDATE',
+  MARK_PAID: 'MARK_PAID',
+  PRINT: 'PRINT',
+  SEND: 'SEND',
+  MANAGE_PERMISSIONS: 'MANAGE_PERMISSIONS'
+} as const
+
+export type PermissionAction = (typeof PermissionAction)[keyof typeof PermissionAction]
+
+
+export const AccessScope = {
+  OWN: 'OWN',
+  ALL: 'ALL'
+} as const
+
+export type AccessScope = (typeof AccessScope)[keyof typeof AccessScope]
+
+
+export const EmployeeStatus = {
+  ONBOARDING: 'ONBOARDING',
+  ACTIVE: 'ACTIVE',
+  ON_LEAVE: 'ON_LEAVE',
+  SUSPENDED: 'SUSPENDED',
+  TERMINATED: 'TERMINATED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type EmployeeStatus = (typeof EmployeeStatus)[keyof typeof EmployeeStatus]
+
+
+export const EmployeeType = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  CONTRACT: 'CONTRACT',
+  INTERN: 'INTERN',
+  TEMPORARY: 'TEMPORARY'
+} as const
+
+export type EmployeeType = (typeof EmployeeType)[keyof typeof EmployeeType]
+
+
+export const EmploymentEventType = {
+  HIRED: 'HIRED',
+  DEPARTMENT_CHANGED: 'DEPARTMENT_CHANGED',
+  POSITION_CHANGED: 'POSITION_CHANGED',
+  MANAGER_CHANGED: 'MANAGER_CHANGED',
+  SCHEDULE_CHANGED: 'SCHEDULE_CHANGED',
+  CONTRACT_CHANGED: 'CONTRACT_CHANGED',
+  STATUS_CHANGED: 'STATUS_CHANGED',
+  TERMINATED: 'TERMINATED',
+  REHIRED: 'REHIRED'
+} as const
+
+export type EmploymentEventType = (typeof EmploymentEventType)[keyof typeof EmploymentEventType]
+
+
+export const ContractStatus = {
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  EXPIRED: 'EXPIRED',
+  TERMINATED: 'TERMINATED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ContractStatus = (typeof ContractStatus)[keyof typeof ContractStatus]
+
+
+export const WageBasis = {
+  MONTHLY: 'MONTHLY',
+  HOURLY: 'HOURLY',
+  DAILY: 'DAILY',
+  ANNUAL: 'ANNUAL'
+} as const
+
+export type WageBasis = (typeof WageBasis)[keyof typeof WageBasis]
+
+
+export const ScheduleType = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  FLEXIBLE: 'FLEXIBLE',
+  SHIFT: 'SHIFT'
+} as const
+
+export type ScheduleType = (typeof ScheduleType)[keyof typeof ScheduleType]
+
+
+export const Weekday = {
+  MONDAY: 'MONDAY',
+  TUESDAY: 'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY: 'THURSDAY',
+  FRIDAY: 'FRIDAY',
+  SATURDAY: 'SATURDAY',
+  SUNDAY: 'SUNDAY'
+} as const
+
+export type Weekday = (typeof Weekday)[keyof typeof Weekday]
+
+
+export const AttendanceStatus = {
+  PRESENT: 'PRESENT',
+  ABSENT: 'ABSENT',
+  ON_LEAVE: 'ON_LEAVE',
+  HOLIDAY: 'HOLIDAY',
+  REST_DAY: 'REST_DAY'
+} as const
+
+export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof AttendanceStatus]
+
+
+export const AttendanceSource = {
+  SELF_SERVICE: 'SELF_SERVICE',
+  MANUAL: 'MANUAL',
+  IMPORT: 'IMPORT',
+  DEVICE: 'DEVICE'
+} as const
+
+export type AttendanceSource = (typeof AttendanceSource)[keyof typeof AttendanceSource]
+
+
+export const AttendanceExceptionType = {
+  MISSING_CHECK_OUT: 'MISSING_CHECK_OUT',
+  LATE: 'LATE',
+  EARLY_DEPARTURE: 'EARLY_DEPARTURE',
+  OVERLAPPING_ENTRIES: 'OVERLAPPING_ENTRIES',
+  OUTSIDE_SCHEDULE: 'OUTSIDE_SCHEDULE',
+  EXCESSIVE_HOURS: 'EXCESSIVE_HOURS',
+  OTHER: 'OTHER'
+} as const
+
+export type AttendanceExceptionType = (typeof AttendanceExceptionType)[keyof typeof AttendanceExceptionType]
+
+
+export const ExceptionStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED',
+  DISMISSED: 'DISMISSED'
+} as const
+
+export type ExceptionStatus = (typeof ExceptionStatus)[keyof typeof ExceptionStatus]
+
+
+export const LeaveUnit = {
+  DAYS: 'DAYS',
+  HOURS: 'HOURS'
+} as const
+
+export type LeaveUnit = (typeof LeaveUnit)[keyof typeof LeaveUnit]
+
+
+export const ApprovalPolicy = {
+  AUTOMATIC: 'AUTOMATIC',
+  SINGLE_APPROVAL: 'SINGLE_APPROVAL',
+  TWO_LEVEL_APPROVAL: 'TWO_LEVEL_APPROVAL'
+} as const
+
+export type ApprovalPolicy = (typeof ApprovalPolicy)[keyof typeof ApprovalPolicy]
+
+
+export const AllocationApprovalPolicy = {
+  SINGLE_APPROVAL: 'SINGLE_APPROVAL',
+  TWO_LEVEL_APPROVAL: 'TWO_LEVEL_APPROVAL'
+} as const
+
+export type AllocationApprovalPolicy = (typeof AllocationApprovalPolicy)[keyof typeof AllocationApprovalPolicy]
+
+
+export const ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REFUSED: 'REFUSED'
+} as const
+
+export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus]
+
+
+export const LeavePayrollTreatment = {
+  PAID: 'PAID',
+  UNPAID: 'UNPAID',
+  PARTIALLY_PAID: 'PARTIALLY_PAID'
+} as const
+
+export type LeavePayrollTreatment = (typeof LeavePayrollTreatment)[keyof typeof LeavePayrollTreatment]
+
+
+export const LeaveStatus = {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  FIRST_APPROVED: 'FIRST_APPROVED',
+  APPROVED: 'APPROVED',
+  REFUSED: 'REFUSED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type LeaveStatus = (typeof LeaveStatus)[keyof typeof LeaveStatus]
+
+
+export const AllocationKind = {
+  REGULAR: 'REGULAR',
+  CARRY_FORWARD: 'CARRY_FORWARD',
+  ADJUSTMENT: 'ADJUSTMENT'
+} as const
+
+export type AllocationKind = (typeof AllocationKind)[keyof typeof AllocationKind]
+
+
+export const SalaryCategoryType = {
+  BASIC: 'BASIC',
+  ALLOWANCE: 'ALLOWANCE',
+  GROSS: 'GROSS',
+  DEDUCTION: 'DEDUCTION',
+  EMPLOYER_CONTRIBUTION: 'EMPLOYER_CONTRIBUTION',
+  NET: 'NET',
+  OTHER: 'OTHER'
+} as const
+
+export type SalaryCategoryType = (typeof SalaryCategoryType)[keyof typeof SalaryCategoryType]
+
+
+export const SalaryComputationMethod = {
+  FIXED: 'FIXED',
+  PERCENTAGE: 'PERCENTAGE',
+  FORMULA: 'FORMULA'
+} as const
+
+export type SalaryComputationMethod = (typeof SalaryComputationMethod)[keyof typeof SalaryComputationMethod]
+
+
+export const SalaryConditionMethod = {
+  ALWAYS: 'ALWAYS',
+  RANGE: 'RANGE',
+  FORMULA: 'FORMULA'
+} as const
+
+export type SalaryConditionMethod = (typeof SalaryConditionMethod)[keyof typeof SalaryConditionMethod]
+
+
+export const SalaryRuleEffect = {
+  EARNING: 'EARNING',
+  DEDUCTION: 'DEDUCTION',
+  EMPLOYER_COST: 'EMPLOYER_COST',
+  INFORMATIONAL: 'INFORMATIONAL'
+} as const
+
+export type SalaryRuleEffect = (typeof SalaryRuleEffect)[keyof typeof SalaryRuleEffect]
+
+
+export const PayFrequency = {
+  MONTHLY: 'MONTHLY',
+  SEMI_MONTHLY: 'SEMI_MONTHLY',
+  BIWEEKLY: 'BIWEEKLY',
+  WEEKLY: 'WEEKLY',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type PayFrequency = (typeof PayFrequency)[keyof typeof PayFrequency]
+
+
+export const PayrunStatus = {
+  DRAFT: 'DRAFT',
+  COMPUTING: 'COMPUTING',
+  COMPUTED: 'COMPUTED',
+  VALIDATED: 'VALIDATED',
+  PARTIALLY_PAID: 'PARTIALLY_PAID',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PayrunStatus = (typeof PayrunStatus)[keyof typeof PayrunStatus]
+
+
+export const PayrunEmployeeStatus = {
+  SELECTED: 'SELECTED',
+  COMPUTED: 'COMPUTED',
+  FAILED: 'FAILED',
+  EXCLUDED: 'EXCLUDED'
+} as const
+
+export type PayrunEmployeeStatus = (typeof PayrunEmployeeStatus)[keyof typeof PayrunEmployeeStatus]
+
+
+export const PayslipStatus = {
+  DRAFT: 'DRAFT',
+  COMPUTED: 'COMPUTED',
+  VALIDATED: 'VALIDATED',
+  PARTIALLY_PAID: 'PARTIALLY_PAID',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PayslipStatus = (typeof PayslipStatus)[keyof typeof PayslipStatus]
+
+
+export const WorkedTimeType = {
+  REGULAR: 'REGULAR',
+  OVERTIME: 'OVERTIME',
+  PAID_LEAVE: 'PAID_LEAVE',
+  UNPAID_LEAVE: 'UNPAID_LEAVE',
+  PARTIALLY_PAID_LEAVE: 'PARTIALLY_PAID_LEAVE',
+  ABSENCE: 'ABSENCE',
+  HOLIDAY: 'HOLIDAY'
+} as const
+
+export type WorkedTimeType = (typeof WorkedTimeType)[keyof typeof WorkedTimeType]
+
+
+export const WarningCode = {
+  MISSING_BANK_DETAILS: 'MISSING_BANK_DETAILS',
+  MISSING_EMAIL: 'MISSING_EMAIL',
+  MISSING_CONTRACT: 'MISSING_CONTRACT',
+  OVERLAPPING_CONTRACTS: 'OVERLAPPING_CONTRACTS',
+  CONTRACT_PERIOD_GAP: 'CONTRACT_PERIOD_GAP',
+  CONTRACT_EXPIRING: 'CONTRACT_EXPIRING',
+  MISSING_SCHEDULE: 'MISSING_SCHEDULE',
+  STRUCTURE_MISMATCH: 'STRUCTURE_MISMATCH',
+  DUPLICATE_PAYSLIP: 'DUPLICATE_PAYSLIP',
+  ATTENDANCE_EXCEPTION: 'ATTENDANCE_EXCEPTION',
+  INSUFFICIENT_LEAVE_BALANCE: 'INSUFFICIENT_LEAVE_BALANCE',
+  NEGATIVE_NET_PAY: 'NEGATIVE_NET_PAY',
+  RULE_COMPUTATION_ERROR: 'RULE_COMPUTATION_ERROR',
+  CURRENCY_MISMATCH: 'CURRENCY_MISMATCH',
+  OTHER: 'OTHER'
+} as const
+
+export type WarningCode = (typeof WarningCode)[keyof typeof WarningCode]
+
+
+export const WarningSeverity = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  BLOCKING: 'BLOCKING'
+} as const
+
+export type WarningSeverity = (typeof WarningSeverity)[keyof typeof WarningSeverity]
+
+
+export const WarningStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED',
+  ACKNOWLEDGED: 'ACKNOWLEDGED'
+} as const
+
+export type WarningStatus = (typeof WarningStatus)[keyof typeof WarningStatus]
+
+
+export const PaymentStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  REVERSED: 'REVERSED'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const PaymentMethod = {
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CASH: 'CASH',
+  CHEQUE: 'CHEQUE',
+  OTHER: 'OTHER'
+} as const
+
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
+export const DocumentStatus = {
+  QUEUED: 'QUEUED',
+  GENERATING: 'GENERATING',
+  READY: 'READY',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]
+
+
+export const DeliveryStatus = {
+  QUEUED: 'QUEUED',
+  SENDING: 'SENDING',
+  SENT: 'SENT',
+  DELIVERED: 'DELIVERED',
+  BOUNCED: 'BOUNCED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type DeliveryStatus = (typeof DeliveryStatus)[keyof typeof DeliveryStatus]
+
+
+export const DeliveryBatchStatus = {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  PARTIALLY_FAILED: 'PARTIALLY_FAILED',
+  FAILED: 'FAILED'
+} as const
+
+export type DeliveryBatchStatus = (typeof DeliveryBatchStatus)[keyof typeof DeliveryBatchStatus]

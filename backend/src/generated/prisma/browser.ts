@@ -22,3 +22,231 @@ export * from './enums.ts';
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Role
+ * Seed canonical and legacy codes before creating users or permission grants.
+ * Using the existing enum as the key preserves User.role and existing auth payloads.
+ */
+export type Role = Prisma.RoleModel
+/**
+ * Model Permission
+ * Resource/action pairs: EMPLOYEE, CONTRACT, ATTENDANCE, LEAVE_REQUEST,
+ * LEAVE_ALLOCATION, LEAVE_TYPE, SCHEDULE, PAYRUN, PAYSLIP, SALARY_STRUCTURE,
+ * SALARY_RULE, HR_REPORT, PAYROLL_REPORT, USER, PERMISSION.
+ */
+export type Permission = Prisma.PermissionModel
+/**
+ * Model RolePermission
+ * 
+ */
+export type RolePermission = Prisma.RolePermissionModel
+/**
+ * Model Department
+ * 
+ */
+export type Department = Prisma.DepartmentModel
+/**
+ * Model JobPosition
+ * 
+ */
+export type JobPosition = Prisma.JobPositionModel
+/**
+ * Model Employee
+ * 
+ */
+export type Employee = Prisma.EmployeeModel
+/**
+ * Model EmployeeBankAccount
+ * 
+ */
+export type EmployeeBankAccount = Prisma.EmployeeBankAccountModel
+/**
+ * Model EmploymentHistory
+ * Append-only history. Snapshots preserve labels and values before master-data edits.
+ */
+export type EmploymentHistory = Prisma.EmploymentHistoryModel
+/**
+ * Model Contract
+ * OPEN is approved contract history. Active-for-period is derived from dates,
+ * including endDate/terminationDate; never rely only on the current status.
+ */
+export type Contract = Prisma.ContractModel
+/**
+ * Model WorkingSchedule
+ * Once referenced historically, create a new schedule version instead of editing.
+ * Weekly hours = sum(endMinute + endDayOffset*1440 - startMinute - breakMinutes)/60.
+ */
+export type WorkingSchedule = Prisma.WorkingScheduleModel
+/**
+ * Model WorkingScheduleLine
+ * Multiple lines per day support split shifts; endDayOffset supports overnight work.
+ * Validate minute bounds, break length and overlapping lines in application/SQL.
+ */
+export type WorkingScheduleLine = Prisma.WorkingScheduleLineModel
+/**
+ * Model ScheduleHoliday
+ * 
+ */
+export type ScheduleHoliday = Prisma.ScheduleHolidayModel
+/**
+ * Model EmployeeScheduleAssignment
+ * Historical employee fallback. Applicable contract schedule takes precedence.
+ */
+export type EmployeeScheduleAssignment = Prisma.EmployeeScheduleAssignmentModel
+/**
+ * Model AttendanceDay
+ * One rollup even without a check-in, so absence and attendance coverage are visible.
+ * Derived caches must refresh after attendance corrections and approved leave changes.
+ */
+export type AttendanceDay = Prisma.AttendanceDayModel
+/**
+ * Model Attendance
+ * Multiple check-in/out sessions per day; employee is available through day.employee.
+ */
+export type Attendance = Prisma.AttendanceModel
+/**
+ * Model AttendanceCorrection
+ * Append-only edit history written in the same transaction as the session change.
+ */
+export type AttendanceCorrection = Prisma.AttendanceCorrectionModel
+/**
+ * Model AttendanceException
+ * 
+ */
+export type AttendanceException = Prisma.AttendanceExceptionModel
+/**
+ * Model LeaveType
+ * 
+ */
+export type LeaveType = Prisma.LeaveTypeModel
+/**
+ * Model LeaveAllocation
+ * 
+ */
+export type LeaveAllocation = Prisma.LeaveAllocationModel
+/**
+ * Model LeaveAllocationApproval
+ * 
+ */
+export type LeaveAllocationApproval = Prisma.LeaveAllocationApprovalModel
+/**
+ * Model LeaveRequest
+ * 
+ */
+export type LeaveRequest = Prisma.LeaveRequestModel
+/**
+ * Model LeaveRequestDay
+ * Daily intervals support partial days/hourly leave, varying schedules and allocations
+ * expiring partway through a request. Derive whole-day intervals from the schedule.
+ */
+export type LeaveRequestDay = Prisma.LeaveRequestDayModel
+/**
+ * Model LeaveRequestApproval
+ * 
+ */
+export type LeaveRequestApproval = Prisma.LeaveRequestApprovalModel
+/**
+ * Model LeaveAllocationConsumption
+ * Balance = approved allocation.amount - SUM(unreleased consumption.amount).
+ * One leave day may consume multiple allocations. Cancellation releases, never deletes.
+ */
+export type LeaveAllocationConsumption = Prisma.LeaveAllocationConsumptionModel
+/**
+ * Model SalaryRuleCategory
+ * 
+ */
+export type SalaryRuleCategory = Prisma.SalaryRuleCategoryModel
+/**
+ * Model SalaryStructure
+ * 
+ */
+export type SalaryStructure = Prisma.SalaryStructureModel
+/**
+ * Model SalaryRule
+ * Formula strings require a restricted expression evaluator, never raw eval/SQL.
+ * Percentage bases can refer to earlier rule codes. Validate method-specific fields.
+ */
+export type SalaryRule = Prisma.SalaryRuleModel
+/**
+ * Model SalaryStructureRule
+ * Structure-specific sequence permits reuse of the same rule in different structures.
+ */
+export type SalaryStructureRule = Prisma.SalaryStructureRuleModel
+/**
+ * Model SalaryRuleDependency
+ * 
+ */
+export type SalaryRuleDependency = Prisma.SalaryRuleDependencyModel
+/**
+ * Model PayrollPeriod
+ * 
+ */
+export type PayrollPeriod = Prisma.PayrollPeriodModel
+/**
+ * Model Payrun
+ * Wizard steps remain client-side. Insert this row and selections in one transaction
+ * only on Create Payrun. idempotencyKey makes repeated submission safe.
+ */
+export type Payrun = Prisma.PayrunModel
+/**
+ * Model PayrunEmployee
+ * Separate selection records retain failed/missing-contract employees in the payrun.
+ */
+export type PayrunEmployee = Prisma.PayrunEmployeeModel
+/**
+ * Model Payslip
+ * 
+ */
+export type Payslip = Prisma.PayslipModel
+/**
+ * Model PayslipLine
+ * Positive component amounts; effect controls whether a component reduces net pay.
+ * GROSS/NET rules are INFORMATIONAL to prevent counting computed totals twice.
+ */
+export type PayslipLine = Prisma.PayslipLineModel
+/**
+ * Model PayslipWorkedTime
+ * 
+ */
+export type PayslipWorkedTime = Prisma.PayslipWorkedTimeModel
+/**
+ * Model PayslipInput
+ * Explicit variable inputs consumed by salary formulas: bonuses, commission, etc.
+ */
+export type PayslipInput = Prisma.PayslipInputModel
+/**
+ * Model PayrollWarning
+ * 
+ */
+export type PayrollWarning = Prisma.PayrollWarningModel
+/**
+ * Model PayrollPayment
+ * 
+ */
+export type PayrollPayment = Prisma.PayrollPaymentModel
+/**
+ * Model PayslipDocument
+ * 
+ */
+export type PayslipDocument = Prisma.PayslipDocumentModel
+/**
+ * Model PayslipDeliveryBatch
+ * Each Send Payslips action creates a batch and one delivery job per selected slip.
+ */
+export type PayslipDeliveryBatch = Prisma.PayslipDeliveryBatchModel
+/**
+ * Model PayslipDelivery
+ * 
+ */
+export type PayslipDelivery = Prisma.PayslipDeliveryModel
+/**
+ * Model PayslipDeliveryAttempt
+ * 
+ */
+export type PayslipDeliveryAttempt = Prisma.PayslipDeliveryAttemptModel
+/**
+ * Model AuditLog
+ * Append-only. entityType/entityId are polymorphic references, not database FKs.
+ * Redact passwords, bank identifiers and confidential leave details in JSON values.
+ */
+export type AuditLog = Prisma.AuditLogModel

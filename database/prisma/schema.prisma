@@ -1,3 +1,11 @@
+// PeoplePay360 HR & Payroll - PostgreSQL / Prisma 7.
+// PostgreSQL namespaces: auth, hr, attendance, leave, payroll, configuration.
+// Connection: backend/prisma.config.ts. Design and workflow rules: ../SCHEMA_GUIDE.md.
+// Money/leave use Decimal. Date-only periods are inclusive; instants are UTC.
+// Schedule times are local minutes after midnight in the schedule's IANA time zone.
+// USER and MANAGER roles preserve existing auth compatibility; map them to
+// EMPLOYEE and HR_MANAGER permissions respectively when implementing RBAC.
+
 generator client {
   provider = "prisma-client"
   output   = "../../backend/src/generated/prisma"
@@ -5,14 +13,1514 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["auth", "hr", "attendance", "leave", "payroll", "configuration"]
 }
 
+// -----------------------------------------------------------------------------
+// Enumerations
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  MANAGER
+  EMPLOYEE
+  HR_MANAGER
+  HR_PAYROLL_USER
+  HR_PAYROLL_MANAGER
+  ADMIN
+
+  @@schema("auth")
+}
+
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  APPROVE
+  REFUSE
+  COMPUTE
+  VALIDATE
+  MARK_PAID
+  PRINT
+  SEND
+  MANAGE_PERMISSIONS
+
+  @@schema("auth")
+}
+
+enum AccessScope {
+  OWN
+  ALL
+
+  @@schema("auth")
+}
+
+enum EmployeeStatus {
+  ONBOARDING
+  ACTIVE
+  ON_LEAVE
+  SUSPENDED
+  TERMINATED
+  ARCHIVED
+
+  @@schema("hr")
+}
+
+enum EmployeeType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  TEMPORARY
+
+  @@schema("hr")
+}
+
+enum EmploymentEventType {
+  HIRED
+  DEPARTMENT_CHANGED
+  POSITION_CHANGED
+  MANAGER_CHANGED
+  SCHEDULE_CHANGED
+  CONTRACT_CHANGED
+  STATUS_CHANGED
+  TERMINATED
+  REHIRED
+
+  @@schema("hr")
+}
+
+enum ContractStatus {
+  DRAFT
+  OPEN
+  EXPIRED
+  TERMINATED
+  CANCELLED
+
+  @@schema("hr")
+}
+
+enum WageBasis {
+  MONTHLY
+  HOURLY
+  DAILY
+  ANNUAL
+
+  @@schema("hr")
+}
+
+enum ScheduleType {
+  FULL_TIME
+  PART_TIME
+  FLEXIBLE
+  SHIFT
+
+  @@schema("configuration")
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+
+  @@schema("configuration")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  ON_LEAVE
+  HOLIDAY
+  REST_DAY
+
+  @@schema("attendance")
+}
+
+enum AttendanceSource {
+  SELF_SERVICE
+  MANUAL
+  IMPORT
+  DEVICE
+
+  @@schema("attendance")
+}
+
+enum AttendanceExceptionType {
+  MISSING_CHECK_OUT
+  LATE
+  EARLY_DEPARTURE
+  OVERLAPPING_ENTRIES
+  OUTSIDE_SCHEDULE
+  EXCESSIVE_HOURS
+  OTHER
+
+  @@schema("attendance")
+}
+
+enum ExceptionStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+
+  @@schema("attendance")
+}
+
+enum LeaveUnit {
+  DAYS
+  HOURS
+
+  @@schema("leave")
+}
+
+enum ApprovalPolicy {
+  AUTOMATIC
+  SINGLE_APPROVAL
+  TWO_LEVEL_APPROVAL
+
+  @@schema("leave")
+}
+
+enum AllocationApprovalPolicy {
+  SINGLE_APPROVAL
+  TWO_LEVEL_APPROVAL
+
+  @@schema("leave")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REFUSED
+
+  @@schema("leave")
+}
+
+enum LeavePayrollTreatment {
+  PAID
+  UNPAID
+  PARTIALLY_PAID
+
+  @@schema("leave")
+}
+
+enum LeaveStatus {
+  DRAFT
+  SUBMITTED
+  FIRST_APPROVED
+  APPROVED
+  REFUSED
+  CANCELLED
+
+  @@schema("leave")
+}
+
+enum AllocationKind {
+  REGULAR
+  CARRY_FORWARD
+  ADJUSTMENT
+
+  @@schema("leave")
+}
+
+enum SalaryCategoryType {
+  BASIC
+  ALLOWANCE
+  GROSS
+  DEDUCTION
+  EMPLOYER_CONTRIBUTION
+  NET
+  OTHER
+
+  @@schema("configuration")
+}
+
+enum SalaryComputationMethod {
+  FIXED
+  PERCENTAGE
+  FORMULA
+
+  @@schema("configuration")
+}
+
+enum SalaryConditionMethod {
+  ALWAYS
+  RANGE
+  FORMULA
+
+  @@schema("configuration")
+}
+
+enum SalaryRuleEffect {
+  EARNING
+  DEDUCTION
+  EMPLOYER_COST
+  INFORMATIONAL
+
+  @@schema("configuration")
+}
+
+enum PayFrequency {
+  MONTHLY
+  SEMI_MONTHLY
+  BIWEEKLY
+  WEEKLY
+  CUSTOM
+
+  @@schema("configuration")
+}
+
+enum PayrunStatus {
+  DRAFT
+  COMPUTING
+  COMPUTED
+  VALIDATED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+
+  @@schema("payroll")
+}
+
+enum PayrunEmployeeStatus {
+  SELECTED
+  COMPUTED
+  FAILED
+  EXCLUDED
+
+  @@schema("payroll")
+}
+
+enum PayslipStatus {
+  DRAFT
+  COMPUTED
+  VALIDATED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+
+  @@schema("payroll")
+}
+
+enum WorkedTimeType {
+  REGULAR
+  OVERTIME
+  PAID_LEAVE
+  UNPAID_LEAVE
+  PARTIALLY_PAID_LEAVE
+  ABSENCE
+  HOLIDAY
+
+  @@schema("payroll")
+}
+
+enum WarningCode {
+  MISSING_BANK_DETAILS
+  MISSING_EMAIL
+  MISSING_CONTRACT
+  OVERLAPPING_CONTRACTS
+  CONTRACT_PERIOD_GAP
+  CONTRACT_EXPIRING
+  MISSING_SCHEDULE
+  STRUCTURE_MISMATCH
+  DUPLICATE_PAYSLIP
+  ATTENDANCE_EXCEPTION
+  INSUFFICIENT_LEAVE_BALANCE
+  NEGATIVE_NET_PAY
+  RULE_COMPUTATION_ERROR
+  CURRENCY_MISMATCH
+  OTHER
+
+  @@schema("payroll")
+}
+
+enum WarningSeverity {
+  INFO
+  WARNING
+  BLOCKING
+
+  @@schema("payroll")
+}
+
+enum WarningStatus {
+  OPEN
+  RESOLVED
+  ACKNOWLEDGED
+
+  @@schema("payroll")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REVERSED
+
+  @@schema("payroll")
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+  OTHER
+
+  @@schema("payroll")
+}
+
+enum DocumentStatus {
+  QUEUED
+  GENERATING
+  READY
+  FAILED
+
+  @@schema("payroll")
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  BOUNCED
+  FAILED
+  CANCELLED
+
+  @@schema("payroll")
+}
+
+enum DeliveryBatchStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  PARTIALLY_FAILED
+  FAILED
+
+  @@schema("payroll")
+}
+
+// -----------------------------------------------------------------------------
+// Identity and configurable role permissions
+// -----------------------------------------------------------------------------
+
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  /// Password hash only; field name retained for existing auth code.
+  password    String
+  role        UserRole  @default(USER)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime? @db.Timestamptz(3)
+  // Preserve the original timestamp column types for existing User records.
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  assignedRole           Role                      @relation(fields: [role], references: [code], onDelete: Restrict)
+  employee               Employee?
+  attendanceEntries      Attendance[]              @relation("AttendanceCreator")
+  attendanceCorrections  AttendanceCorrection[]
+  resolvedExceptions     AttendanceException[]     @relation("ExceptionResolver")
+  employmentEvents       EmploymentHistory[]
+  submittedLeaveRequests LeaveRequest[]            @relation("LeaveRequester")
+  createdAllocations     LeaveAllocation[]         @relation("AllocationCreator")
+  leaveApprovals         LeaveRequestApproval[]
+  allocationApprovals    LeaveAllocationApproval[]
+  createdPayruns         Payrun[]                  @relation("PayrunCreator")
+  validatedPayruns       Payrun[]                  @relation("PayrunValidator")
+  validatedPayslips      Payslip[]                 @relation("PayslipValidator")
+  resolvedWarnings       PayrollWarning[]          @relation("WarningResolver")
+  recordedPayments       PayrollPayment[]
+  requestedDocuments     PayslipDocument[]
+  deliveryBatches        PayslipDeliveryBatch[]
+  auditLogs              AuditLog[]
+
+  @@index([role, isActive])
+  @@schema("auth")
+}
+
+/// Seed canonical and legacy codes before creating users or permission grants.
+/// Using the existing enum as the key preserves User.role and existing auth payloads.
+model Role {
+  code        UserRole         @id
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+  users       User[]
+  permissions RolePermission[]
+
+  @@schema("auth")
+}
+
+/// Resource/action pairs: EMPLOYEE, CONTRACT, ATTENDANCE, LEAVE_REQUEST,
+/// LEAVE_ALLOCATION, LEAVE_TYPE, SCHEDULE, PAYRUN, PAYSLIP, SALARY_STRUCTURE,
+/// SALARY_RULE, HR_REPORT, PAYROLL_REPORT, USER, PERMISSION.
+model Permission {
+  id          Int              @id @default(autoincrement())
+  resource    String           @db.VarChar(64)
+  action      PermissionAction
+  description String?
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+  @@schema("auth")
+}
+
+model RolePermission {
+  role           UserRole
+  permissionId   Int
+  scope          AccessScope @default(ALL)
+  createdAt      DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime    @updatedAt @db.Timestamptz(3)
+  permission     Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  roleDefinition Role        @relation(fields: [role], references: [code], onDelete: Restrict)
+
+  @@id([role, permissionId])
+  @@index([permissionId])
+  @@schema("auth")
+}
+
+// -----------------------------------------------------------------------------
+// Employee master and historical employment terms
+// -----------------------------------------------------------------------------
+
+model Department {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique @db.VarChar(32)
+  name        String        @db.VarChar(150)
+  description String?
+  parentId    Int?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+  parent      Department?   @relation("DepartmentTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Department[]  @relation("DepartmentTree")
+  positions   JobPosition[]
+  employees   Employee[]
+  contracts   Contract[]
+  payslips    Payslip[]
+  payruns     Payrun[]
+
+  @@index([parentId])
+  @@schema("hr")
+}
+
+model JobPosition {
+  id           Int         @id @default(autoincrement())
+  code         String      @unique @db.VarChar(32)
+  title        String      @db.VarChar(150)
+  description  String?
+  departmentId Int?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  employees    Employee[]
+  contracts    Contract[]
+
+  @@index([departmentId])
+  @@schema("hr")
+}
+
+model Employee {
+  id                    Int            @id @default(autoincrement())
+  employeeCode          String         @unique @db.VarChar(40)
+  userId                Int?           @unique
+  firstName             String         @db.VarChar(100)
+  lastName              String         @db.VarChar(100)
+  displayName           String?
+  workEmail             String?        @unique
+  personalEmail         String?
+  workPhone             String?
+  personalPhone         String?
+  photoStorageKey       String?
+  birthDate             DateTime?      @db.Date
+  addressLine1          String?
+  addressLine2          String?
+  city                  String?
+  state                 String?
+  postalCode            String?
+  countryCode           String?        @db.Char(2)
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  departmentId          Int?
+  jobPositionId         Int?
+  managerId             Int?
+  employeeType          EmployeeType   @default(FULL_TIME)
+  status                EmployeeStatus @default(ONBOARDING)
+  hireDate              DateTime       @db.Date
+  terminationDate       DateTime?      @db.Date
+  workLocation          String?
+  notes                 String?
+  archivedAt            DateTime?      @db.Timestamptz(3)
+  createdAt             DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime       @updatedAt @db.Timestamptz(3)
+
+  user                User?                        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  department          Department?                  @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  jobPosition         JobPosition?                 @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
+  manager             Employee?                    @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: Restrict)
+  directReports       Employee[]                   @relation("EmployeeManager")
+  bankAccounts        EmployeeBankAccount[]
+  contracts           Contract[]
+  employmentHistory   EmploymentHistory[]
+  scheduleAssignments EmployeeScheduleAssignment[]
+  attendanceDays      AttendanceDay[]
+  leaveRequests       LeaveRequest[]
+  leaveAllocations    LeaveAllocation[]
+  payrunSelections    PayrunEmployee[]
+  payslips            Payslip[]
+  payrollWarnings     PayrollWarning[]
+
+  @@index([departmentId, employeeType, status])
+  @@index([managerId])
+  @@index([jobPositionId])
+  @@index([status, hireDate])
+  @@schema("hr")
+}
+
+model EmployeeBankAccount {
+  id                     Int              @id @default(autoincrement())
+  employeeId             Int
+  accountHolderName      String
+  bankName               String
+  /// Application encryption required for full account/routing identifiers.
+  accountNumberEncrypted String
+  accountLastFour        String           @db.VarChar(4)
+  routingCodeEncrypted   String?
+  ibanEncrypted          String?
+  swiftCode              String?
+  countryCode            String?          @db.Char(2)
+  currency               String           @db.Char(3)
+  isPrimary              Boolean          @default(false)
+  isActive               Boolean          @default(true)
+  createdAt              DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime         @updatedAt @db.Timestamptz(3)
+  employee               Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  payments               PayrollPayment[]
+
+  @@index([employeeId, isActive, isPrimary])
+  @@schema("hr")
+}
+
+/// Append-only history. Snapshots preserve labels and values before master-data edits.
+model EmploymentHistory {
+  id            Int                 @id @default(autoincrement())
+  employeeId    Int
+  eventType     EmploymentEventType
+  effectiveDate DateTime            @db.Date
+  before        Json?
+  after         Json
+  reason        String?
+  changedById   Int
+  createdAt     DateTime            @default(now()) @db.Timestamptz(3)
+  employee      Employee            @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  changedBy     User                @relation(fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, effectiveDate])
+  @@index([changedById])
+  @@schema("hr")
+}
+
+/// OPEN is approved contract history. Active-for-period is derived from dates,
+/// including endDate/terminationDate; never rely only on the current status.
+model Contract {
+  id                 Int              @id @default(autoincrement())
+  reference          String           @unique @db.VarChar(60)
+  name               String
+  employeeId         Int
+  departmentId       Int
+  jobPositionId      Int
+  employeeType       EmployeeType
+  startDate          DateTime         @db.Date
+  endDate            DateTime?        @db.Date
+  probationEndDate   DateTime?        @db.Date
+  terminationDate    DateTime?        @db.Date
+  status             ContractStatus   @default(DRAFT)
+  wage               Decimal          @db.Decimal(19, 4)
+  currency           String           @db.Char(3)
+  wageBasis          WageBasis        @default(MONTHLY)
+  payFrequency       PayFrequency     @default(MONTHLY)
+  salaryStructureId  Int
+  workingScheduleId  Int?
+  terms              String?
+  terminationReason  String?
+  signedAt           DateTime?        @db.Timestamptz(3)
+  documentStorageKey String?
+  archivedAt         DateTime?        @db.Timestamptz(3)
+  createdAt          DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime         @updatedAt @db.Timestamptz(3)
+  employee           Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  department         Department       @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  jobPosition        JobPosition      @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
+  salaryStructure    SalaryStructure  @relation(fields: [salaryStructureId], references: [id], onDelete: Restrict)
+  workingSchedule    WorkingSchedule? @relation(fields: [workingScheduleId], references: [id], onDelete: Restrict)
+  payslips           Payslip[]
+
+  @@index([employeeId, status, startDate, endDate])
+  @@index([departmentId])
+  @@index([jobPositionId])
+  @@index([salaryStructureId, status])
+  @@index([workingScheduleId])
+  @@index([status, endDate])
+  @@schema("hr")
+}
+
+// -----------------------------------------------------------------------------
+// Working schedules and attendance
+// -----------------------------------------------------------------------------
+
+/// Once referenced historically, create a new schedule version instead of editing.
+/// Weekly hours = sum(endMinute + endDayOffset*1440 - startMinute - breakMinutes)/60.
+model WorkingSchedule {
+  id                       Int                          @id @default(autoincrement())
+  code                     String                       @unique @db.VarChar(40)
+  name                     String
+  type                     ScheduleType                 @default(FULL_TIME)
+  timezone                 String                       @default("Asia/Kolkata")
+  lateGraceMinutes         Int                          @default(0)
+  overtimeThresholdMinutes Int                          @default(0)
+  isActive                 Boolean                      @default(true)
+  description              String?
+  createdAt                DateTime                     @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime                     @updatedAt @db.Timestamptz(3)
+  lines                    WorkingScheduleLine[]
+  holidays                 ScheduleHoliday[]
+  assignments              EmployeeScheduleAssignment[]
+  contracts                Contract[]
+  attendanceDays           AttendanceDay[]
+  payslips                 Payslip[]
+
+  @@schema("configuration")
+}
+
+/// Multiple lines per day support split shifts; endDayOffset supports overnight work.
+/// Validate minute bounds, break length and overlapping lines in application/SQL.
+model WorkingScheduleLine {
+  id                Int             @id @default(autoincrement())
+  workingScheduleId Int
+  day               Weekday
+  sequence          Int             @default(10)
+  startMinute       Int
+  endMinute         Int
+  endDayOffset      Int             @default(0)
+  breakMinutes      Int             @default(0)
+  workingSchedule   WorkingSchedule @relation(fields: [workingScheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([workingScheduleId, day, sequence])
+  @@map("ScheduleLine")
+  @@schema("configuration")
+}
+
+model ScheduleHoliday {
+  id                Int             @id @default(autoincrement())
+  workingScheduleId Int
+  name              String
+  date              DateTime        @db.Date
+  isPaid            Boolean         @default(true)
+  workingSchedule   WorkingSchedule @relation(fields: [workingScheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([workingScheduleId, date])
+  @@schema("configuration")
+}
+
+/// Historical employee fallback. Applicable contract schedule takes precedence.
+model EmployeeScheduleAssignment {
+  id                Int             @id @default(autoincrement())
+  employeeId        Int
+  workingScheduleId Int
+  startDate         DateTime        @db.Date
+  endDate           DateTime?       @db.Date
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  employee          Employee        @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  workingSchedule   WorkingSchedule @relation(fields: [workingScheduleId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, startDate])
+  @@index([employeeId, startDate, endDate])
+  @@index([workingScheduleId])
+  @@schema("hr")
+}
+
+/// One rollup even without a check-in, so absence and attendance coverage are visible.
+/// Derived caches must refresh after attendance corrections and approved leave changes.
+model AttendanceDay {
+  id                   Int                   @id @default(autoincrement())
+  employeeId           Int
+  workDate             DateTime              @db.Date
+  workingScheduleId    Int?
+  status               AttendanceStatus      @default(ABSENT)
+  expectedMinutes      Int                   @default(0)
+  workedMinutes        Int                   @default(0)
+  overtimeMinutes      Int                   @default(0)
+  lateMinutes          Int                   @default(0)
+  earlyLeaveMinutes    Int                   @default(0)
+  approvedLeaveMinutes Int                   @default(0)
+  scheduleSnapshot     Json?
+  calculatedAt         DateTime?             @db.Timestamptz(3)
+  createdAt            DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime              @updatedAt @db.Timestamptz(3)
+  employee             Employee              @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  workingSchedule      WorkingSchedule?      @relation(fields: [workingScheduleId], references: [id], onDelete: Restrict)
+  entries              Attendance[]
+  exceptions           AttendanceException[]
+
+  @@unique([employeeId, workDate])
+  @@index([workDate, status])
+  @@index([workingScheduleId])
+  @@schema("attendance")
+}
+
+/// Multiple check-in/out sessions per day; employee is available through day.employee.
+model Attendance {
+  id              Int                    @id @default(autoincrement())
+  attendanceDayId Int
+  checkIn         DateTime               @db.Timestamptz(3)
+  checkOut        DateTime?              @db.Timestamptz(3)
+  breakMinutes    Int                    @default(0)
+  source          AttendanceSource       @default(SELF_SERVICE)
+  notes           String?
+  createdById     Int
+  createdAt       DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime               @updatedAt @db.Timestamptz(3)
+  day             AttendanceDay          @relation(fields: [attendanceDayId], references: [id], onDelete: Restrict)
+  createdBy       User                   @relation("AttendanceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  corrections     AttendanceCorrection[]
+
+  @@unique([attendanceDayId, checkIn])
+  @@index([checkIn, checkOut])
+  @@index([createdById])
+  @@schema("attendance")
+}
+
+/// Append-only edit history written in the same transaction as the session change.
+model AttendanceCorrection {
+  id                    Int        @id @default(autoincrement())
+  attendanceId          Int
+  previousCheckIn       DateTime   @db.Timestamptz(3)
+  previousCheckOut      DateTime?  @db.Timestamptz(3)
+  correctedCheckIn      DateTime   @db.Timestamptz(3)
+  correctedCheckOut     DateTime?  @db.Timestamptz(3)
+  previousBreakMinutes  Int
+  correctedBreakMinutes Int
+  reason                String
+  correctedById         Int
+  createdAt             DateTime   @default(now()) @db.Timestamptz(3)
+  attendance            Attendance @relation(fields: [attendanceId], references: [id], onDelete: Restrict)
+  correctedBy           User       @relation(fields: [correctedById], references: [id], onDelete: Restrict)
+
+  @@index([attendanceId, createdAt])
+  @@index([correctedById])
+  @@schema("attendance")
+}
+
+model AttendanceException {
+  id              Int                     @id @default(autoincrement())
+  attendanceDayId Int
+  type            AttendanceExceptionType
+  status          ExceptionStatus         @default(OPEN)
+  message         String
+  resolvedById    Int?
+  resolvedAt      DateTime?               @db.Timestamptz(3)
+  resolutionNote  String?
+  createdAt       DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime                @updatedAt @db.Timestamptz(3)
+  day             AttendanceDay           @relation(fields: [attendanceDayId], references: [id], onDelete: Restrict)
+  resolvedBy      User?                   @relation("ExceptionResolver", fields: [resolvedById], references: [id], onDelete: Restrict)
+
+  @@index([attendanceDayId, status])
+  @@index([status, type])
+  @@index([resolvedById])
+  @@schema("attendance")
+}
+
+// -----------------------------------------------------------------------------
+// Time off policies, allocation approvals, requests and auditable consumption
+// -----------------------------------------------------------------------------
+
+model LeaveType {
+  id                       Int                      @id @default(autoincrement())
+  code                     String                   @unique @db.VarChar(40)
+  name                     String
+  description              String?
+  color                    String?                  @db.VarChar(20)
+  unit                     LeaveUnit                @default(DAYS)
+  requiresAllocation       Boolean                  @default(true)
+  requestApprovalPolicy    ApprovalPolicy           @default(SINGLE_APPROVAL)
+  allocationApprovalPolicy AllocationApprovalPolicy @default(SINGLE_APPROVAL)
+  payrollTreatment         LeavePayrollTreatment    @default(PAID)
+  /// 100 = fully paid; 0 = unpaid; intermediate values = partially paid.
+  paidPercentage           Decimal                  @default(100) @db.Decimal(7, 4)
+  allowNegativeBalance     Boolean                  @default(false)
+  negativeBalanceLimit     Decimal                  @default(0) @db.Decimal(12, 4)
+  allowHalfDay             Boolean                  @default(true)
+  includeNonWorkingDays    Boolean                  @default(false)
+  isActive                 Boolean                  @default(true)
+  createdAt                DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime                 @updatedAt @db.Timestamptz(3)
+  requests                 LeaveRequest[]
+  allocations              LeaveAllocation[]
+  workedTimeLines          PayslipWorkedTime[]
+
+  @@schema("leave")
+}
+
+model LeaveAllocation {
+  id             Int                          @id @default(autoincrement())
+  reference      String                       @unique @db.VarChar(60)
+  employeeId     Int
+  leaveTypeId    Int
+  name           String
+  kind           AllocationKind               @default(REGULAR)
+  /// Snapshot unit: policy edits must never reinterpret approved historical amounts.
+  unit           LeaveUnit
+  amount         Decimal                      @db.Decimal(12, 4)
+  validFrom      DateTime                     @db.Date
+  validUntil     DateTime?                    @db.Date
+  status         LeaveStatus                  @default(DRAFT)
+  approvalPolicy AllocationApprovalPolicy     @default(SINGLE_APPROVAL)
+  reason         String?
+  createdById    Int
+  submittedAt    DateTime?                    @db.Timestamptz(3)
+  approvedAt     DateTime?                    @db.Timestamptz(3)
+  refusedAt      DateTime?                    @db.Timestamptz(3)
+  cancelledAt    DateTime?                    @db.Timestamptz(3)
+  createdAt      DateTime                     @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime                     @updatedAt @db.Timestamptz(3)
+  employee       Employee                     @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  leaveType      LeaveType                    @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  createdBy      User                         @relation("AllocationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  approvals      LeaveAllocationApproval[]
+  consumptions   LeaveAllocationConsumption[]
+
+  @@index([employeeId, leaveTypeId, status, validFrom, validUntil])
+  @@index([leaveTypeId])
+  @@index([createdById])
+  @@schema("leave")
+}
+
+model LeaveAllocationApproval {
+  id           Int             @id @default(autoincrement())
+  allocationId Int
+  step         Int
+  status       ApprovalStatus  @default(PENDING)
+  approverId   Int?
+  comment      String?
+  decidedAt    DateTime?       @db.Timestamptz(3)
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  allocation   LeaveAllocation @relation(fields: [allocationId], references: [id], onDelete: Restrict)
+  approver     User?           @relation(fields: [approverId], references: [id], onDelete: Restrict)
+
+  @@unique([allocationId, step])
+  @@index([approverId, status])
+  @@schema("leave")
+}
+
+model LeaveRequest {
+  id                   Int                    @id @default(autoincrement())
+  reference            String                 @unique @db.VarChar(60)
+  employeeId           Int
+  leaveTypeId          Int
+  startDate            DateTime               @db.Date
+  endDate              DateTime               @db.Date
+  unit                 LeaveUnit
+  duration             Decimal                @db.Decimal(12, 4)
+  durationDays         Decimal                @db.Decimal(12, 4)
+  durationHours        Decimal                @db.Decimal(12, 4)
+  status               LeaveStatus            @default(DRAFT)
+  approvalPolicy       ApprovalPolicy
+  payrollTreatment     LeavePayrollTreatment
+  paidPercentage       Decimal                @db.Decimal(7, 4)
+  policySnapshot       Json
+  reason               String?
+  refusalReason        String?
+  cancellationReason   String?
+  attachmentStorageKey String?
+  requestedById        Int
+  submittedAt          DateTime?              @db.Timestamptz(3)
+  approvedAt           DateTime?              @db.Timestamptz(3)
+  refusedAt            DateTime?              @db.Timestamptz(3)
+  cancelledAt          DateTime?              @db.Timestamptz(3)
+  createdAt            DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime               @updatedAt @db.Timestamptz(3)
+  employee             Employee               @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  leaveType            LeaveType              @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  requestedBy          User                   @relation("LeaveRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  days                 LeaveRequestDay[]
+  approvals            LeaveRequestApproval[]
+
+  @@index([employeeId, startDate, endDate])
+  @@index([leaveTypeId, status])
+  @@index([status, startDate, endDate])
+  @@index([requestedById])
+  @@schema("leave")
+}
+
+/// Daily intervals support partial days/hourly leave, varying schedules and allocations
+/// expiring partway through a request. Derive whole-day intervals from the schedule.
+model LeaveRequestDay {
+  id               Int                          @id @default(autoincrement())
+  leaveRequestId   Int
+  date             DateTime                     @db.Date
+  startAt          DateTime                     @db.Timestamptz(3)
+  endAt            DateTime                     @db.Timestamptz(3)
+  scheduledMinutes Int
+  durationDays     Decimal                      @db.Decimal(12, 4)
+  durationHours    Decimal                      @db.Decimal(12, 4)
+  leaveRequest     LeaveRequest                 @relation(fields: [leaveRequestId], references: [id], onDelete: Restrict)
+  consumptions     LeaveAllocationConsumption[]
+
+  @@unique([leaveRequestId, date, startAt])
+  @@index([date])
+  @@schema("leave")
+}
+
+model LeaveRequestApproval {
+  id             Int            @id @default(autoincrement())
+  leaveRequestId Int
+  step           Int
+  status         ApprovalStatus @default(PENDING)
+  approverId     Int?
+  comment        String?
+  decidedAt      DateTime?      @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @db.Timestamptz(3)
+  leaveRequest   LeaveRequest   @relation(fields: [leaveRequestId], references: [id], onDelete: Restrict)
+  approver       User?          @relation(fields: [approverId], references: [id], onDelete: Restrict)
+
+  @@unique([leaveRequestId, step])
+  @@index([approverId, status])
+  @@schema("leave")
+}
+
+/// Balance = approved allocation.amount - SUM(unreleased consumption.amount).
+/// One leave day may consume multiple allocations. Cancellation releases, never deletes.
+model LeaveAllocationConsumption {
+  id                Int             @id @default(autoincrement())
+  allocationId      Int
+  leaveRequestDayId Int
+  amount            Decimal         @db.Decimal(12, 4)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  releasedAt        DateTime?       @db.Timestamptz(3)
+  releaseReason     String?
+  allocation        LeaveAllocation @relation(fields: [allocationId], references: [id], onDelete: Restrict)
+  requestDay        LeaveRequestDay @relation(fields: [leaveRequestDayId], references: [id], onDelete: Restrict)
+
+  @@unique([allocationId, leaveRequestDayId])
+  @@index([leaveRequestDayId])
+  @@index([allocationId, releasedAt])
+  @@schema("leave")
+}
+
+// -----------------------------------------------------------------------------
+// Salary structures and executable rule configuration
+// -----------------------------------------------------------------------------
+
+model SalaryRuleCategory {
+  id          Int                @id @default(autoincrement())
+  code        String             @unique @db.VarChar(40)
+  name        String
+  type        SalaryCategoryType
+  description String?
+  rules       SalaryRule[]
+
+  @@schema("configuration")
+}
+
+model SalaryStructure {
+  id           Int                   @id @default(autoincrement())
+  code         String                @unique @db.VarChar(40)
+  name         String
+  description  String?
+  currency     String                @db.Char(3)
+  payFrequency PayFrequency          @default(MONTHLY)
+  isActive     Boolean               @default(true)
+  revision     Int                   @default(1)
+  createdAt    DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime              @updatedAt @db.Timestamptz(3)
+  rules        SalaryStructureRule[]
+  contracts    Contract[]
+  payruns      Payrun[]
+  payslips     Payslip[]
+
+  @@schema("configuration")
+}
+
+/// Formula strings require a restricted expression evaluator, never raw eval/SQL.
+/// Percentage bases can refer to earlier rule codes. Validate method-specific fields.
+model SalaryRule {
+  id                Int                     @id @default(autoincrement())
+  code              String                  @unique @db.VarChar(40)
+  name              String
+  description       String?
+  categoryId        Int
+  effect            SalaryRuleEffect
+  sequence          Int                     @default(10)
+  computationMethod SalaryComputationMethod @default(FIXED)
+  fixedAmount       Decimal?                @db.Decimal(19, 4)
+  percentageRate    Decimal?                @db.Decimal(12, 6)
+  percentageBase    String?
+  formula           String?
+  quantityFormula   String?
+  conditionMethod   SalaryConditionMethod   @default(ALWAYS)
+  conditionFormula  String?
+  conditionBase     String?
+  conditionMinimum  Decimal?                @db.Decimal(19, 4)
+  conditionMaximum  Decimal?                @db.Decimal(19, 4)
+  appearsOnPayslip  Boolean                 @default(true)
+  isActive          Boolean                 @default(true)
+  revision          Int                     @default(1)
+  createdAt         DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime                @updatedAt @db.Timestamptz(3)
+  category          SalaryRuleCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  structures        SalaryStructureRule[]
+  dependencies      SalaryRuleDependency[]  @relation("DependentRule")
+  dependents        SalaryRuleDependency[]  @relation("PrerequisiteRule")
+  payslipLines      PayslipLine[]
+
+  @@index([categoryId, isActive])
+  @@schema("configuration")
+}
+
+/// Structure-specific sequence permits reuse of the same rule in different structures.
+model SalaryStructureRule {
+  salaryStructureId Int
+  salaryRuleId      Int
+  sequence          Int
+  isActive          Boolean         @default(true)
+  salaryStructure   SalaryStructure @relation(fields: [salaryStructureId], references: [id], onDelete: Cascade)
+  salaryRule        SalaryRule      @relation(fields: [salaryRuleId], references: [id], onDelete: Restrict)
+
+  @@id([salaryStructureId, salaryRuleId])
+  @@unique([salaryStructureId, sequence])
+  @@index([salaryRuleId])
+  @@schema("configuration")
+}
+
+model SalaryRuleDependency {
+  salaryRuleId Int
+  dependsOnId  Int
+  rule         SalaryRule @relation("DependentRule", fields: [salaryRuleId], references: [id], onDelete: Cascade)
+  dependsOn    SalaryRule @relation("PrerequisiteRule", fields: [dependsOnId], references: [id], onDelete: Restrict)
+
+  @@id([salaryRuleId, dependsOnId])
+  @@index([dependsOnId])
+  @@schema("configuration")
+}
+
+// -----------------------------------------------------------------------------
+// Payroll scope, explicit employee selection, calculation and historical records
+// -----------------------------------------------------------------------------
+
+model PayrollPeriod {
+  id          Int          @id @default(autoincrement())
+  name        String
+  startDate   DateTime     @db.Date
+  endDate     DateTime     @db.Date
+  paymentDate DateTime?    @db.Date
+  frequency   PayFrequency @default(MONTHLY)
+  isClosed    Boolean      @default(false)
+  closedAt    DateTime?    @db.Timestamptz(3)
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
+  payruns     Payrun[]
+  payslips    Payslip[]
+
+  @@unique([startDate, endDate, frequency])
+  @@index([isClosed, startDate, endDate])
+  @@schema("payroll")
+}
+
+/// Wizard steps remain client-side. Insert this row and selections in one transaction
+/// only on Create Payrun. idempotencyKey makes repeated submission safe.
+model Payrun {
+  id                 Int                    @id @default(autoincrement())
+  reference          String                 @unique @db.VarChar(60)
+  name               String
+  payrollPeriodId    Int
+  salaryStructureId  Int
+  departmentId       Int?
+  employeeTypes      EmployeeType[]         @default([])
+  scopeSnapshot      Json?
+  currency           String                 @db.Char(3)
+  status             PayrunStatus           @default(DRAFT)
+  idempotencyKey     String                 @unique
+  /// Optimistic concurrency token incremented on each workflow mutation.
+  version            Int                    @default(1)
+  computationVersion Int                    @default(0)
+  structureSnapshot  Json?
+  notes              String?
+  createdById        Int
+  validatedById      Int?
+  computedAt         DateTime?              @db.Timestamptz(3)
+  validatedAt        DateTime?              @db.Timestamptz(3)
+  paidAt             DateTime?              @db.Timestamptz(3)
+  cancelledAt        DateTime?              @db.Timestamptz(3)
+  cancellationReason String?
+  archivedAt         DateTime?              @db.Timestamptz(3)
+  createdAt          DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime               @updatedAt @db.Timestamptz(3)
+  period             PayrollPeriod          @relation(fields: [payrollPeriodId], references: [id], onDelete: Restrict)
+  salaryStructure    SalaryStructure        @relation(fields: [salaryStructureId], references: [id], onDelete: Restrict)
+  department         Department?            @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  createdBy          User                   @relation("PayrunCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  validatedBy        User?                  @relation("PayrunValidator", fields: [validatedById], references: [id], onDelete: Restrict)
+  employees          PayrunEmployee[]
+  payslips           Payslip[]
+  warnings           PayrollWarning[]
+  deliveryBatches    PayslipDeliveryBatch[]
+
+  @@index([payrollPeriodId, status])
+  @@index([salaryStructureId])
+  @@index([departmentId])
+  @@index([createdById])
+  @@index([validatedById])
+  @@index([status, paidAt])
+  @@schema("payroll")
+}
+
+/// Separate selection records retain failed/missing-contract employees in the payrun.
+model PayrunEmployee {
+  payrunId     Int
+  employeeId   Int
+  status       PayrunEmployeeStatus @default(SELECTED)
+  errorMessage String?
+  selectedAt   DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(3)
+  payrun       Payrun               @relation(fields: [payrunId], references: [id], onDelete: Restrict)
+  employee     Employee             @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  payslip      Payslip?
+
+  @@id([payrunId, employeeId])
+  @@index([employeeId])
+  @@schema("payroll")
+}
+
+model Payslip {
+  id                         Int           @id @default(autoincrement())
+  number                     String        @unique @db.VarChar(60)
+  payrunId                   Int
+  employeeId                 Int
+  payrollPeriodId            Int
+  salaryStructureId          Int
+  /// Nullable in draft, allowing missing-contract warnings before computation.
+  contractId                 Int?
+  workingScheduleId          Int?
+  /// Historical reporting dimensions taken from applicable contract at computation.
+  departmentId               Int?
+  employeeType               EmployeeType
+  periodStart                DateTime      @db.Date
+  periodEnd                  DateTime      @db.Date
+  currency                   String        @db.Char(3)
+  status                     PayslipStatus @default(DRAFT)
+  version                    Int           @default(1)
+  computationVersion         Int           @default(0)
+  basicAmount                Decimal       @default(0) @db.Decimal(19, 4)
+  allowanceAmount            Decimal       @default(0) @db.Decimal(19, 4)
+  grossAmount                Decimal       @default(0) @db.Decimal(19, 4)
+  deductionAmount            Decimal       @default(0) @db.Decimal(19, 4)
+  employerContributionAmount Decimal       @default(0) @db.Decimal(19, 4)
+  netAmount                  Decimal       @default(0) @db.Decimal(19, 4)
+  employerCostAmount         Decimal       @default(0) @db.Decimal(19, 4)
+  scheduledDays              Decimal       @default(0) @db.Decimal(12, 4)
+  workedDays                 Decimal       @default(0) @db.Decimal(12, 4)
+  workedHours                Decimal       @default(0) @db.Decimal(12, 4)
+  /// Require these snapshots before COMPUTED/VALIDATED. They preserve identity,
+  /// contract terms, schedules, rules, inputs and labels for historical PDF rendering.
+  employeeSnapshot           Json?
+  contractSnapshot           Json?
+  scheduleSnapshot           Json?
+  structureSnapshot          Json?
+  computationInputs          Json?
+  computedAt                 DateTime?     @db.Timestamptz(3)
+  validatedAt                DateTime?     @db.Timestamptz(3)
+  validatedById              Int?
+  paidAt                     DateTime?     @db.Timestamptz(3)
+  cancelledAt                DateTime?     @db.Timestamptz(3)
+  cancellationReason         String?
+  archivedAt                 DateTime?     @db.Timestamptz(3)
+  createdAt                  DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt                  DateTime      @updatedAt @db.Timestamptz(3)
+
+  payrun          Payrun              @relation(fields: [payrunId], references: [id], onDelete: Restrict)
+  employee        Employee            @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  selection       PayrunEmployee      @relation(fields: [payrunId, employeeId], references: [payrunId, employeeId], onDelete: Restrict)
+  period          PayrollPeriod       @relation(fields: [payrollPeriodId], references: [id], onDelete: Restrict)
+  salaryStructure SalaryStructure     @relation(fields: [salaryStructureId], references: [id], onDelete: Restrict)
+  contract        Contract?           @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  workingSchedule WorkingSchedule?    @relation(fields: [workingScheduleId], references: [id], onDelete: Restrict)
+  department      Department?         @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  validatedBy     User?               @relation("PayslipValidator", fields: [validatedById], references: [id], onDelete: Restrict)
+  lines           PayslipLine[]
+  workedTime      PayslipWorkedTime[]
+  inputs          PayslipInput[]
+  warnings        PayrollWarning[]
+  payments        PayrollPayment[]
+  documents       PayslipDocument[]
+  deliveries      PayslipDelivery[]
+
+  // Cross-run duplicate validation also checks overlapping periods independently of
+  // structure; no blanket unique so a cancelled slip can be replaced in another run.
+  @@unique([payrunId, employeeId])
+  @@index([employeeId, periodStart, periodEnd, status])
+  @@index([payrollPeriodId, status])
+  @@index([departmentId, employeeType, periodStart])
+  @@index([salaryStructureId])
+  @@index([contractId])
+  @@index([workingScheduleId])
+  @@index([validatedById])
+  @@index([status, paidAt])
+  @@schema("payroll")
+}
+
+/// Positive component amounts; effect controls whether a component reduces net pay.
+/// GROSS/NET rules are INFORMATIONAL to prevent counting computed totals twice.
+model PayslipLine {
+  id                 Int                @id @default(autoincrement())
+  payslipId          Int
+  salaryRuleId       Int
+  code               String             @db.VarChar(40)
+  name               String
+  categoryCode       String
+  categoryType       SalaryCategoryType
+  effect             SalaryRuleEffect
+  sequence           Int
+  quantity           Decimal            @default(1) @db.Decimal(14, 6)
+  rate               Decimal            @default(100) @db.Decimal(12, 6)
+  amount             Decimal            @db.Decimal(19, 4)
+  total              Decimal            @db.Decimal(19, 4)
+  appearsOnPayslip   Boolean            @default(true)
+  ruleSnapshot       Json
+  calculationDetails Json?
+  createdAt          DateTime           @default(now()) @db.Timestamptz(3)
+  payslip            Payslip            @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  salaryRule         SalaryRule         @relation(fields: [salaryRuleId], references: [id], onDelete: Restrict)
+
+  @@unique([payslipId, code])
+  @@unique([payslipId, sequence])
+  @@index([salaryRuleId])
+  @@schema("payroll")
+}
+
+model PayslipWorkedTime {
+  id             Int            @id @default(autoincrement())
+  payslipId      Int
+  code           String         @db.VarChar(40)
+  name           String
+  type           WorkedTimeType
+  leaveTypeId    Int?
+  days           Decimal        @db.Decimal(12, 4)
+  hours          Decimal        @db.Decimal(12, 4)
+  paidPercentage Decimal        @default(100) @db.Decimal(7, 4)
+  /// Frozen attendance and leave day IDs, source values and proration details.
+  sourceSnapshot Json
+  payslip        Payslip        @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  leaveType      LeaveType?     @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+
+  @@unique([payslipId, code])
+  @@index([leaveTypeId])
+  @@schema("payroll")
+}
+
+/// Explicit variable inputs consumed by salary formulas: bonuses, commission, etc.
+model PayslipInput {
+  id          Int      @id @default(autoincrement())
+  payslipId   Int
+  code        String   @db.VarChar(40)
+  description String?
+  amount      Decimal  @db.Decimal(19, 4)
+  quantity    Decimal  @default(1) @db.Decimal(14, 6)
+  source      String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  payslip     Payslip  @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+
+  @@unique([payslipId, code])
+  @@schema("payroll")
+}
+
+model PayrollWarning {
+  id               Int             @id @default(autoincrement())
+  payrunId         Int
+  payslipId        Int?
+  employeeId       Int?
+  /// Stable per run, e.g. employee:42:MISSING_BANK_DETAILS.
+  deduplicationKey String
+  code             WarningCode
+  severity         WarningSeverity @default(WARNING)
+  status           WarningStatus   @default(OPEN)
+  message          String
+  details          Json?
+  detectedAt       DateTime        @default(now()) @db.Timestamptz(3)
+  resolvedAt       DateTime?       @db.Timestamptz(3)
+  resolvedById     Int?
+  resolutionNote   String?
+  updatedAt        DateTime        @updatedAt @db.Timestamptz(3)
+  payrun           Payrun          @relation(fields: [payrunId], references: [id], onDelete: Restrict)
+  payslip          Payslip?        @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  employee         Employee?       @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  resolvedBy       User?           @relation("WarningResolver", fields: [resolvedById], references: [id], onDelete: Restrict)
+
+  @@unique([payrunId, deduplicationKey])
+  @@index([payslipId, status])
+  @@index([employeeId])
+  @@index([status, severity, code])
+  @@index([resolvedById])
+  @@schema("payroll")
+}
+
+model PayrollPayment {
+  id                Int                  @id @default(autoincrement())
+  payslipId         Int
+  bankAccountId     Int?
+  amount            Decimal              @db.Decimal(19, 4)
+  currency          String               @db.Char(3)
+  method            PaymentMethod        @default(BANK_TRANSFER)
+  status            PaymentStatus        @default(PENDING)
+  idempotencyKey    String               @unique
+  externalReference String?
+  /// Masked account labels only; full identifiers require application encryption.
+  bankSnapshot      Json?
+  paidAt            DateTime?            @db.Timestamptz(3)
+  failedAt          DateTime?            @db.Timestamptz(3)
+  failureReason     String?
+  reversedAt        DateTime?            @db.Timestamptz(3)
+  reversalReason    String?
+  recordedById      Int
+  createdAt         DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime             @updatedAt @db.Timestamptz(3)
+  payslip           Payslip              @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  bankAccount       EmployeeBankAccount? @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+  recordedBy        User                 @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+
+  @@index([payslipId, status])
+  @@index([status, paidAt])
+  @@index([bankAccountId])
+  @@index([recordedById])
+  @@schema("payroll")
+}
+
+// -----------------------------------------------------------------------------
+// Printable artifacts and bulk email delivery tracking
+// -----------------------------------------------------------------------------
+
+model PayslipDocument {
+  id                 Int               @id @default(autoincrement())
+  payslipId          Int
+  computationVersion Int
+  templateVersion    String
+  status             DocumentStatus    @default(QUEUED)
+  storageKey         String?
+  fileName           String?
+  mimeType           String            @default("application/pdf")
+  checksumSha256     String?           @db.Char(64)
+  byteSize           Int?
+  requestedById      Int
+  generatedAt        DateTime?         @db.Timestamptz(3)
+  errorMessage       String?
+  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+  payslip            Payslip           @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  requestedBy        User              @relation(fields: [requestedById], references: [id], onDelete: Restrict)
+  deliveries         PayslipDelivery[]
+
+  @@unique([payslipId, computationVersion, templateVersion])
+  @@index([status, createdAt])
+  @@index([requestedById])
+  @@schema("payroll")
+}
+
+/// Each Send Payslips action creates a batch and one delivery job per selected slip.
+model PayslipDeliveryBatch {
+  id             Int                 @id @default(autoincrement())
+  payrunId       Int
+  requestedById  Int
+  idempotencyKey String              @unique
+  status         DeliveryBatchStatus @default(QUEUED)
+  requestedAt    DateTime            @default(now()) @db.Timestamptz(3)
+  completedAt    DateTime?           @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+  payrun         Payrun              @relation(fields: [payrunId], references: [id], onDelete: Restrict)
+  requestedBy    User                @relation(fields: [requestedById], references: [id], onDelete: Restrict)
+  deliveries     PayslipDelivery[]
+
+  @@index([payrunId, requestedAt])
+  @@index([status, requestedAt])
+  @@index([requestedById])
+  @@schema("payroll")
+}
+
+model PayslipDelivery {
+  id                Int                      @id @default(autoincrement())
+  batchId           Int
+  payslipId         Int
+  documentId        Int
+  recipientEmail    String
+  subject           String
+  status            DeliveryStatus           @default(QUEUED)
+  idempotencyKey    String                   @unique
+  attemptCount      Int                      @default(0)
+  nextAttemptAt     DateTime?                @db.Timestamptz(3)
+  lockedUntil       DateTime?                @db.Timestamptz(3)
+  providerMessageId String?
+  lastError         String?
+  sentAt            DateTime?                @db.Timestamptz(3)
+  deliveredAt       DateTime?                @db.Timestamptz(3)
+  createdAt         DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime                 @updatedAt @db.Timestamptz(3)
+  batch             PayslipDeliveryBatch     @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  payslip           Payslip                  @relation(fields: [payslipId], references: [id], onDelete: Restrict)
+  document          PayslipDocument          @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  attempts          PayslipDeliveryAttempt[]
+
+  @@unique([batchId, payslipId])
+  @@index([payslipId])
+  @@index([documentId])
+  @@index([status, nextAttemptAt])
+  @@schema("payroll")
+}
+
+model PayslipDeliveryAttempt {
+  id                Int             @id @default(autoincrement())
+  deliveryId        Int
+  attemptNumber     Int
+  status            DeliveryStatus  @default(SENDING)
+  providerMessageId String?
+  errorMessage      String?
+  startedAt         DateTime        @default(now()) @db.Timestamptz(3)
+  completedAt       DateTime?       @db.Timestamptz(3)
+  delivery          PayslipDelivery @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+
+  @@unique([deliveryId, attemptNumber])
+  @@schema("payroll")
+}
+
+// -----------------------------------------------------------------------------
+// Cross-module audit trail. Dashboards query the operational tables above live.
+// -----------------------------------------------------------------------------
+
+/// Append-only. entityType/entityId are polymorphic references, not database FKs.
+/// Redact passwords, bank identifiers and confidential leave details in JSON values.
+model AuditLog {
+  id            BigInt   @id @default(autoincrement())
+  actorId       Int?
+  action        String   @db.VarChar(80)
+  entityType    String   @db.VarChar(80)
+  entityId      String   @db.VarChar(80)
+  before        Json?
+  after         Json?
+  reason        String?
+  correlationId String?
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  actor         User?    @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@schema("auth")
 }
