@@ -15,6 +15,7 @@ export const updateAccountSchema = z.object({
 }).strict().refine((value) => Object.keys(value).length > 0, "Choose a change to save");
 
 export const createEmployeeSchema = z.object({
+  userId: z.number().int().positive(),
   employeeCode: z.string().trim().min(2).max(40),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().min(1).max(100),

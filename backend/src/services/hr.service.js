@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js";
+import { employeeAccountFilter } from "./employee-account.service.js";
 import { getSettings } from "./settings.service.js";
 import { audit, date, dateRange, dayKey, fail, json, lockEmployee, applicableSchedule } from "../lib/workspace.js";
 import { resource, archiveResource, detailResource } from "./workspace.service.js";
@@ -14,7 +15,7 @@ export function hrData(value) {
 }
 export async function hrLookups() {
   const [employees, departments, positions, schedules, leaveTypes, settings] = await Promise.all([
-    prisma.employee.findMany({ where: { status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true }, orderBy: { firstName: "asc" } }),
+    prisma.employee.findMany({ where: { ...employeeAccountFilter, status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true }, orderBy: { firstName: "asc" } }),
     prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.jobPosition.findMany({ where: { isActive: true }, orderBy: { title: "asc" } }),
     prisma.workingSchedule.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
@@ -30,13 +31,13 @@ export async function hrDashboard({ month }) {
   const dayWhere = { workDate: { gte: start, lt: end, lte: today } };
   const leaveWhere = { startDate: { lt: end }, endDate: { gte: start } };
   const [employees, activeEmployees, activeContracts, pendingLeave, leaveToday, days, departments, leave, attendance, missingCheckout] = await Promise.all([
-    prisma.employee.count({ where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } } }),
-    prisma.employee.count({ where: { status: "ACTIVE" } }),
+    prisma.employee.count({ where: { ...employeeAccountFilter, status: { notIn: ["ARCHIVED", "TERMINATED"] } } }),
+    prisma.employee.count({ where: { ...employeeAccountFilter, status: "ACTIVE" } }),
     prisma.contract.count({ where: { status: "OPEN", startDate: { lte: today }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: today } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: today } }] }] } }),
     prisma.leaveRequest.count({ where: { ...leaveWhere, status: { in: ["SUBMITTED", "FIRST_APPROVED"] } } }),
     prisma.leaveRequestDay.findMany({ where: { date: today, leaveRequest: { status: "APPROVED" } }, select: { leaveRequest: { select: { employeeId: true } } } }),
     prisma.attendanceDay.findMany({ where: dayWhere, select: { workDate: true, status: true, lateMinutes: true, overtimeMinutes: true, workedMinutes: true } }),
-    prisma.department.findMany({ where: { isActive: true }, select: { id: true, name: true, _count: { select: { employees: { where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } } } } } }, orderBy: { name: "asc" } }),
+    prisma.department.findMany({ where: { isActive: true }, select: { id: true, name: true, _count: { select: { employees: { where: { ...employeeAccountFilter, status: { notIn: ["ARCHIVED", "TERMINATED"] } } } } } }, orderBy: { name: "asc" } }),
     prisma.leaveRequest.findMany({ where: { ...leaveWhere, status: { in: ["SUBMITTED", "FIRST_APPROVED"] } }, include: { employee: person, leaveType: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.attendanceDay.findMany({ where: dayWhere, include: { employee: person }, orderBy: { workDate: "desc" }, take: 6 }),
     prisma.attendance.count({ where: { day: dayWhere, checkOut: null, voidedAt: null } }),

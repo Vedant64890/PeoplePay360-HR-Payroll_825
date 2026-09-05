@@ -1,5 +1,6 @@
 import prisma from "../lib/prisma.js";
 import { getSettings } from "./settings.service.js";
+import { employeeAccountFilter, requireEmployeeAccount } from "./employee-account.service.js";
 import { audit, date, dayKey, fail, json, lockEmployee, validateSchedule, expression, D } from "../lib/workspace.js";
 
 const person = { select: { id: true, firstName: true, lastName: true, employeeCode: true } };
@@ -30,6 +31,7 @@ export function resourceId(name, value) {
 }
 export async function listResource(name, query) {
   const config = resource(name), where = {};
+  if (name === "employees") Object.assign(where, employeeAccountFilter);
   if (name === "attendance") where.voidedAt = null;
   if (query.status && ["employees", "contracts", "leave", "allocations", "payruns", "payslips"].includes(name)) where.status = query.status;
   if (query.q) {
@@ -56,6 +58,7 @@ export async function detailResource(name, id) {
   const extra = name === "payslips" ? { lines: { orderBy: { sequence: "asc" } }, inputs: true, workedTime: true, warnings: true, payments: true, payrun: { select: { id: true, version: true, status: true } } } : name === "payruns" ? { payslips: { include: { employee: person } } } : {};
   const item = await prisma[config.model].findUnique({ where: { [config.key || "id"]: id }, include: { ...config.include, ...extra } });
   if (!item) fail("Record not found.", 404);
+  if (name === "employees" && !await prisma.employee.count({ where: { id, ...employeeAccountFilter } })) fail("Employee workspace account not found.", 404);
   return json(item);
 }
 function dates(data) {
@@ -68,6 +71,7 @@ async function validateRelations(tx, name, data, id, before) {
     if (data.jobPositionId) { const pos = await tx.jobPosition.findUnique({ where: { id: data.jobPositionId } }); if (!pos || (pos.departmentId && pos.departmentId !== data.departmentId)) fail("Job position must belong to the selected department."); }
   }
   if (name === "employees") {
+    await requireEmployeeAccount(tx, data, before);
     let managerId = data.managerId; const seen = new Set(id ? [id] : []);
     while (managerId) { if (seen.has(managerId)) fail("Employee reporting lines cannot contain a cycle."); seen.add(managerId); const manager = await tx.employee.findUnique({ where: { id: managerId }, select: { managerId: true } }); if (!manager) fail("Manager not found."); managerId = manager.managerId; }
     if (before?.status === "ARCHIVED" && data.status !== "ARCHIVED") data.archivedAt = null;
@@ -155,7 +159,7 @@ export async function archiveResource(name, id, actorId) {
 
 export async function lookups() {
   const [employees, departments, positions, schedules, structures, rules, categories, leaveTypes, users, settings] = await Promise.all([
-    prisma.employee.findMany({ where: { status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true, departmentId: true, jobPositionId: true, employeeType: true }, orderBy: { firstName: "asc" } }),
+    prisma.employee.findMany({ where: { ...employeeAccountFilter, status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true, departmentId: true, jobPositionId: true, employeeType: true }, orderBy: { firstName: "asc" } }),
     prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }), prisma.jobPosition.findMany({ where: { isActive: true }, orderBy: { title: "asc" } }),
     prisma.workingSchedule.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     prisma.salaryStructure.findMany({ where: { isActive: true }, select: { id: true, name: true, currency: true, payFrequency: true }, orderBy: { name: "asc" } }),

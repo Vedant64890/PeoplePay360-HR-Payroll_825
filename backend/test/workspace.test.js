@@ -33,7 +33,12 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       return { status: response.status, data: content.includes("json") ? await response.json() : await response.text(), cookie: response.headers.get("set-cookie")?.split(";")[0] };
     }
     const root = "/admin/workspace/";
-    const create = async (name, payload, collection) => { const r = await request(root + name, "POST", payload); assert.equal(r.status, 201, JSON.stringify(r.data)); if (collection) ids[collection].push(r.data.data.id); return r.data.data; };
+    const create = async (name, payload, collection) => {
+      if (name === "employees" && !payload.userId) {
+        const account = await prisma.user.create({ data: { name: `${payload.firstName} ${payload.lastName}`, email: `${payload.employeeCode.toLowerCase()}@example.test`, password: await hashPassword(password), role: "EMPLOYEE" } });
+        ids.users.push(account.id); payload = { ...payload, userId: account.id };
+      }
+      const r = await request(root + name, "POST", payload); assert.equal(r.status, 201, JSON.stringify(r.data)); if (collection) ids[collection].push(r.data.data.id); return r.data.data; };
     let department, position, employee, schedule, basic, deduction, structure, contract, attendance, type, allocation, leave, run, slip;
     const schedulePayload = { code: tag, name: tag, timezone: "Asia/Kolkata", lines: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].map(day => ({ day, sequence: 10, startMinute: 540, endMinute: 1080, endDayOffset: 0, breakMinutes: 60 })) };
     await t.test("new endpoints require administrator authentication", async () => {
@@ -336,9 +341,10 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
         assert.equal("paidSalary" in dashboard.data.data.metrics, false); assert.equal("payruns" in dashboard.data.data, false);
         assert.equal((await request(hroot + "departments", "POST", { code: tag + "HR", name: "Cross origin" }, { Cookie: hrLogin.cookie, Origin: "https://invalid.test" })).status, 403);
       });
-      await t.test("creates and edits employees, schedules, assignments and contracts without payroll setup", async () => {
+      await t.test("edits account-linked employees and manages schedules, assignments and contracts without payroll setup", async () => {
         const employeeBody = { employeeCode: tag + "HR", firstName: "HR", lastName: tag, employeeType: "FULL_TIME", hireDate: "2026-09-01", departmentId: department.id, jobPositionId: position.id, managerId: employee.id };
-        he = await hcreate("employees", employeeBody, "employees");
+        assert.equal((await hr(hroot + "employees", "POST", employeeBody)).status, 400);
+        he = await create("employees", employeeBody, "employees");
         assert.equal((await hr(hroot + `employees/${he.id}`, "PUT", { ...employeeBody, workLocation: "Chennai" })).status, 200);
         assert.equal((await hr(hroot + `employees/${he.id}`, "PUT", { ...employeeBody, userId: admin.id })).status, 403);
         hs = await hcreate("schedules", { ...schedulePayload, code: tag + "HR", name: tag + " HR" }, "schedules");

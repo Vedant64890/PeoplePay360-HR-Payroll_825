@@ -47,7 +47,7 @@ test("admin authentication, authorization and workspace actions", async (t) => {
       adminCookie = response.headers.get("set-cookie").split(";")[0];
       const dashboard = await request("/admin/dashboard?month=2026-09&currency=INR", { cookie: adminCookie });
       assert.equal(dashboard.status, 200); assert.equal(dashboard.json.data.trend.length, 6);
-      assert.equal(dashboard.json.data.metrics.employees, await prisma.employee.count({ where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } } }));
+      assert.equal(dashboard.json.data.metrics.employees, await prisma.employee.count({ where: { user: { is: { role: "EMPLOYEE" } }, status: { notIn: ["ARCHIVED", "TERMINATED"] } } }));
       assert.equal((await request("/admin/dashboard?month=invalid", { cookie: adminCookie })).status, 400);
     });
     await t.test("searchable accounts omit password hashes", async () => {
@@ -68,7 +68,7 @@ test("admin authentication, authorization and workspace actions", async (t) => {
       assert.equal(await prisma.auditLog.count({ where: { actorId: admin.id, action: "USER_CREATED" } }), 1);
     });
     await t.test("employee creation updates the searchable directory and employment history", async () => {
-      const result = await request("/admin/employees", { method: "POST", cookie: adminCookie, body: { employeeCode: tag, firstName: "API", lastName: "Fixture", employeeType: "FULL_TIME", hireDate: "2026-09-01" } });
+      const result = await request("/admin/employees", { method: "POST", cookie: adminCookie, body: { userId: employee.id, employeeCode: tag, firstName: "API", lastName: "Fixture", employeeType: "FULL_TIME", hireDate: "2026-09-01" } });
       assert.equal(result.status, 201); employeeId = result.json.employee.id;
       assert.equal((await request(`/admin/employees?q=${tag}`, { cookie: adminCookie })).json.data.total, 1);
       assert.equal(await prisma.employmentHistory.count({ where: { employeeId } }), 1);
@@ -120,7 +120,9 @@ test("admin authentication, authorization and workspace actions", async (t) => {
     });
   } finally {
     if (server) { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
-    if (employeeId) { await prisma.employmentHistory.deleteMany({ where: { employeeId } }); await prisma.employee.delete({ where: { id: employeeId } }); }
+    const profiles = { OR: [{ id: employeeId || 0 }, { userId: { in: fixtureIds } }] };
+    await prisma.employmentHistory.deleteMany({ where: { employee: profiles } });
+    await prisma.employee.deleteMany({ where: profiles });
     await prisma.auditLog.deleteMany({ where: { actorId: { in: fixtureIds } } });
     await prisma.user.deleteMany({ where: { id: { in: fixtureIds } } });
     await prisma.$disconnect();

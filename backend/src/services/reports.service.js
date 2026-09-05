@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js";
+import { employeeAccountFilter } from "./employee-account.service.js";
 import { D, date, dateRange, dayKey, json } from "../lib/workspace.js";
 
 export async function reports({ month, currency = "INR", departmentId, employeeType, trendMonths = 6 }) {
@@ -13,8 +14,8 @@ export async function reports({ month, currency = "INR", departmentId, employeeT
     prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", paidAt: { gte: start, lt: end }, ...(Object.keys(departmentScope).length ? { payslip: departmentScope } : {}) }, _sum: { amount: true } }),
     prisma.contract.count({ where: { ...departmentScope, status: "OPEN", endDate: { gte: start, lt: end } } }),
     prisma.department.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.employee.count({ where: { ...departmentScope, status: { notIn: ["ARCHIVED", "TERMINATED"] } } }),
-    prisma.employee.groupBy({ by: ["departmentId"], where: { ...departmentScope, status: { notIn: ["ARCHIVED", "TERMINATED"] } }, _count: true }),
+    prisma.employee.count({ where: { ...employeeAccountFilter, ...departmentScope, status: { notIn: ["ARCHIVED", "TERMINATED"] } } }),
+    prisma.employee.groupBy({ by: ["departmentId"], where: { ...employeeAccountFilter, ...departmentScope, status: { notIn: ["ARCHIVED", "TERMINATED"] } }, _count: true }),
     prisma.leaveRequest.findMany({ where: { employee: departmentScope, status: { in: ["SUBMITTED", "FIRST_APPROVED"] }, startDate: { lt: end }, endDate: { gte: start } }, select: { leaveTypeId: true, leaveType: { select: { name: true } } } }),
     prisma.leaveAllocation.findMany({ where: { employee: departmentScope, status: "APPROVED", validFrom: { lt: end }, OR: [{ validUntil: null }, { validUntil: { gte: start } }] }, select: { leaveTypeId: true, unit: true, amount: true, leaveType: { select: { name: true } }, consumptions: { where: { releasedAt: null }, select: { amount: true } } } }),
     prisma.attendanceCorrection.count({ where: { attendance: { day: { employee: departmentScope, workDate: { gte: start, lt: end } } } } }),

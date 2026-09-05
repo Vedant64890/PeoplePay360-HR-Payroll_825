@@ -8,4 +8,5 @@
 .pp-employee-profile-heading .pp-avatar { width: 58px; height: 58px; font-size: 20px; }
 .pp-employee-dashboard .pp-table td p { margin: 6px 0; }
 .pp-employee-dashboard .pp-settings-section + .pp-settings-section { margin-top: 24px; }
+.pp-employee-dashboard .pp-metric > strong { font-size: clamp(24px, 2vw, 28px); letter-spacing: -.7px; margin: 9px 0 13px; }
 @media (max-width: 650px) { .pp-employee-clock { align-items: flex-start; flex-direction: column; padding: 22px; } .pp-employee-form-grid { grid-template-columns: 1fr; } .pp-employee-dashboard .pp-filter-bar { flex-wrap: wrap; gap: 14px; } }
