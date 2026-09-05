@@ -13,14 +13,14 @@ export function hrData(value) {
   return clean(json(value));
 }
 export async function hrLookups() {
-  const [employees, departments, positions, schedules, leaveTypes, settings] = await Promise.all([
+  const [employees, departments, positions, schedules, leaveTypes, settings, cycles] = await Promise.all([
     prisma.employee.findMany({ where: { status: { not: "ARCHIVED" } }, select: { id: true, firstName: true, lastName: true, employeeCode: true }, orderBy: { firstName: "asc" } }),
     prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.jobPosition.findMany({ where: { isActive: true }, orderBy: { title: "asc" } }),
     prisma.workingSchedule.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.leaveType.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }), getSettings(),
+    prisma.leaveType.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }), getSettings(), prisma.hrReviewCycle.findMany({ select: { id: true, name: true }, orderBy: { startDate: "desc" } }),
   ]);
-  return hrData({ employees, departments, positions, schedules, leaveTypes, settings: { organizationName: settings.organizationName, timezone: settings.timezone, defaultCurrency: settings.defaultCurrency } });
+  return hrData({ employees, departments, positions, schedules, leaveTypes, cycles, settings: { organizationName: settings.organizationName, supportEmail: settings.supportEmail, timezone: settings.timezone, defaultCurrency: settings.defaultCurrency } });
 }
 function period(month) { const start = date(`${month}-01`); return { start, end: new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1)) }; }
 export async function hrDashboard({ month }) {
@@ -41,9 +41,14 @@ export async function hrDashboard({ month }) {
     prisma.attendanceDay.findMany({ where: dayWhere, include: { employee: person }, orderBy: { workDate: "desc" }, take: 6 }),
     prisma.attendance.count({ where: { day: dayWhere, checkOut: null, voidedAt: null } }),
   ]);
+  const todayDays = await prisma.attendanceDay.findMany({ where: { workDate: today }, select: { status: true, lateMinutes: true } });
+  const upcoming = await prisma.employee.findMany({ where: { status: { notIn: ["ARCHIVED", "TERMINATED"] } }, select: { id: true, firstName: true, lastName: true, hireDate: true, birthDate: true } });
+  const until = new Date(+today + 30 * 86400000);
+  const upcomingJoining = upcoming.filter(e => e.hireDate > today && e.hireDate <= until);
+  const upcomingBirthdays = upcoming.filter(e => { if (!e.birthDate) return false; const next = new Date(Date.UTC(today.getUTCFullYear(), e.birthDate.getUTCMonth(), e.birthDate.getUTCDate())); if (next < today) next.setUTCFullYear(next.getUTCFullYear() + 1); return next <= until; }).map(({ id, firstName, lastName }) => ({ id, firstName, lastName }));
   const present = days.filter(d => d.status === "PRESENT").length, absent = days.filter(d => d.status === "ABSENT").length;
   return hrData({ month, today, organizationName: settings.organizationName, updatedAt: new Date(),
-    metrics: { employees, activeEmployees, activeContracts, pendingLeave, employeesOnLeave: new Set(leaveToday.map(d => d.leaveRequest.employeeId)).size, present, absent, late: days.filter(d => d.lateMinutes > 0).length, overtimeMinutes: days.reduce((n, d) => n + d.overtimeMinutes, 0), workedMinutes: days.reduce((n, d) => n + d.workedMinutes, 0), missingCheckout, attendanceRate: present + absent ? Math.round(present / (present + absent) * 100) : null },
+    metrics: { presentToday: todayDays.filter(d => d.status === "PRESENT").length, absentToday: todayDays.filter(d => d.status === "ABSENT").length, lateToday: todayDays.filter(d => d.lateMinutes > 0).length, upcomingJoining: upcomingJoining.length, upcomingBirthdays: upcomingBirthdays.length, employees, activeEmployees, activeContracts, pendingLeave, employeesOnLeave: new Set(leaveToday.map(d => d.leaveRequest.employeeId)).size, present, absent, late: days.filter(d => d.lateMinutes > 0).length, overtimeMinutes: days.reduce((n, d) => n + d.overtimeMinutes, 0), workedMinutes: days.reduce((n, d) => n + d.workedMinutes, 0), missingCheckout, attendanceRate: present + absent ? Math.round(present / (present + absent) * 100) : null },
     departments: departments.map(d => ({ id: d.id, name: d.name, employees: d._count.employees })), leave, attendance,
     trend: dateRange(start, new Date(end.getTime() - 86400000)).map(day => { const rows = days.filter(d => dayKey(d.workDate) === dayKey(day)); return { date: dayKey(day), present: rows.filter(d => d.status === "PRESENT").length, absent: rows.filter(d => d.status === "ABSENT").length, leave: rows.filter(d => d.status === "ON_LEAVE").length }; }),
   });

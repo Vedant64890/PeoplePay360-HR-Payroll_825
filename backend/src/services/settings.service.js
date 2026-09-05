@@ -5,15 +5,20 @@ export const defaultSettings = { organizationName: "Your organization", supportE
 export async function getSettings(db = prisma) {
   return json(await db.workspaceSettings.findUnique({ where: { id: 1 } }) || defaultSettings);
 }
-export async function writeSettings(tx, input, actorId) {
+export async function writeSettings(tx, input, actorId, hrOnly = false) {
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(710360)::text`;
   const before = await getSettings(tx);
   if (before.version !== input.version) fail("Settings were updated elsewhere. Reload before saving your changes.", 409);
-  const { version, ...data } = input;
+  const { version, ...data } = hrOnly ? { ...input, defaultCurrency: before.defaultCurrency, reportMonths: before.reportMonths } : input;
   const saved = await tx.workspaceSettings.upsert({ where: { id: 1 }, create: { id: 1, ...data, version: 1 }, update: { ...data, version: version + 1 } });
   await audit(tx, actorId, "WORKSPACE_SETTINGS_UPDATED", "WorkspaceSettings", 1, data);
   return json(saved);
 }
 export async function saveSettings(input, actorId) {
   return prisma.$transaction(tx => writeSettings(tx, input, actorId));
+}
+
+export const hrSettingsData = ({ organizationName, supportEmail, timezone, version }) => ({ organizationName, supportEmail, timezone, version });
+export async function saveHrSettings(input, actorId) {
+  return hrSettingsData(await prisma.$transaction(tx => writeSettings(tx, input, actorId, true)));
 }

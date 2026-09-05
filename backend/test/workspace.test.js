@@ -201,12 +201,30 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
         assert.equal((await request("/hr/dashboard?month=2026-09", "GET", undefined, { Cookie: "" })).status, 401);
         const lowLogin = await request("/auth/login", "POST", { email: low.email, password });
         assert.equal((await request(hroot + "employees", "GET", undefined, { Cookie: lowLogin.cookie })).status, 403);
-        for (const name of ["payruns", "payslips", "structures", "rules", "categories", "users", "roles", "activity", "settings", "reports"]) {
+        for (const name of ["payruns", "payslips", "structures", "rules", "categories", "users", "roles", "activity", "reports"]) {
           for (const method of ["GET", "POST", "PUT", "DELETE"]) assert.equal((await hr(hroot + name + (method === "PUT" || method === "DELETE" ? "/1" : ""), method, method === "GET" ? undefined : {})).status, 403, `${method} ${name}`);
           assert.equal((await hr(root + name)).status, 403);
         }
         assert.equal((await hr(`/admin/workspace/payslips/${slip.id}/inputs`, "PUT", { inputs: [] })).status, 403);
         assert.equal((await hr(`/admin/workspace/payruns/${run.id}/actions`, "POST", { action: "pay" })).status, 403);
+        const settings = await hr(hroot + "settings");
+        assert.equal(settings.status, 200);
+        assert.deepEqual(Object.keys(settings.data.data).sort(), ["organizationName", "supportEmail", "timezone", "version"]);
+        assert.equal((await hr(hroot + "settings", "PUT", { ...settings.data.data, defaultCurrency: "USD" })).status, 400);
+        assert.equal((await hr(hroot + "settings", "PUT", { ...settings.data.data, timezone: "Invalid/Zone" })).status, 400);
+        assert.equal((await request(hroot + "settings", "GET", undefined, { Cookie: lowLogin.cookie })).status, 403);
+        const rollbackSettings = new Error("Rollback HR settings test");
+        await assert.rejects(prisma.$transaction(async tx => {
+          const before = await getSettings(tx);
+          const input = { organizationName: tag + " HR", supportEmail: "hr@example.test", timezone: "UTC", version: before.version };
+          const result = await writeSettings(tx, input, hrUser.id, true);
+          assert.equal(result.organizationName, input.organizationName);
+          assert.equal(result.timezone, "UTC");
+          assert.equal(result.defaultCurrency, before.defaultCurrency);
+          assert.equal(result.reportMonths, before.reportMonths);
+          await assert.rejects(writeSettings(tx, input, hrUser.id, true), /updated elsewhere/);
+          throw rollbackSettings;
+        }), e => e === rollbackSettings);
         const catalog = (await hr(hroot + "lookups")).data.data;
         for (const key of ["users", "structures", "rules", "categories"]) assert.equal(key in catalog, false);
         const contractView = (await hr(hroot + `contracts/${contract.id}`)).data.data;
@@ -231,6 +249,30 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
         assert.equal((await hr(hroot + `contracts/${hc.id}`, "PUT", { ...contractBody, salaryStructureId: structure.id })).status, 403);
         const profile = (await hr(hroot + `employees/${he.id}`)).data.data;
         assert.equal(profile.contracts.length, 1); assert.equal(profile.assignments.length, 1); assert.ok(profile.history.length >= 2); assert.equal(profile.currentSchedule.id, hs.id); assert.equal(profile.workLocation, "Chennai");
+      });
+      await t.test("HR operations persist reviews/documents and restrict review transitions and profile access", async () => {
+        const cycle = await hcreate("review-cycles", { name: tag + " Review", startDate: "2026-09-01", endDate: "2026-09-30" });
+        const reviewBody = { name: tag + " Performance", employeeId: he.id, reviewerId: employee.id, cycleId: cycle.id, goals: "Complete onboarding goals", status: "SELF_REVIEW" };
+        let review = await hcreate("reviews", reviewBody);
+        assert.equal((await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, status: "FINAL", version: review.version })).status, 409);
+        assert.equal((await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, status: "MANAGER_REVIEW", version: review.version })).status, 400);
+        let response = await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, selfReview: "Goals achieved", status: "MANAGER_REVIEW", version: review.version });
+        assert.equal(response.status, 200, JSON.stringify(response.data)); review = response.data.data;
+        assert.equal((await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, selfReview: "Goals achieved", status: "MANAGER_REVIEW", version: 1 })).status, 409);
+        response = await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, selfReview: "Goals achieved", managerReview: "Verified outcomes", rating: 4, status: "FINAL", version: review.version });
+        assert.equal(response.status, 200, JSON.stringify(response.data));
+        assert.equal((await hr(hroot + `reviews/${review.id}`, "PUT", { ...reviewBody, version: response.data.data.version })).status, 409);
+        const doc = { name: tag + " Contract reference", employeeId: he.id, category: "EMPLOYMENT", url: "https://example.test/documents/contract" };
+        assert.equal((await hr(hroot + "documents", "POST", { ...doc, url: "javascript:alert(1)" })).status, 400);
+        const document = await hcreate("documents", doc);
+        assert.equal((await hr(hroot + `documents/${document.id}`)).data.data.employee.id, he.id);
+        assert.equal((await hr(hroot + "notifications")).status, 200);
+        const report = await hr(hroot + "hr-reports?month=2026-09"); assert.equal(report.status, 200); assert.equal("paidSalary" in report.data.data.metrics, false);
+        assert.equal((await hr(hroot + "holidays")).status, 200);
+        assert.equal((await hr("/hr/profile", "PUT", { name: "Changed", role: "ADMIN" })).status, 400);
+        const profile = await hr("/hr/profile", "PUT", { name: tag + " HR updated" }); assert.equal(profile.status, 200); assert.equal(profile.data.data.role, "HR_MANAGER");
+        assert.equal((await request(hroot + "reviews", "GET", undefined, { Cookie: "" })).status, 401);
+        assert.equal((await request(hroot + "reviews", "POST", reviewBody, { Cookie: hrLogin.cookie, Origin: "https://invalid.test" })).status, 403);
       });
       await t.test("records late/overtime, corrects and removes attendance without deleting its audit history", async () => {
         const body = { employeeId: he.id, checkIn: "2026-09-02T03:45:00Z", checkOut: "2026-09-02T13:00:00Z", breakMinutes: 60 };
@@ -288,6 +330,7 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
     await prisma.payslip.deleteMany({ where: runs }); await prisma.payrunEmployee.deleteMany({ where: runs }); await prisma.payrun.deleteMany({ where: { id: { in: ids.runs } } });
     await prisma.leaveAllocationConsumption.deleteMany({ where: { allocation: employees } }); await prisma.leaveRequestApproval.deleteMany({ where: { leaveRequest: employees } }); await prisma.leaveRequestDay.deleteMany({ where: { leaveRequest: employees } }); await prisma.leaveRequest.deleteMany({ where: employees }); await prisma.leaveAllocationApproval.deleteMany({ where: { allocation: employees } }); await prisma.leaveAllocation.deleteMany({ where: employees });
     await prisma.attendanceCorrection.deleteMany({ where: { attendance: { day: employees } } }); await prisma.attendance.deleteMany({ where: { day: employees } }); await prisma.attendanceException.deleteMany({ where: { day: employees } }); await prisma.attendanceDay.deleteMany({ where: employees });
+    await prisma.hrReview.deleteMany({ where: { employeeId: { in: ids.employees } } }); await prisma.hrDocument.deleteMany({ where: { employeeId: { in: ids.employees } } }); await prisma.hrReviewCycle.deleteMany({ where: { name: { startsWith: tag } } });
     await prisma.employeeScheduleAssignment.deleteMany({ where: employees }); await prisma.contract.deleteMany({ where: employees }); await prisma.employmentHistory.deleteMany({ where: employees }); await prisma.employee.deleteMany({ where: { id: { in: ids.employees } } });
     await prisma.salaryStructureRule.deleteMany({ where: { salaryStructureId: { in: ids.structures } } }); await prisma.salaryStructure.deleteMany({ where: { id: { in: ids.structures } } }); await prisma.salaryRule.deleteMany({ where: { id: { in: ids.rules } } }); await prisma.salaryRuleCategory.deleteMany({ where: { id: { in: ids.categories } } });
     await prisma.workingSchedule.deleteMany({ where: { id: { in: ids.schedules } } }); await prisma.leaveType.deleteMany({ where: { id: { in: ids.leaveTypes } } }); await prisma.jobPosition.deleteMany({ where: { id: { in: ids.positions } } }); await prisma.department.deleteMany({ where: { id: { in: ids.departments } } });

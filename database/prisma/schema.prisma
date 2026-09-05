@@ -593,6 +593,9 @@ model Employee {
   jobPosition         JobPosition?                 @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
   manager             Employee?                    @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: Restrict)
   directReports       Employee[]                   @relation("EmployeeManager")
+  reviews             HrReview[] @relation("ReviewEmployee")
+  assignedReviews     HrReview[] @relation("ReviewReviewer")
+  documents           HrDocument[]
   bankAccounts        EmployeeBankAccount[]
   contracts           Contract[]
   employmentHistory   EmploymentHistory[]
@@ -1550,4 +1553,51 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([action, createdAt])
   @@schema("auth")
+}
+
+model HrReviewCycle {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(150)
+  startDate DateTime @db.Date
+  endDate DateTime @db.Date
+  description String?
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  reviews HrReview[]
+  @@schema("hr")
+}
+model HrReview {
+  id Int @id @default(autoincrement())
+  employeeId Int
+  reviewerId Int
+  cycleId Int
+  name String @db.VarChar(150)
+  goals String
+  selfReview String?
+  managerReview String?
+  rating Int?
+  status String @default("SELF_REVIEW") @db.VarChar(30)
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  employee Employee @relation("ReviewEmployee", fields: [employeeId], references: [id], onDelete: Restrict)
+  reviewer Employee @relation("ReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  cycle HrReviewCycle @relation(fields: [cycleId], references: [id], onDelete: Restrict)
+  @@unique([employeeId, cycleId])
+  @@schema("hr")
+}
+model HrDocument {
+  id Int @id @default(autoincrement())
+  employeeId Int
+  name String @db.VarChar(150)
+  category String @db.VarChar(30)
+  url String
+  expiryDate DateTime? @db.Date
+  description String?
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  @@schema("hr")
 }

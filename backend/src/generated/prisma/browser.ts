@@ -260,3 +260,18 @@ export type PayslipDeliveryAttempt = Prisma.PayslipDeliveryAttemptModel
  * Redact passwords, bank identifiers and confidential leave details in JSON values.
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model HrReviewCycle
+ * 
+ */
+export type HrReviewCycle = Prisma.HrReviewCycleModel
+/**
+ * Model HrReview
+ * 
+ */
+export type HrReview = Prisma.HrReviewModel
+/**
+ * Model HrDocument
+ * 
+ */
+export type HrDocument = Prisma.HrDocumentModel
