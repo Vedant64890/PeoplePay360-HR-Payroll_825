@@ -1,7 +1,9 @@
 import api from "./api";
+import { bankApi } from "./bank-api";
 export const hrLogin = async credentials => (await api.post("/auth/hr/login", credentials)).data;
 export const fetchHrDashboard = async params => (await api.get("/hr/dashboard", { params })).data.data;
 export const hrWorkspaceApi = {
+  ...bankApi("/hr/workspace"),
   saveWorkspaceSettings: async data => (await api.put("/hr/workspace/settings", data)).data.data,
   fetchWorkspace: async (resource, params) => (await api.get(`/hr/workspace/${resource}`, { params })).data.data,
   fetchWorkspaceRecord: async (resource, id) => (await api.get(`/hr/workspace/${resource}/${id}`)).data.data,

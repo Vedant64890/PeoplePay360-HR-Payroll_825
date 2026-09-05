@@ -7,7 +7,8 @@ import workspaceRoutes from "./workspace.routes.js";
 import { lookups, resourceId } from "../services/workspace.service.js";
 import { hrResources, removeHrRecord, hrDetail, attendanceDays, rebuildAttendance } from "../services/hr.service.js";
 import { createLeave, createAllocation } from "../services/time.service.js";
-import { schemas, workspaceQuery, reportQuery } from "../validators/workspace.validator.js";
+import { schemas, workspaceQuery, reportQuery, payrunScopeQuery } from "../validators/workspace.validator.js";
+import { eligiblePayrunEmployees } from "../services/payroll.service.js";
 import { payrollDashboard } from "../services/payroll-dashboard.service.js";
 import { reports, reportCsv } from "../services/reports.service.js";
 import { audit, fail, json } from "../lib/workspace.js";
@@ -41,16 +42,7 @@ router.use("/workspace/:resource", (req, res, next) => {
   next();
 });
 router.get("/workspace/lookups", route(async (_req, res) => { const { users, settings, ...data } = await lookups(); send(res, { ...data, settings: { timezone: settings.timezone, defaultCurrency: settings.defaultCurrency, organizationName: settings.organizationName } }); }));
-router.get("/workspace/payruns/eligible", route(async (req, res) => {
-  const input = parse(z.object({ startDate: z.iso.date(), endDate: z.iso.date(), salaryStructureId: z.coerce.number().int().positive() }).refine(v => v.endDate >= v.startDate, "Period end must follow its start."), req.query);
-  const start = new Date(input.startDate), end = new Date(input.endDate);
-  const employees = await prisma.employee.findMany({ where: { status: { not: "ARCHIVED" }, hireDate: { lte: end }, OR: [{ terminationDate: null }, { terminationDate: { gte: start } }] }, include: { contracts: { where: { status: { in: ["OPEN", "EXPIRED", "TERMINATED"] }, startDate: { lte: end }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: start } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: start } }] }] } } } });
-  send(res, employees.filter(e => {
-    if (e.contracts.length !== 1) return false;
-    const c = e.contracts[0], requiredStart = Math.max(+start, +e.hireDate), requiredEnd = Math.min(+end, e.terminationDate ? +e.terminationDate : Infinity, c.terminationDate ? +c.terminationDate : Infinity);
-    return c.salaryStructureId === input.salaryStructureId && +c.startDate <= requiredStart && (!c.endDate || +c.endDate >= requiredEnd);
-  }).map(({ id, firstName, lastName, employeeCode }) => ({ id, firstName, lastName, employeeCode })));
-}));
+router.get("/workspace/payruns/eligible", route(async (req, res) => send(res, await eligiblePayrunEmployees(parse(payrunScopeQuery, req.query)))));
 router.get("/workspace/reports", route(async (req, res) => send(res, await reports(parse(querySchema, req.query)))));
 router.get("/workspace/reports/export", route(async (req, res) => res.type("text/csv").attachment("payroll-report.csv").send(reportCsv(await reports(parse(querySchema, req.query))))));
 router.get("/workspace/employees/:id", route(async (req, res) => send(res, await hrDetail("employees", resourceId("employees", req.params.id)))));

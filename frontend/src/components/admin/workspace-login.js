@@ -19,7 +19,7 @@ export default function WorkspaceLogin({ mode = "login" }) {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
   async function submit(event) {
     event.preventDefault();
     if (busy) return;
@@ -30,7 +30,7 @@ export default function WorkspaceLogin({ mode = "login" }) {
         if (password !== confirmation) throw new Error("The passwords do not match.");
         if (!token) throw new Error("Open the reset link from your email to continue.");
         const result = await resetPassword(token, password); setNotice(result.message); setPassword(""); setConfirmation(""); setBusy(false);
-      } else { const result = await loginUser({ email, password }); router.replace(workspaceHome(result.user.role)); }
+      } else { const result = await loginUser({ email, password, keepSignedIn }); router.replace(workspaceHome(result.user.role)); }
     } catch (failure) {
       setError(errorMessage(failure, failure.message || "Unable to sign in. Check your email and password."));
       setBusy(false);
@@ -75,11 +75,12 @@ export default function WorkspaceLogin({ mode = "login" }) {
       <div className="pp-login-form-wrap">
         <div className="pp-login-emblem"><Fingerprint size={28} strokeWidth={1.6} /></div>
         <span className="pp-eyebrow pp-admin-label">{mode === "login" ? "WORKSPACE SIGN IN" : "ACCOUNT RECOVERY"}</span>
-        <h2>{mode === "forgot" ? "Forgot password?" : mode === "reset" ? "A fresh start." : "Welcome back."}</h2>
+        <h2 style={mode === "login" ? { color: "#182619", fontWeight: 600 } : {}}>{mode === "forgot" ? "Forgot password?" : mode === "reset" ? "A fresh start." : "Welcome back."}</h2>
         <p className="pp-login-intro">{mode === "forgot" ? "Enter your work email and we’ll send you a reset link." : mode === "reset" ? "Choose a new password for your workspace account." : <>Your people and your workplace, together.<br />One sign-in for every role.</>}</p>
         {notice ? <div className="pp-recovery-notice" role="status"><ShieldCheck size={23} /><p>{notice}</p><Link href="/login" className="pp-button pp-button-primary">Back to sign in <ArrowRight size={17} /></Link></div> : <form className="pp-form" onSubmit={submit}>
           {mode !== "reset" && <><label htmlFor="login-email">Work email</label><div className="pp-input-icon"><Mail size={18} /><input id="login-email" type="email" autoComplete="username" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} required disabled={busy} autoFocus /></div></>}
-          {mode !== "forgot" && <><div className="pp-password-label"><label htmlFor="login-password">{mode === "reset" ? "New password" : "Password"}</label>{mode === "login" && <Link href="/forgot-password">Forgot password?</Link>}</div><div className="pp-input-icon"><LockKeyhole size={18} /><input id="login-password" type={showPassword ? "text" : "password"} autoComplete={mode === "reset" ? "new-password" : "current-password"} placeholder={mode === "reset" ? "At least 12 characters" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} minLength={mode === "reset" ? 12 : 1} maxLength={mode === "reset" ? 72 : undefined} required disabled={busy} /><button type="button" className="pp-password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></>}
+          {mode !== "forgot" && <><div className="pp-password-label"><label htmlFor="login-password">{mode === "reset" ? "New password" : "Password"}</label>{mode === "login" && <Link href="/forgot-password">Forgot password?</Link>}</div><div className="pp-input-icon"><LockKeyhole size={18} /><input id="login-password" type={showPassword ? "text" : "password"} autoComplete={mode === "reset" ? "new-password" : "current-password"} placeholder={mode === "reset" ? "At least 12 characters" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} minLength={mode === "reset" ? 12 : 1} maxLength={mode === "reset" ? 72 : undefined} required disabled={busy} /><button type="button" className="pp-password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+          {mode === "login" && <div style={{ display: "flex", alignItems: "center", gap: "9px", marginTop: "16px", marginBottom: "4px" }}><input type="checkbox" id="keep-signed-in" checked={keepSignedIn} onChange={e => setKeepSignedIn(e.target.checked)} style={{ accentColor: "#628541", width: "16px", height: "16px", cursor: "pointer", margin: 0 }} /><label htmlFor="keep-signed-in" style={{ fontSize: "13px", color: "#6a7f5a", cursor: "pointer", margin: 0, fontWeight: 450, userSelect: "none" }}>Keep me signed in on this device</label></div>}</>}
           {mode === "reset" && <><label htmlFor="login-confirm">Confirm new password</label><div className="pp-input-icon"><LockKeyhole size={18} /><input id="login-confirm" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Re-enter your new password" value={confirmation} onChange={e => setConfirmation(e.target.value)} required disabled={busy} minLength={12} maxLength={72} /></div>{token === "" && <p className="pp-error" role="alert">Open the reset link from your email, or <Link href="/forgot-password">request a new link</Link>.</p>}</>}
           <p className="pp-login-hint"><ShieldCheck size={15} />{mode === "forgot" ? "Reset links expire in 30 minutes and can be used once." : mode === "reset" ? "Use at least 12 characters. Existing sessions will be signed out." : "Sign in with your work account to access your workspace."}</p>
           {error && <div className="pp-error" role="alert">{error}</div>}

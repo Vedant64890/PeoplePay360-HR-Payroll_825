@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Activity, ArrowRight, ArrowUpRight, Bell, CalendarDays, ChevronRight, Clock3, FileCheck2, LayoutDashboard, Leaf, LoaderCircle, LogOut, Menu, RefreshCw, ShieldCheck, Settings, Users, X } from "lucide-react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import useDashboardRefresh from "@/components/admin/use-dashboard-refresh";
 import Brand from "@/components/admin/brand";
 import WorkspaceSettings from "@/components/admin/workspace-settings";
 import WorkspaceModule from "@/components/admin/workspace-module";
@@ -31,6 +32,7 @@ export default function HrDashboardPage() {
   const [section, setSection] = useState("overview"), [month, setMonth] = useState(currentMonth), [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true), [error, setError] = useState(""), [revision, setRevision] = useState(0), [mobileNav, setMobileNav] = useState(false), [signingOut, setSigningOut] = useState(false);
   const [navScrolling, setNavScrolling] = useState(false), navTimer = useRef(null);
+  useDashboardRefresh(setRevision);
   useEffect(() => () => clearTimeout(navTimer.current), []);
   const reportError = useCallback(e => { if (e.response?.status === 401) router.replace("/login"); else setError(errorMessage(e)); }, [router]);
   useEffect(() => {

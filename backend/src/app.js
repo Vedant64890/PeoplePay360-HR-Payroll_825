@@ -9,11 +9,11 @@ import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import payrollWorkspaceRoutes from "./routes/payroll-workspace.routes.js";
 import hrRoutes from "./routes/hr.routes.js";
+import employeeRoutes from "./routes/employee.routes.js";
 
 import {
   errorHandler,
 } from "./middleware/error.middleware.js";
-import { success } from "zod";
 
 const app = express();
 
@@ -86,6 +86,7 @@ app.use(
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/hr", hrRoutes);
+app.use("/api/employee", employeeRoutes);
 app.use("/api/payroll", payrollWorkspaceRoutes);
 
 app.use((req, res) => {

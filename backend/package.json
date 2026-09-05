@@ -14,7 +14,9 @@
     "prisma:validate": "prisma validate --config prisma.config.ts",
     "prisma:push": "prisma db push --config prisma.config.ts",
     "prisma:generate": "prisma generate --config prisma.config.ts",
-    "prisma:sync": "prisma format --config prisma.config.ts && prisma validate --config prisma.config.ts && prisma db push --config prisma.config.ts && prisma generate --config prisma.config.ts"
+    "prisma:sync": "prisma format --config prisma.config.ts && prisma validate --config prisma.config.ts && prisma db push --config prisma.config.ts && prisma generate --config prisma.config.ts",
+    "demo:seed": "node --import tsx scripts/demo-workspace.mjs",
+    "test": "npm run test:workspace"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^10.0.0",
+    "pdfkit": "^0.20.2",
     "pg": "^8.23.0",
     "zod": "^4.5.4"
   },

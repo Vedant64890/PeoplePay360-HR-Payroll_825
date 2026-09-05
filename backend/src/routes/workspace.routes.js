@@ -3,11 +3,17 @@ import { schemas, workspaceQuery, actionSchema, inputSchema, reportQuery, settin
 import { getSettings, saveSettings } from "../services/settings.service.js";
 import { resource, resourceId, listResource, detailResource, saveResource, archiveResource, lookups, reports, reportCsv } from "../services/workspace.service.js";
 import { saveAttendance, createAllocation, createLeave, decideLeave } from "../services/time.service.js";
-import { createPayrun, payrunAction, savePayslipInputs } from "../services/payroll.service.js";
+import { createPayrun, payrunAction, savePayslipInputs, eligiblePayrunEmployees } from "../services/payroll.service.js";
+import { payrunScopeQuery } from "../validators/workspace.validator.js";
 import { fail } from "../lib/workspace.js";
 import { deleteRole } from "../services/admin.service.js";
+import { z } from "zod";
+import { payslipPdf } from "../services/payslip-document.service.js";
+import { queuePayslips, deliveryHistory, retryDelivery } from "../services/payslip-delivery.service.js";
+import bankAccountRoutes from "./bank-account.routes.js";
 
 const router = Router();
+router.use(bankAccountRoutes);
 const route = fn => async (req, res, next) => {
   try { await fn(req, res); }
   catch (error) {
@@ -25,6 +31,14 @@ function parse(schema, body) {
   return result.data;
 }
 router.get("/lookups", route(async (req, res) => res.json({ success: true, data: await lookups() })));
+router.get("/payruns/eligible", route(async (req, res) => res.json({ success: true, data: await eligiblePayrunEmployees(parse(payrunScopeQuery, req.query)) })));
+router.get("/payslips/:id/pdf", route(async (req, res) => {
+  const { document, bytes } = await payslipPdf(resourceId("payslips", req.params.id), req.user.id);
+  res.set("Cache-Control", "no-store").type("application/pdf").attachment(document.fileName).send(bytes);
+}));
+router.get("/payruns/:id/deliveries", route(async (req, res) => res.json({ success: true, data: await deliveryHistory(resourceId("payruns", req.params.id)) })));
+router.post("/payruns/:id/deliveries", route(async (req, res) => res.status(202).json({ success: true, data: await queuePayslips(resourceId("payruns", req.params.id), parse(z.object({ version: z.number().int().positive(), idempotencyKey: z.string().uuid() }).strict(), req.body), req.user.id) })));
+router.post("/payruns/:id/deliveries/:deliveryId/retry", route(async (req, res) => res.json({ success: true, data: await retryDelivery(resourceId("payruns", req.params.id), resourceId("payruns", req.params.deliveryId), req.user.id) })));
 router.delete("/roles/:id", route(async (req, res) => res.json({ success: true, data: await deleteRole(resourceId("roles", req.params.id), req.user.id) })));
 router.get("/settings", route(async (req, res) => res.json({ success: true, data: await getSettings() })));
 router.put("/settings", route(async (req, res) => res.json({ success: true, data: await saveSettings(parse(settingsSchema, req.body), req.user.id) })));

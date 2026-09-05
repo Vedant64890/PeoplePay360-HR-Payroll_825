@@ -1,8 +1,12 @@
 import api from "./api";
+import { payslipApi } from "./payslip-api";
+import { bankApi } from "./bank-api";
 export const fetchPayrollDashboard = async params => (await api.get("/payroll/dashboard", { params })).data.data;
 export const fetchPayrollProfile = async () => (await api.get("/payroll/profile")).data.data;
 export const savePayrollProfile = async data => (await api.put("/payroll/profile", data)).data.data;
 export const payrollApi = {
+  ...payslipApi("/payroll/workspace"),
+  ...bankApi("/payroll/workspace"),
   eligibleEmployees: async params => (await api.get("/payroll/workspace/payruns/eligible", { params })).data.data,
   fetchWorkspace: async (resource, params) => (await api.get(`/payroll/workspace/${resource}`, { params })).data.data,
   fetchWorkspaceRecord: async (resource, id) => (await api.get(`/payroll/workspace/${resource}/${id}`)).data.data,

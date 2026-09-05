@@ -7,6 +7,7 @@ import { listResource, resourceId, saveResource, archiveResource } from "../serv
 import { saveAttendance, createAllocation, createLeave, decideLeave } from "../services/time.service.js";
 import { hrResources, hrData, hrLookups, hrDashboard, hrDetail, attendanceDays, rebuildAttendance, removeHrRecord } from "../services/hr.service.js";
 import { fail } from "../lib/workspace.js";
+import bankAccountRoutes from "./bank-account.routes.js";
 
 import { getSettings, hrSettingsData, saveHrSettings } from "../services/settings.service.js";
 
@@ -30,6 +31,7 @@ const monthQuery = workspaceQuery.extend({ month: z.string().regex(/^20\d{2}-(0[
 const actionSchema = z.object({ action: z.enum(["approve", "refuse", "cancel", "archive", "remove"]), reason: z.string().trim().max(1000).optional() }).strict();
 const send = (res, data) => res.json({ success: true, data: hrData(data) });
 router.get("/dashboard", route(async (req, res) => send(res, await hrDashboard(parse(monthQuery, req.query)))));
+router.use("/workspace", bankAccountRoutes);
 const hrSettingsSchema = settingsSchema.pick({ organizationName: true, supportEmail: true, timezone: true, version: true }).strict();
 router.get("/workspace/settings", route(async (_req, res) => send(res, hrSettingsData(await getSettings()))));
 router.put("/workspace/settings", route(async (req, res) => send(res, await saveHrSettings(parse(hrSettingsSchema, req.body), req.user.id))));

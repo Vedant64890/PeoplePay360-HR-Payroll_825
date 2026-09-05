@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
+import { queuePayslips, processDeliveryQueue, retryDelivery } from "../src/services/payslip-delivery.service.js";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
 import app from "../src/app.js";
@@ -189,6 +191,75 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
       for (const name of ["departments", "positions", "employees", "contracts", "schedules", "assignments", "categories", "structures", "rules", "leave-types", "allocations", "leave", "attendance", "payruns", "payslips", "roles", "activity"]) assert.equal((await request(root + name)).status, 200, name);
       assert.equal((await request(root + "reports?month=wrong")).status, 400);
     });
+    await t.test("employee self-service isolates identity, attendance, leave and contact updates", async () => {
+      const session = await request("/auth/login", "POST", { email: low.email, password });
+      const own = (path, method = "GET", body) => request(path, method, body, { Cookie: session.cookie });
+      assert.equal((await own("/employee/dashboard?month=2026-09")).status, 409);
+      await prisma.employee.update({ where: { id: employee.id }, data: { userId: low.id, status: "ACTIVE" } });
+      const dashboard = await own("/employee/dashboard?month=2026-09");
+      assert.equal(dashboard.status, 200, JSON.stringify(dashboard.data));
+      assert.equal(dashboard.data.data.profile.id, employee.id);
+      assert.equal(dashboard.data.data.schedule.weeklyHours, 40);
+      assert.ok(dashboard.data.data.attendance.every(day => day.employeeId === employee.id));
+      assert.ok(!JSON.stringify(dashboard.data).includes("contractSnapshot"));
+      assert.equal((await own("/employee/dashboard?month=2026-09&employeeId=1")).status, 400);
+      assert.equal((await own("/payroll/dashboard?month=2026-09")).status, 403);
+      assert.equal((await own("/employee/profile", "PATCH", { status: "ACTIVE", userId: 1 })).status, 400);
+      assert.equal((await own("/employee/profile", "PATCH", { personalPhone: "5550001234", emergencyContactName: "QA contact" })).status, 200);
+      assert.equal((await own("/employee/dashboard?month=2026-09")).data.data.profile.personalPhone, "5550001234");
+      assert.equal((await own("/employee/attendance/clock", "POST", { action: "check-in", employeeId: 1 })).status, 400);
+      let clock = await own("/employee/attendance/clock", "POST", { action: "check-in" });
+      assert.equal(clock.status, 200, JSON.stringify(clock.data)); assert.equal(clock.data.data.source, "SELF_SERVICE");
+      assert.equal((await own("/employee/attendance/clock", "POST", { action: "check-in" })).status, 409);
+      assert.equal((await own("/employee/attendance/clock", "POST", { action: "check-out", breakMinutes: 1440 })).status, 409);
+      assert.equal((await own("/employee/attendance/clock", "POST", { action: "check-out", breakMinutes: 0 })).status, 200);
+      assert.equal((await own("/employee/attendance/clock", "POST", { action: "check-out" })).status, 409);
+      const ownType = await create("leave-types", { code: tag + "SELF", name: "Self-service test", requiresAllocation: false }, "leaveTypes");
+      const body = { leaveTypeId: ownType.id, startDate: "2026-09-15", endDate: "2026-09-15", reason: "Personal plans" };
+      assert.equal((await own("/employee/leave", "POST", { ...body, employeeId: 1 })).status, 403);
+      const leave = await own("/employee/leave", "POST", body); assert.equal(leave.status, 200, JSON.stringify(leave.data));
+      assert.equal(leave.data.data.employeeId, employee.id);
+      assert.equal((await own(`/employee/leave/${leave.data.data.id}/cancel`, "POST", { reason: "Plans changed" })).status, 200);
+      assert.equal((await own("/employee/leave/2147483647/cancel", "POST", { reason: "Plans changed" })).status, 404);
+      const auto = await create("leave-types", { code: tag + "AUTO", name: "Automatic", requiresAllocation: false, requestApprovalPolicy: "AUTOMATIC" }, "leaveTypes");
+      const approved = await own("/employee/leave", "POST", { ...body, leaveTypeId: auto.id });
+      assert.equal(approved.data.data.status, "APPROVED");
+      assert.equal((await own(`/employee/leave/${approved.data.data.id}/cancel`, "POST", { reason: "Plans changed" })).status, 409);
+    });
+    await t.test("bank identifiers are encrypted, masked and inaccessible to employees", async () => {
+      const previous = process.env.BANK_ENCRYPTION_KEY; process.env.BANK_ENCRYPTION_KEY = "a".repeat(64);
+      try {
+        const result = await request(root + `employees/${employee.id}/bank-accounts`, "POST", { accountHolderName: "Test Employee", bankName: "Test bank", accountNumber: "123456789012", routingCode: "TEST123", currency: "INR" });
+        assert.equal(result.status, 200, JSON.stringify(result.data)); assert.equal(result.data.data.accountLastFour, "9012");
+        assert.ok(!JSON.stringify(result.data).includes("123456789012"));
+        const stored = await prisma.employeeBankAccount.findUnique({ where: { id: result.data.data.id } });
+        assert.match(stored.accountNumberEncrypted, /^v1:/); assert.ok(!stored.accountNumberEncrypted.includes("123456789012"));
+        assert.equal((await request(root + `employees/${employee.id}/bank-accounts/${stored.id}`, "DELETE")).status, 200);
+        const session = await request("/auth/login", "POST", { email: low.email, password });
+        assert.equal((await request(`/payroll/workspace/employees/${employee.id}/bank-accounts`, "GET", undefined, { Cookie: session.cookie })).status, 403);
+      } finally { if (previous === undefined) delete process.env.BANK_ENCRYPTION_KEY; else process.env.BANK_ENCRYPTION_KEY = previous; }
+    });
+    await t.test("PDF downloads and bulk delivery preserve values and retry failed mail without duplicating successful sends", async () => {
+      const result = await fetch(base + root + `payslips/${slip.id}/pdf`, { headers: { Cookie: cookie } });
+      assert.equal(result.status, 200); assert.match(result.headers.get("content-type"), /application\/pdf/);
+      const bytes = Buffer.from(await result.arrayBuffer()); assert.equal(bytes.subarray(0, 5).toString(), "%PDF-");
+      await mkdir("../tmp/pdfs", { recursive: true }); await writeFile("../tmp/pdfs/verified-payslip.pdf", bytes);
+      await prisma.employee.update({ where: { id: employee.id }, data: { workEmail: `${tag.toLowerCase()}-payslip@example.test` } });
+      const current = await prisma.payrun.findUnique({ where: { id: run.id } });
+      const input = { version: current.version, idempotencyKey: randomUUID() };
+      const batch = await queuePayslips(run.id, input, admin.id, { configured: true });
+      assert.equal((await queuePayslips(run.id, input, admin.id, { configured: true })).id, batch.id);
+      await processDeliveryQueue(async () => { throw new Error("Test SMTP failure"); }, { batchId: batch.id });
+      const failed = await prisma.payslipDelivery.findFirst({ where: { batchId: batch.id } }); assert.equal(failed.status, "FAILED");
+      await retryDelivery(run.id, failed.id, admin.id);
+      let sent = 0;
+      await processDeliveryQueue(async message => { sent++; assert.equal(message.to, `${tag.toLowerCase()}-payslip@example.test`); assert.equal(message.attachments[0].content.subarray(0, 5).toString(), "%PDF-"); return { messageId: "test-smtp-id" }; }, { batchId: batch.id });
+      await processDeliveryQueue(async () => { sent++; }, { batchId: batch.id });
+      assert.equal(sent, 1);
+      assert.equal((await prisma.payslipDelivery.findUnique({ where: { id: failed.id } })).attemptCount, 2);
+      assert.equal((await prisma.payslipDeliveryBatch.findUnique({ where: { id: batch.id } })).status, "COMPLETED");
+      await assert.rejects(retryDelivery(run.id, failed.id, admin.id), /Only failed/);
+    });
     await t.test("Payroll Manager inherits HR operations and manages payroll without system access", async () => {
       const manager = await prisma.user.create({ data: { name: tag + " payroll", email: `${tag.toLowerCase()}-payroll@example.test`, password: await hashPassword(password), role: "HR_PAYROLL_MANAGER" } }); ids.users.push(manager.id);
       const payrollUser = await prisma.user.create({ data: { name: tag + " payroll user", email: `${tag.toLowerCase()}-payroll-user@example.test`, password: await hashPassword(password), role: "HR_PAYROLL_USER" } }); ids.users.push(payrollUser.id);
@@ -333,6 +404,11 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
   } finally {
     if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
     const employees = { employeeId: { in: ids.employees } }, runs = { payrunId: { in: ids.runs } }, slips = { payslip: runs };
+    await prisma.payslipDeliveryAttempt.deleteMany({ where: { delivery: { payslip: runs } } });
+    await prisma.payslipDelivery.deleteMany({ where: slips });
+    await prisma.payslipDeliveryBatch.deleteMany({ where: runs });
+    await prisma.payslipDocument.deleteMany({ where: slips });
+    await prisma.employeeBankAccount.deleteMany({ where: employees });
     await prisma.payrollPayment.deleteMany({ where: slips }); await prisma.payrollWarning.deleteMany({ where: runs });
     await prisma.payslipLine.deleteMany({ where: slips }); await prisma.payslipWorkedTime.deleteMany({ where: slips }); await prisma.payslipInput.deleteMany({ where: slips });
     await prisma.payslip.deleteMany({ where: runs }); await prisma.payrunEmployee.deleteMany({ where: runs }); await prisma.payrun.deleteMany({ where: { id: { in: ids.runs } } });

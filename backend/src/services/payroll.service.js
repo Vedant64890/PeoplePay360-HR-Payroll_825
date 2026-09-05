@@ -3,6 +3,20 @@ import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { D, addDays, audit, date, dateRange, dayKey, daysBetween, expression, fail, json, lockEmployee, scheduleDay } from "../lib/workspace.js";
 import { refreshDay } from "./time.service.js";
+import { getSettings } from "./settings.service.js";
+
+async function payrollWarnings(tx, run) {
+  const warnings = [];
+  for (const selection of run.employees) {
+    const employee = selection.employee, label = `${employee.firstName} ${employee.lastName}`;
+    const add = (code, message, severity = "WARNING") => warnings.push({ payrunId: run.id, employeeId: employee.id, deduplicationKey: `${employee.id}:${code}`, code, severity, message: `${label}: ${message}` });
+    if (!employee.workEmail) add("MISSING_EMAIL", "Work email is missing; add it before sending payslips.");
+    if (!await tx.employeeBankAccount.count({ where: { employeeId: employee.id, isActive: true, currency: run.currency } })) add("MISSING_BANK_DETAILS", "No active bank account is recorded for this currency.");
+    if (await tx.payslip.count({ where: { employeeId: employee.id, payrunId: { not: run.id }, status: { not: "CANCELLED" }, periodStart: { lte: run.period.endDate }, periodEnd: { gte: run.period.startDate } } })) add("DUPLICATE_PAYSLIP", "Another payslip overlaps this period. Cancel the duplicate batch before validation.", "BLOCKING");
+    if (await tx.contract.count({ where: { employeeId: employee.id, status: "OPEN", endDate: { gte: run.period.startDate, lte: run.period.endDate } } })) add("CONTRACT_EXPIRING", "A contract ends during this payroll period; review its coverage.");
+  }
+  for (const warning of warnings) await tx.payrollWarning.upsert({ where: { payrunId_deduplicationKey: { payrunId: run.id, deduplicationKey: warning.deduplicationKey } }, create: warning, update: { ...warning, status: "OPEN", resolvedAt: null, resolutionNote: null } });
+}
 
 export function calculateRules(memberships, values) {
   const context = { ...values, GROSS: D(), NET: D() }, lines = [];
@@ -42,12 +56,27 @@ export async function createPayrun(input, actorId) {
     const employeeIds = [...input.employeeIds].sort((a, b) => a - b);
     for (const id of employeeIds) await lockEmployee(tx, id);
     if (await tx.employee.count({ where: { id: { in: employeeIds }, status: { not: "ARCHIVED" } } }) !== employeeIds.length) fail("Select existing, unarchived employees.");
+    if (input.departmentId || input.employeeTypes?.length) {
+      const eligible = await eligiblePayrunEmployees({ ...input }, tx);
+      if (employeeIds.some(id => !eligible.some(e => e.id === id))) fail("Selected employees must match the department, employment type, structure and period scope.", 409);
+    }
     const period = await tx.payrollPeriod.upsert({ where: { startDate_endDate_frequency: { startDate: date(input.startDate), endDate: date(input.endDate), frequency: structure.payFrequency } }, create: { name: `${input.startDate} – ${input.endDate}`, startDate: date(input.startDate), endDate: date(input.endDate), frequency: structure.payFrequency, paymentDate: input.paymentDate ? date(input.paymentDate) : null }, update: {} });
     if (period.isClosed) fail("This payroll period is closed.", 409);
-    const item = await tx.payrun.create({ data: { name: input.name, reference: `RUN-${randomUUID()}`, payrollPeriodId: period.id, salaryStructureId: structure.id, currency: structure.currency, idempotencyKey: input.idempotencyKey, scopeSnapshot: json(input), notes: input.notes, createdById: actorId, employees: { create: employeeIds.map(employeeId => ({ employeeId })) } } });
+    const item = await tx.payrun.create({ data: { name: input.name, reference: `RUN-${randomUUID()}`, payrollPeriodId: period.id, salaryStructureId: structure.id, departmentId: input.departmentId, employeeTypes: input.employeeTypes || [], currency: structure.currency, idempotencyKey: input.idempotencyKey, scopeSnapshot: json(input), notes: input.notes, createdById: actorId, employees: { create: employeeIds.map(employeeId => ({ employeeId })) } } });
     await audit(tx, actorId, "PAYRUN_CREATED", "Payrun", item.id);
     return json(item);
   }, { isolationLevel: "Serializable", timeout: 30000 });
+}
+export async function eligiblePayrunEmployees(input, tx = prisma) {
+  const start = date(input.startDate), end = date(input.endDate);
+  dateRange(start, end);
+  const employees = await tx.employee.findMany({ where: { status: { not: "ARCHIVED" }, hireDate: { lte: end }, OR: [{ terminationDate: null }, { terminationDate: { gte: start } }] }, include: { contracts: { where: { status: { in: ["OPEN", "EXPIRED", "TERMINATED"] }, startDate: { lte: end }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: start } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: start } }] }] }, include: { workingSchedule: { include: { lines: true } } } } } });
+  const types = input.employeeType ? [input.employeeType] : input.employeeTypes || [];
+  return json(employees.filter(e => {
+    if (e.contracts.length !== 1) return false;
+    const c = e.contracts[0], requiredStart = Math.max(+start, +e.hireDate), requiredEnd = Math.min(+end, e.terminationDate ? +e.terminationDate : Infinity, c.terminationDate ? +c.terminationDate : Infinity);
+    return c.salaryStructureId === input.salaryStructureId && (!input.departmentId || c.departmentId === input.departmentId) && (!types.length || types.includes(c.employeeType)) && +c.startDate <= requiredStart && (!c.endDate || +c.endDate >= requiredEnd);
+  }).map(e => ({ id: e.id, firstName: e.firstName, lastName: e.lastName, employeeCode: e.employeeCode, hireDate: e.hireDate, wage: e.contracts[0].wage, currency: e.contracts[0].currency, workingSchedule: e.contracts[0].workingSchedule?.name })));
 }
 async function computeEmployee(tx, run, selection) {
   const employee = selection.employee;
@@ -104,7 +133,7 @@ async function computeEmployee(tx, run, selection) {
   const context = { WAGE: wage, CONTRACT_WAGE: contract.wage, WORKED_HOURS: workedHours, WORKED_DAYS: workedDays, SCHEDULED_DAYS: scheduledDays, PAID_DAYS: paidDays };
   for (const input of previous?.inputs || []) { if (Object.hasOwn(context, input.code) || ["GROSS", "NET"].includes(input.code)) fail("A variable input cannot replace a reserved payroll value."); context[input.code] = D(input.amount).mul(input.quantity); }
   const computed = calculateRules(run.salaryStructure.rules, context);
-  const data = { contractId: contract.id, workingScheduleId: schedule.id, departmentId: contract.departmentId, employeeType: contract.employeeType, status: "COMPUTED", ...computed.totals, scheduledDays, workedDays, workedHours, employeeSnapshot: json({ id: employee.id, employeeCode: employee.employeeCode, firstName: employee.firstName, lastName: employee.lastName, workEmail: employee.workEmail }), contractSnapshot: json(contract), scheduleSnapshot: json(schedule), structureSnapshot: json(run.salaryStructure), computationInputs: json({ context, attendance: attendanceSnapshots, leaveDays, proration: "Calendar-day wage proration; scheduled-day pay fraction from closed attendance and approved paid leave. Hourly wages use worked hours; daily wages use paid days." }), computedAt: new Date(), computationVersion: run.computationVersion + 1 };
+  const data = { contractId: contract.id, workingScheduleId: schedule.id, departmentId: contract.departmentId, employeeType: contract.employeeType, status: "COMPUTED", ...computed.totals, scheduledDays, workedDays, workedHours, employeeSnapshot: json({ organizationName: run.organizationName, id: employee.id, employeeCode: employee.employeeCode, firstName: employee.firstName, lastName: employee.lastName, workEmail: employee.workEmail }), contractSnapshot: json(contract), scheduleSnapshot: json(schedule), structureSnapshot: json(run.salaryStructure), computationInputs: json({ context, attendance: attendanceSnapshots, leaveDays, proration: "Calendar-day wage proration; scheduled-day pay fraction from closed attendance and approved paid leave. Hourly wages use worked hours; daily wages use paid days." }), computedAt: new Date(), computationVersion: run.computationVersion + 1 };
   if (previous) { await tx.payslipLine.deleteMany({ where: { payslipId: previous.id } }); await tx.payslipWorkedTime.deleteMany({ where: { payslipId: previous.id } }); }
   const slip = previous ? await tx.payslip.update({ where: { id: previous.id }, data: { ...data, version: { increment: 1 } } }) : await tx.payslip.create({ data: { ...data, number: `SLIP-${randomUUID()}`, payrunId: run.id, employeeId: employee.id, payrollPeriodId: run.payrollPeriodId, salaryStructureId: run.salaryStructureId, periodStart: run.period.startDate, periodEnd: run.period.endDate, currency: run.currency } });
   await tx.payslipLine.createMany({ data: computed.lines.map(line => ({ ...line, payslipId: slip.id })) });
@@ -129,6 +158,8 @@ export async function payrunAction(id, input, actorId) {
       if (!["DRAFT", "COMPUTED"].includes(run.status)) fail("Only draft or computed payruns can be computed.", 409);
       if (!run.salaryStructure.isActive) fail("This salary structure is inactive.");
       await tx.payrollWarning.updateMany({ where: { payrunId: id, status: "OPEN" }, data: { status: "RESOLVED", resolvedAt: new Date(), resolutionNote: "Rechecked during computation" } });
+      const settings = await getSettings(tx);
+      run.organizationName = settings.organizationName;
       let failures = 0;
       for (const selection of run.employees) {
         await tx.payslip.upsert({ where: { payrunId_employeeId: { payrunId: id, employeeId: selection.employeeId } }, create: { number: `SLIP-${randomUUID()}`, payrunId: id, employeeId: selection.employeeId, payrollPeriodId: run.payrollPeriodId, salaryStructureId: run.salaryStructureId, employeeType: selection.employee.employeeType, periodStart: run.period.startDate, periodEnd: run.period.endDate, currency: run.currency }, update: {} });
@@ -141,6 +172,7 @@ export async function payrunAction(id, input, actorId) {
           await tx.payrollWarning.upsert({ where: { payrunId_deduplicationKey: { payrunId: id, deduplicationKey: `compute:${selection.employeeId}` } }, create: { payrunId: id, employeeId: selection.employeeId, deduplicationKey: `compute:${selection.employeeId}`, code: "RULE_COMPUTATION_ERROR", severity: "BLOCKING", message: error.message }, update: { status: "OPEN", message: error.message, resolvedAt: null } });
         }
       }
+      await payrollWarnings(tx, run);
       await tx.payrun.update({ where: { id }, data: { status: failures ? "DRAFT" : "COMPUTED", computedAt: new Date(), computationVersion: { increment: 1 }, version: { increment: 1 }, structureSnapshot: json(run.salaryStructure) } });
     } else if (input.action === "validate") {
       if (run.status !== "COMPUTED" || !run.payslips.length || run.payslips.length !== run.employees.length || run.payslips.some(s => s.status !== "COMPUTED") || run.employees.some(e => e.status !== "COMPUTED")) fail("Compute every selected employee successfully before validating.", 409);

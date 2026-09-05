@@ -1,5 +1,5 @@
 import api from "./api";
-export const workspaceHome = role => role === "ADMIN" ? "/admin/dashboard" : role === "HR_MANAGER" ? "/hr/dashboard" : ["HR_PAYROLL_MANAGER", "HR_PAYROLL_USER"].includes(role) ? "/payroll/dashboard" : "/workspace";
+export const workspaceHome = role => role === "ADMIN" ? "/admin/dashboard" : role === "HR_MANAGER" ? "/hr/dashboard" : ["HR_PAYROLL_MANAGER", "HR_PAYROLL_USER"].includes(role) ? "/payroll/dashboard" : role === "EMPLOYEE" ? "/employee/dashboard" : "/workspace";
 export const requestPasswordReset = async email => (await api.post("/auth/forgot-password", { email })).data;
 export const resetPassword = async (token, password) => (await api.post("/auth/reset-password", { token, password })).data;
 

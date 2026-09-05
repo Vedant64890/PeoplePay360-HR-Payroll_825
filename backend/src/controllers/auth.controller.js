@@ -4,21 +4,16 @@ import {
 } from "../services/auth.service.js";
 import { sessionCookieName } from "../lib/session-cookie.js";
 
-function getCookieOptions() {
+function getCookieOptions(keepSignedIn = false) {
   const isProduction =
     process.env.NODE_ENV === "production";
 
   return {
     httpOnly: true,
-
     secure: isProduction,
-
-    sameSite: isProduction
-      ? "none"
-      : "lax",
-
-    maxAge: 24 * 60 * 60 * 1000,
-
+    sameSite: isProduction ? "none" : "lax",
+    // 30 days if keep signed in, else session cookie (expires on close)
+    ...(keepSignedIn ? { maxAge: 30 * 24 * 60 * 60 * 1000 } : {}),
     path: "/",
   };
 }
@@ -51,7 +46,7 @@ async function completeLogin(req, res, next, adminOnly = false, hrOnly = false) 
     res.cookie(
       cookieName,
       token,
-      getCookieOptions()
+      getCookieOptions(req.validatedBody.keepSignedIn)
     );
 
     return res.status(200).json({

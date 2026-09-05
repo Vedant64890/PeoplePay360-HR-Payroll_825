@@ -17,7 +17,7 @@ export async function refreshDay(tx, employeeId, workDate) {
   const data = { workingScheduleId: schedule?.id || null, expectedMinutes: expected.minutes, workedMinutes, approvedLeaveMinutes, lateMinutes, overtimeMinutes: Math.max(0, workedMinutes - expected.minutes - (schedule?.overtimeThresholdMinutes || 0)), status, scheduleSnapshot: json(schedule || {}), calculatedAt: new Date() };
   return tx.attendanceDay.upsert({ where: { employeeId_workDate: { employeeId, workDate } }, create: { employeeId, workDate, ...data }, update: data });
 }
-export async function saveAttendance(input, actorId, id) {
+export async function saveAttendance(input, actorId, id, { selfService = false } = {}) {
   return prisma.$transaction(async tx => {
     await lockEmployee(tx, input.employeeId);
     const before = id ? await tx.attendance.findUnique({ where: { id }, include: { day: true } }) : null;
@@ -39,7 +39,7 @@ export async function saveAttendance(input, actorId, id) {
     if (prior && scheduleDay(prior, priorDate).lines.some(l => l.endDayOffset && checkIn >= localInstant(priorDate, l.startMinute, prior.timezone) && checkIn < localInstant(priorDate, l.endMinute + 1440, prior.timezone))) workDate = priorDate;
     const day = await refreshDay(tx, input.employeeId, workDate);
     const data = { attendanceDayId: day.id, checkIn, checkOut, breakMinutes: input.breakMinutes, notes: input.notes };
-    const item = id ? await tx.attendance.update({ where: { id }, data }) : await tx.attendance.create({ data: { ...data, source: "MANUAL", createdById: actorId } });
+    const item = id ? await tx.attendance.update({ where: { id }, data }) : await tx.attendance.create({ data: { ...data, source: selfService ? "SELF_SERVICE" : "MANUAL", createdById: actorId } });
     if (before) await tx.attendanceCorrection.create({ data: { attendanceId: id, previousCheckIn: before.checkIn, previousCheckOut: before.checkOut, correctedCheckIn: checkIn, correctedCheckOut: checkOut, previousBreakMinutes: before.breakMinutes, correctedBreakMinutes: input.breakMinutes, reason: input.reason, correctedById: actorId } });
     await refreshDay(tx, input.employeeId, workDate);
     if (before && dayKey(before.day.workDate) !== dayKey(workDate)) await refreshDay(tx, input.employeeId, before.day.workDate);
@@ -114,11 +114,11 @@ export async function createLeave(input, actorId, id) {
     const item = id ? await tx.leaveRequest.update({ where: { id }, data, include: { days: true } }) : await tx.leaveRequest.create({ data: { ...data, reference: `LEAVE-${randomUUID()}`, requestedById: actorId, status: "SUBMITTED", submittedAt: new Date() }, include: { days: true } });
     if (type.requestApprovalPolicy === "AUTOMATIC") { await consumeLeave(tx, item); await tx.leaveRequest.update({ where: { id: item.id }, data: { status: "APPROVED", approvedAt: new Date() } }); for (const day of days) await refreshDay(tx, input.employeeId, day.date); }
     await audit(tx, actorId, id ? "LEAVE_UPDATED" : "LEAVE_SUBMITTED", "LeaveRequest", item.id);
-    return json(item);
+    return json(await tx.leaveRequest.findUnique({ where: { id: item.id }, include: { days: true } }));
   }, { isolationLevel: "Serializable", timeout: 30000 });
 }
 
-export async function decideLeave(name, id, action, actorId, reason) {
+export async function decideLeave(name, id, action, actorId, reason, { pendingOnly = false } = {}) {
   if (!["approve", "refuse", "cancel"].includes(action)) fail("Invalid leave action.");
   if (["refuse", "cancel"].includes(action) && !reason?.trim()) fail("Provide a reason for this decision.");
   return prisma.$transaction(async tx => {
@@ -128,6 +128,7 @@ export async function decideLeave(name, id, action, actorId, reason) {
     await lockEmployee(tx, initial.employeeId);
     const item = await tx[model].findUnique({ where: { id }, include: { approvals: true, ...(allocation ? { consumptions: true } : { days: true }) } });
     if (action === "cancel") {
+      if (pendingOnly && !["SUBMITTED", "FIRST_APPROVED"].includes(item.status)) fail("This request has already been decided. Contact HR to change approved leave.", 409);
       if (["CANCELLED", "REFUSED"].includes(item.status)) fail("This record is already closed.", 409);
       if (allocation && item.consumptions.some(c => !c.releasedAt)) fail("Cancel consuming leave requests before cancelling their allocation.", 409);
       if (!allocation) await tx.leaveAllocationConsumption.updateMany({ where: { requestDay: { leaveRequestId: id }, releasedAt: null }, data: { releasedAt: new Date(), releaseReason: reason } });

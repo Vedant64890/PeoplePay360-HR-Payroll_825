@@ -7,6 +7,7 @@ import WorkspaceModule from "@/components/admin/workspace-module";
 import WorkspaceReports from "@/components/admin/workspace-reports";
 import WorkspaceSettings from "@/components/admin/workspace-settings";
 import { ThemeToggle } from "@/components/admin/theme-provider";
+import useDashboardRefresh from "@/components/admin/use-dashboard-refresh";
 import Brand from "@/components/admin/brand";
 import DeleteAccountDialog from "@/components/admin/delete-account-dialog";
 import RecordDialog, { roleLabels } from "@/components/admin/record-dialog";
@@ -88,6 +89,7 @@ export default function AdminDashboardPage() {
   const [mobileNav, setMobileNav] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
+  useDashboardRefresh(setRevision);
   useEffect(() => {
     if (!user) return;
     let active = true;
