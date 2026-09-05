@@ -96,10 +96,7 @@ export const ModelName = {
   PayslipDeliveryBatch: 'PayslipDeliveryBatch',
   PayslipDelivery: 'PayslipDelivery',
   PayslipDeliveryAttempt: 'PayslipDeliveryAttempt',
-  AuditLog: 'AuditLog',
-  HrReviewCycle: 'HrReviewCycle',
-  HrReview: 'HrReview',
-  HrDocument: 'HrDocument'
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -951,55 +948,6 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
-
-
-export const HrReviewCycleScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  description: 'description',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type HrReviewCycleScalarFieldEnum = (typeof HrReviewCycleScalarFieldEnum)[keyof typeof HrReviewCycleScalarFieldEnum]
-
-
-export const HrReviewScalarFieldEnum = {
-  id: 'id',
-  employeeId: 'employeeId',
-  reviewerId: 'reviewerId',
-  cycleId: 'cycleId',
-  name: 'name',
-  goals: 'goals',
-  selfReview: 'selfReview',
-  managerReview: 'managerReview',
-  rating: 'rating',
-  status: 'status',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type HrReviewScalarFieldEnum = (typeof HrReviewScalarFieldEnum)[keyof typeof HrReviewScalarFieldEnum]
-
-
-export const HrDocumentScalarFieldEnum = {
-  id: 'id',
-  employeeId: 'employeeId',
-  name: 'name',
-  category: 'category',
-  url: 'url',
-  expiryDate: 'expiryDate',
-  description: 'description',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type HrDocumentScalarFieldEnum = (typeof HrDocumentScalarFieldEnum)[keyof typeof HrDocumentScalarFieldEnum]
 
 
 export const SortOrder = {

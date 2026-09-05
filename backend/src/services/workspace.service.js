@@ -59,7 +59,7 @@ export async function detailResource(name, id) {
   return json(item);
 }
 function dates(data) {
-  for (const key of ["birthDate", "hireDate", "terminationDate", "startDate", "endDate", "probationEndDate"]) if (data[key]) data[key] = date(data[key]);
+  for (const key of ["hireDate", "terminationDate", "startDate", "endDate", "probationEndDate"]) if (data[key]) data[key] = date(data[key]);
   return data;
 }
 async function validateRelations(tx, name, data, id, before) {

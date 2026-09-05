@@ -9,6 +9,3 @@ export const hrWorkspaceApi = {
   workspaceAction: async (resource, id, data) => (await api.post(`/hr/workspace/${resource}/${id}/actions`, data)).data.data,
   rebuildAttendance: async data => (await api.post("/hr/workspace/attendance-days/recalculate", data)).data.data,
 };
-
-export const fetchHrProfile = async () => (await api.get("/hr/profile")).data.data;
-export const saveHrProfile = async data => (await api.put("/hr/profile", data)).data.data;

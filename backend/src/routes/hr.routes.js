@@ -6,12 +6,10 @@ import { schemas, workspaceQuery, settingsSchema } from "../validators/workspace
 import { listResource, resourceId, saveResource, archiveResource } from "../services/workspace.service.js";
 import { saveAttendance, createAllocation, createLeave, decideLeave } from "../services/time.service.js";
 import { hrResources, hrData, hrLookups, hrDashboard, hrDetail, attendanceDays, rebuildAttendance, removeHrRecord } from "../services/hr.service.js";
-import { audit, fail } from "../lib/workspace.js";
+import { fail } from "../lib/workspace.js";
 
 import { getSettings, hrSettingsData, saveHrSettings } from "../services/settings.service.js";
 
-import prisma from "../lib/prisma.js";
-import { operationModels, operationSchemas, listOperations, operationDetail, saveOperation, hrAlerts } from "../services/hr-operations.service.js";
 
 const router = Router();
 router.use(authenticate, authorizeRoles("HR_MANAGER", "ADMIN"));
@@ -38,32 +36,6 @@ router.put("/workspace/settings", route(async (req, res) => send(res, await save
 router.get("/workspace/lookups", route(async (_req, res) => send(res, await hrLookups())));
 router.get("/workspace/attendance-days", route(async (req, res) => send(res, await attendanceDays(parse(monthQuery, req.query)))));
 router.post("/workspace/attendance-days/recalculate", route(async (req, res) => send(res, await rebuildAttendance(parse(monthQuery, req.body), req.user.id))));
-router.get("/profile", route(async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { id: true, name: true, email: true, role: true } });
-  send(res, user);
-}));
-router.put("/profile", route(async (req, res) => {
-  const input = parse(z.object({ name: z.string().trim().min(1).max(150) }).strict(), req.body);
-  send(res, await prisma.$transaction(async tx => {
-    const result = await tx.user.update({ where: { id: req.user.id }, data: input, select: { id: true, name: true, email: true, role: true } });
-    await audit(tx, req.user.id, "HR_PROFILE_UPDATED", "User", req.user.id);
-    return result;
-  }));
-}));
-router.get("/workspace/notifications", route(async (_req, res) => send(res, await hrAlerts())));
-router.get("/workspace/hr-reports", route(async (req, res) => send(res, await hrDashboard(parse(monthQuery, req.query)))));
-router.get("/workspace/holidays", route(async (req, res) => {
-  const query = parse(workspaceQuery, req.query);
-  const where = query.q ? { name: { contains: query.q, mode: "insensitive" } } : {};
-  const [items, total] = await prisma.$transaction([prisma.scheduleHoliday.findMany({ where, include: { workingSchedule: { select: { id: true, name: true } } }, orderBy: { date: "asc" }, take: 20, skip: (query.page - 1) * 20 }), prisma.scheduleHoliday.count({ where })]);
-  send(res, { items, total, pageSize: 20 });
-}));
-for (const name of Object.keys(operationModels)) {
-  router.get(`/workspace/${name}`, route(async (req, res) => send(res, await listOperations(name, parse(workspaceQuery, req.query)))));
-  router.get(`/workspace/${name}/:id`, route(async (req, res) => send(res, await operationDetail(name, resourceId(name, req.params.id)))));
-  router.post(`/workspace/${name}`, route(async (req, res) => { res.status(201); send(res, await saveOperation(name, parse(operationSchemas[name], req.body), req.user.id)); }));
-  router.put(`/workspace/${name}/:id`, route(async (req, res) => send(res, await saveOperation(name, parse(operationSchemas[name], req.body), req.user.id, resourceId(name, req.params.id)))));
-}
 router.use("/workspace/:resource", (req, res, next) => hrResources.has(req.params.resource) ? next() : res.status(403).json({ success: false, message: "This section is not available to the HR Manager workspace." }));
 router.get("/workspace/:resource", route(async (req, res) => {
   const query = parse(workspaceQuery, req.query);

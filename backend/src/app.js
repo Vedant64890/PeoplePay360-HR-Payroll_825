@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import payrollWorkspaceRoutes from "./routes/payroll-workspace.routes.js";
 import hrRoutes from "./routes/hr.routes.js";
 
 import {
@@ -76,6 +77,7 @@ app.use(
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/hr", hrRoutes);
+app.use("/api/payroll", payrollWorkspaceRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -1,16 +1,16 @@
 import prisma from "../lib/prisma.js";
 import { D, date, dateRange, dayKey, json } from "../lib/workspace.js";
 
-export async function reports({ month, currency = "INR", departmentId, trendMonths = 6 }) {
+export async function reports({ month, currency = "INR", departmentId, employeeType, trendMonths = 6 }) {
   const start = date(`${month || dayKey(new Date()).slice(0, 7)}-01`);
   const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
   const trendStart = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() - trendMonths + 1, 1));
-  const departmentScope = departmentId ? { departmentId } : {};
+  const departmentScope = { ...(departmentId ? { departmentId } : {}), ...(employeeType ? { employeeType } : {}) };
   const [slips, days, leaves, payments, contracts, departmentOptions, currentEmployees] = await Promise.all([
     prisma.payslip.findMany({ where: { currency, ...departmentScope, periodStart: { gte: trendStart, lt: end }, status: { in: ["VALIDATED", "PARTIALLY_PAID", "PAID"] } }, select: { id: true, periodStart: true, departmentId: true, department: { select: { name: true } }, grossAmount: true, deductionAmount: true, netAmount: true, employerCostAmount: true } }),
-    prisma.attendanceDay.findMany({ where: { workDate: { gte: start, lt: end }, ...(departmentId ? { employee: departmentScope } : {}) }, select: { workDate: true, status: true, workedMinutes: true, lateMinutes: true, overtimeMinutes: true } }),
-    prisma.leaveRequestDay.findMany({ where: { date: { gte: start, lt: end }, leaveRequest: { status: "APPROVED", ...(departmentId ? { employee: departmentScope } : {}) } }, select: { durationDays: true, durationHours: true, leaveRequest: { select: { leaveTypeId: true, leaveType: { select: { name: true } } } } } }),
-    prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", paidAt: { gte: start, lt: end }, ...(departmentId ? { payslip: departmentScope } : {}) }, _sum: { amount: true } }),
+    prisma.attendanceDay.findMany({ where: { workDate: { gte: start, lt: end }, ...(Object.keys(departmentScope).length ? { employee: departmentScope } : {}) }, select: { workDate: true, status: true, workedMinutes: true, lateMinutes: true, overtimeMinutes: true } }),
+    prisma.leaveRequestDay.findMany({ where: { date: { gte: start, lt: end }, leaveRequest: { status: "APPROVED", ...(Object.keys(departmentScope).length ? { employee: departmentScope } : {}) } }, select: { durationDays: true, durationHours: true, leaveRequest: { select: { leaveTypeId: true, leaveType: { select: { name: true } } } } } }),
+    prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", paidAt: { gte: start, lt: end }, ...(Object.keys(departmentScope).length ? { payslip: departmentScope } : {}) }, _sum: { amount: true } }),
     prisma.contract.count({ where: { ...departmentScope, status: "OPEN", endDate: { gte: start, lt: end } } }),
     prisma.department.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
     prisma.employee.count({ where: { ...departmentScope, status: { notIn: ["ARCHIVED", "TERMINATED"] } } }),
