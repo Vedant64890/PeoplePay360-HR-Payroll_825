@@ -29,6 +29,21 @@ export default function ThemeProvider({ children }) {
   const value = useSyncExternalStore(subscribe, snapshot, () => "system:light");
   const [preference, resolved] = value.split(":");
   useEffect(() => { document.documentElement.dataset.ppTheme = resolved; }, [resolved]);
+  useEffect(() => {
+    const root = document.documentElement;
+    let timer;
+    function onScroll() {
+      root.dataset.ppScrolling = "true";
+      clearTimeout(timer);
+      timer = setTimeout(() => { delete root.dataset.ppScrolling; }, 900);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+      delete root.dataset.ppScrolling;
+    };
+  }, []);
   function setTheme(next) {
     if (!valid(next)) return;
     sessionPreference = next;

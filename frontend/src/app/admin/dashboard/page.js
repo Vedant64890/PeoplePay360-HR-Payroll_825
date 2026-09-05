@@ -173,18 +173,41 @@ export default function AdminDashboardPage() {
     </aside>
 
     <div className="pp-workspace-main">
-      <header className="pp-topbar"><div className="pp-breadcrumb"><button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" onClick={() => setMobileNav(true)}><Menu size={22} /></button><span>Workspace</span><ChevronRight size={14} /><strong>{navigation.find((item) => item.id === section)?.label}</strong></div><div className="pp-topbar-actions"><ThemeToggle /><span className="pp-live-status"><span className="pp-dot" /> Live workspace</span><button className="pp-icon-button" title="View recent activity" aria-label="View recent activity" onClick={() => navigate("reports")}><Bell size={19} /></button><span className="pp-topbar-divider" /><span className="pp-avatar" title={`${user.name} · ${user.email}`}>{initials(user.name)}</span></div></header>
+      <header className="pp-topbar">
+        <div className="pp-topbar-location">
+          <button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" onClick={() => setMobileNav(true)}><Menu size={21} /></button>
+          <span className="pp-topbar-mark" aria-hidden="true"><LayoutDashboard size={21} strokeWidth={1.7} /></span>
+          <div className="pp-topbar-location-text">
+            <span className="pp-topbar-eyebrow">Admin workspace</span>
+            <nav className="pp-breadcrumb" aria-label="Breadcrumb">
+              <button className="pp-breadcrumb-home" onClick={() => navigate("overview")}>Workspace</button>
+              <ChevronRight className="pp-breadcrumb-separator" size={13} aria-hidden="true" />
+              <strong aria-current="page" title={navigation.find((item) => item.id === section)?.label}>{navigation.find((item) => item.id === section)?.label}</strong>
+            </nav>
+          </div>
+        </div>
+        <div className="pp-topbar-actions">
+          <span className="pp-live-status"><span className="pp-dot" /> Live workspace</span>
+          <div className="pp-topbar-tools"><ThemeToggle /><button className="pp-icon-button pp-activity-button" title="View recent activity" aria-label="View recent activity" onClick={() => navigate("reports")}><Bell size={19} /></button></div>
+          <span className="pp-topbar-divider" aria-hidden="true" />
+          <button className="pp-topbar-profile" aria-label={`Open workspace settings for ${user.name}`} title={`${user.email} · Workspace settings`} onClick={() => navigate("settings")}>
+            <span className="pp-avatar" aria-hidden="true">{initials(user.name)}</span>
+            <span className="pp-topbar-profile-text"><strong>{user.name}</strong><small>Administrator</small></span>
+            <Settings className="pp-profile-settings" size={15} aria-hidden="true" />
+          </button>
+        </div>
+      </header>
       <main className="pp-main-content" id="main-content">
         <div className="pp-page-heading"><div><p className="pp-eyebrow">{section === "overview" ? "THE BIG PICTURE" : "YOUR CONNECTED WORKSPACE"}</p><h1>{titles[section]}<span className="pp-heading-dot">.</span></h1><p>{descriptions[section]}</p></div><div className="pp-heading-actions">{section === "overview" && <button className="pp-button pp-button-outline" onClick={exportOverview} disabled={!data || loading}><ArrowDownToLine size={17} />Export report</button>}{["overview", "users"].includes(section) && actions}</div></div>
         {error && <div className="pp-error pp-dashboard-error" role="alert"><span>{error}</span><button onClick={() => setRevision((value) => value + 1)}>Try again</button></div>}
         {section !== "settings" && <div className="pp-filter-bar"><div className="pp-period-filter"><CalendarDays size={16} /><label htmlFor="dashboard-month">Reporting month</label><input type="month" id="dashboard-month" min="2000-01" max="2099-12" value={month} onChange={(event) => { if (event.target.value) setMonth(event.target.value); }} /></div><div className="pp-filter-right"><label className="pp-currency-filter">Currency<select value={currency} onChange={(event) => setCurrency(event.target.value)}>{([...new Set([currency, ...(data?.currencies || ["INR"])])]).map((code) => <option key={code} value={code}>{code}</option>)}</select></label><button className="pp-icon-button" aria-label="Refresh dashboard" onClick={() => setRevision((value) => value + 1)} disabled={loading}><RefreshCw size={16} className={loading ? "pp-spin" : ""} /></button></div></div>}
         {loading && !data ? <Loading /> : data && <>
           {section === "overview" && <>
-            <section className="pp-metrics" aria-label="Workspace metrics">
-              <div className="pp-metric"><div className="pp-metric-top"><span>Total employees</span><span className="pp-icon-box pp-tone-green"><Users size={19} /></span></div><strong>{metric.employees.toLocaleString()}</strong><p><span className="pp-small-dot pp-green-dot" />{metric.activeEmployees} active employees <button aria-label="View employees" onClick={() => navigate("employees")}><ArrowUpRight size={16} /></button></p></div>
-              <div className="pp-metric"><div className="pp-metric-top"><span>Recorded attendance</span><span className="pp-icon-box pp-tone-blue"><Clock3 size={19} /></span></div><strong>{metric.attendanceRate === null ? "—" : `${metric.attendanceRate}%`}</strong><p>{metric.present + metric.absent ? `${metric.present} present · ${metric.absent} absent days` : "Your first check-in starts here"}<button aria-label="View attendance" onClick={() => navigate("attendance")}><ArrowUpRight size={16} /></button></p></div>
-              <div className="pp-metric"><div className="pp-metric-top"><span>Pending time off</span><span className="pp-icon-box pp-tone-orange"><CalendarDays size={19} /></span></div><strong>{metric.pendingLeave}</strong><p><span className="pp-small-dot pp-orange-dot" />{metric.pendingLeave ? "Requests awaiting a decision" : "You’re all caught up"}<button aria-label="View time off" onClick={() => navigate("leave")}><ArrowUpRight size={16} /></button></p></div>
-              <div className="pp-metric pp-metric-dark"><div className="pp-metric-top"><span>Net salary paid</span><span className="pp-icon-box"><Wallet size={19} /></span></div><strong>{money(metric.paidSalary, currency, Number(metric.paidSalary) >= 1000000)}</strong><p>Successful payments this month<button aria-label="View payroll" onClick={() => navigate("payruns")}><ArrowUpRight size={16} /></button></p></div>
+            <section className="pp-metrics" aria-label="Workspace metrics" aria-busy={loading}>
+              <div className="pp-metric"><div className="pp-metric-top"><span>Total employees</span><span className="pp-icon-box pp-tone-green"><Users size={19} /></span></div><strong className="pp-kpi-value" key={`employees:${metric.employees}`}>{metric.employees.toLocaleString()}</strong><p><span className="pp-small-dot pp-green-dot" />{metric.activeEmployees} active employees <button aria-label="View employees" onClick={() => navigate("employees")}><ArrowUpRight size={16} /></button></p></div>
+              <div className="pp-metric"><div className="pp-metric-top"><span>Recorded attendance</span><span className="pp-icon-box pp-tone-blue"><Clock3 size={19} /></span></div><strong className="pp-kpi-value" key={`attendance:${metric.attendanceRate}`}>{metric.attendanceRate === null ? "—" : `${metric.attendanceRate}%`}</strong><p>{metric.present + metric.absent ? `${metric.present} present · ${metric.absent} absent days` : "Your first check-in starts here"}<button aria-label="View attendance" onClick={() => navigate("attendance")}><ArrowUpRight size={16} /></button></p></div>
+              <div className="pp-metric"><div className="pp-metric-top"><span>Pending time off</span><span className="pp-icon-box pp-tone-orange"><CalendarDays size={19} /></span></div><strong className="pp-kpi-value" key={`leave:${metric.pendingLeave}`}>{metric.pendingLeave}</strong><p><span className="pp-small-dot pp-orange-dot" />{metric.pendingLeave ? "Requests awaiting a decision" : "You’re all caught up"}<button aria-label="View time off" onClick={() => navigate("leave")}><ArrowUpRight size={16} /></button></p></div>
+              <div className="pp-metric pp-metric-dark"><div className="pp-metric-top"><span>Net salary paid</span><span className="pp-icon-box"><Wallet size={19} /></span></div><strong className="pp-kpi-value" key={`salary:${metric.paidSalary}:${currency}`}>{money(metric.paidSalary, currency, Number(metric.paidSalary) >= 1000000)}</strong><p>Successful payments this month<button aria-label="View payroll" onClick={() => navigate("payruns")}><ArrowUpRight size={16} /></button></p></div>
             </section>
 
             <section className="pp-overview-grid">

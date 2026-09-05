@@ -30,6 +30,8 @@ export function resourceId(name, value) {
 }
 export async function listResource(name, query) {
   const config = resource(name), where = {};
+  if (name === "attendance") where.voidedAt = null;
+  if (query.status && ["employees", "contracts", "leave", "allocations", "payruns", "payslips"].includes(name)) where.status = query.status;
   if (query.q) {
     const contains = { contains: query.q, mode: "insensitive" };
     where.OR = config.search.map(field => ({ [field]: contains }));
@@ -79,8 +81,10 @@ async function validateRelations(tx, name, data, id, before) {
       const end = [data.endDate, data.terminationDate].filter(Boolean).sort((a, b) => a - b)[0];
       if (["DRAFT", "CANCELLED"].includes(data.status) || (end && computed.some(s => s.periodEnd > end))) fail("The contract change would invalidate existing computed payroll.", 409);
     }
-    const structure = await tx.salaryStructure.findUnique({ where: { id: data.salaryStructureId } });
-    if (!structure?.isActive || structure.currency !== data.currency || structure.payFrequency !== data.payFrequency) fail("Choose an active salary structure with matching currency and pay frequency.");
+    if (data.salaryStructureId) {
+      const structure = await tx.salaryStructure.findUnique({ where: { id: data.salaryStructureId } });
+      if (!structure?.isActive || structure.currency !== data.currency || structure.payFrequency !== data.payFrequency) fail("Choose an active salary structure with matching currency and pay frequency.");
+    }
     const schedule = await tx.workingSchedule.findUnique({ where: { id: data.workingScheduleId } });
     if (!schedule?.isActive) fail("Choose an active working schedule.");
     if (!["DRAFT", "CANCELLED"].includes(data.status)) {
@@ -116,7 +120,7 @@ async function validateRelations(tx, name, data, id, before) {
     if (await tx.salaryRule.count({ where: { id: { in: ids } } }) !== ids.length) fail("A selected salary rule no longer exists.");
   }
 }
-export async function saveResource(name, input, actorId, id) {
+export async function saveResource(name, input, actorId, id, { hrOnly = false } = {}) {
   const config = resource(name);
   if (config.readonly || config.workflow) fail("Use this record's workflow action.", 405);
   if (name === "roles" && (!id || id === "ADMIN")) fail("The administrator role is fixed; edit another existing role.", 409);
@@ -124,6 +128,7 @@ export async function saveResource(name, input, actorId, id) {
     const before = id ? await tx[config.model].findUnique({ where: { [config.key || "id"]: id } }) : null;
     if (id && !before) fail("Record not found.", 404);
     const data = dates({ ...input });
+    if (hrOnly && name === "contracts") { data.salaryStructureId = before?.salaryStructureId ?? null; data.payFrequency = before?.payFrequency ?? "MONTHLY"; }
     await validateRelations(tx, name, data, id, before);
     if (name === "schedules") {
       const { lines, holidays } = data;

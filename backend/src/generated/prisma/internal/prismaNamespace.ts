@@ -4107,6 +4107,7 @@ export const AttendanceScalarFieldEnum = {
   breakMinutes: 'breakMinutes',
   source: 'source',
   notes: 'notes',
+  voidedAt: 'voidedAt',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

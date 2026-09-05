@@ -441,9 +441,9 @@ export type SalaryStructureUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type SalaryStructureScalarRelationFilter = {
-  is?: Prisma.SalaryStructureWhereInput
-  isNot?: Prisma.SalaryStructureWhereInput
+export type SalaryStructureNullableScalarRelationFilter = {
+  is?: Prisma.SalaryStructureWhereInput | null
+  isNot?: Prisma.SalaryStructureWhereInput | null
 }
 
 export type SalaryStructureCountOrderByAggregateInput = {
@@ -495,16 +495,23 @@ export type SalaryStructureSumOrderByAggregateInput = {
   revision?: Prisma.SortOrder
 }
 
+export type SalaryStructureScalarRelationFilter = {
+  is?: Prisma.SalaryStructureWhereInput
+  isNot?: Prisma.SalaryStructureWhereInput
+}
+
 export type SalaryStructureCreateNestedOneWithoutContractsInput = {
   create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutContractsInput, Prisma.SalaryStructureUncheckedCreateWithoutContractsInput>
   connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutContractsInput
   connect?: Prisma.SalaryStructureWhereUniqueInput
 }
 
-export type SalaryStructureUpdateOneRequiredWithoutContractsNestedInput = {
+export type SalaryStructureUpdateOneWithoutContractsNestedInput = {
   create?: Prisma.XOR<Prisma.SalaryStructureCreateWithoutContractsInput, Prisma.SalaryStructureUncheckedCreateWithoutContractsInput>
   connectOrCreate?: Prisma.SalaryStructureCreateOrConnectWithoutContractsInput
   upsert?: Prisma.SalaryStructureUpsertWithoutContractsInput
+  disconnect?: Prisma.SalaryStructureWhereInput | boolean
+  delete?: Prisma.SalaryStructureWhereInput | boolean
   connect?: Prisma.SalaryStructureWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.SalaryStructureUpdateToOneWithWhereWithoutContractsInput, Prisma.SalaryStructureUpdateWithoutContractsInput>, Prisma.SalaryStructureUncheckedUpdateWithoutContractsInput>
 }

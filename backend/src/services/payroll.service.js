@@ -82,7 +82,7 @@ async function computeEmployee(tx, run, selection) {
     if (workDate > date(dayKey(new Date()))) fail("The payroll period includes future working days. Wait until the period is complete or shorten it.");
     scheduledDays = scheduledDays.plus(1);
     const day = await refreshDay(tx, employee.id, workDate);
-    if (await tx.attendance.count({ where: { attendanceDayId: day.id, checkOut: null } })) fail(`Close attendance sessions on ${dayKey(workDate)} before computing payroll.`);
+    if (await tx.attendance.count({ where: { attendanceDayId: day.id, checkOut: null, voidedAt: null } })) fail(`Close attendance sessions on ${dayKey(workDate)} before computing payroll.`);
     const workedFraction = D(day.workedMinutes).div(info.minutes);
     const cappedWork = workedFraction.gt(1) ? D(1) : workedFraction;
     workedDays = workedDays.plus(cappedWork); workedHours = workedHours.plus(D(day.workedMinutes).div(60));

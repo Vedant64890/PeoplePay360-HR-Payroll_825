@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import hrRoutes from "./routes/hr.routes.js";
 
 import {
   errorHandler,
@@ -73,6 +74,7 @@ app.use(
 // ==========================================
 
 app.use("/api/admin", adminRoutes);
+app.use("/api/hr", hrRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

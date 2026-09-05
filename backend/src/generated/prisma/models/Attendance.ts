@@ -48,6 +48,7 @@ export type AttendanceMinAggregateOutputType = {
   breakMinutes: number | null
   source: $Enums.AttendanceSource | null
   notes: string | null
+  voidedAt: Date | null
   createdById: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -61,6 +62,7 @@ export type AttendanceMaxAggregateOutputType = {
   breakMinutes: number | null
   source: $Enums.AttendanceSource | null
   notes: string | null
+  voidedAt: Date | null
   createdById: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -74,6 +76,7 @@ export type AttendanceCountAggregateOutputType = {
   breakMinutes: number
   source: number
   notes: number
+  voidedAt: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -103,6 +106,7 @@ export type AttendanceMinAggregateInputType = {
   breakMinutes?: true
   source?: true
   notes?: true
+  voidedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -116,6 +120,7 @@ export type AttendanceMaxAggregateInputType = {
   breakMinutes?: true
   source?: true
   notes?: true
+  voidedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -129,6 +134,7 @@ export type AttendanceCountAggregateInputType = {
   breakMinutes?: true
   source?: true
   notes?: true
+  voidedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -229,6 +235,7 @@ export type AttendanceGroupByOutputType = {
   breakMinutes: number
   source: $Enums.AttendanceSource
   notes: string | null
+  voidedAt: Date | null
   createdById: number
   createdAt: Date
   updatedAt: Date
@@ -265,6 +272,7 @@ export type AttendanceWhereInput = {
   breakMinutes?: Prisma.IntFilter<"Attendance"> | number
   source?: Prisma.EnumAttendanceSourceFilter<"Attendance"> | $Enums.AttendanceSource
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
+  voidedAt?: Prisma.DateTimeNullableFilter<"Attendance"> | Date | string | null
   createdById?: Prisma.IntFilter<"Attendance"> | number
   createdAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
@@ -281,6 +289,7 @@ export type AttendanceOrderByWithRelationInput = {
   breakMinutes?: Prisma.SortOrder
   source?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  voidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -301,6 +310,7 @@ export type AttendanceWhereUniqueInput = Prisma.AtLeast<{
   breakMinutes?: Prisma.IntFilter<"Attendance"> | number
   source?: Prisma.EnumAttendanceSourceFilter<"Attendance"> | $Enums.AttendanceSource
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
+  voidedAt?: Prisma.DateTimeNullableFilter<"Attendance"> | Date | string | null
   createdById?: Prisma.IntFilter<"Attendance"> | number
   createdAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
@@ -317,6 +327,7 @@ export type AttendanceOrderByWithAggregationInput = {
   breakMinutes?: Prisma.SortOrder
   source?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  voidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -338,6 +349,7 @@ export type AttendanceScalarWhereWithAggregatesInput = {
   breakMinutes?: Prisma.IntWithAggregatesFilter<"Attendance"> | number
   source?: Prisma.EnumAttendanceSourceWithAggregatesFilter<"Attendance"> | $Enums.AttendanceSource
   notes?: Prisma.StringNullableWithAggregatesFilter<"Attendance"> | string | null
+  voidedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Attendance"> | Date | string | null
   createdById?: Prisma.IntWithAggregatesFilter<"Attendance"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Attendance"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Attendance"> | Date | string
@@ -349,6 +361,7 @@ export type AttendanceCreateInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   day: Prisma.AttendanceDayCreateNestedOneWithoutEntriesInput
@@ -364,6 +377,7 @@ export type AttendanceUncheckedCreateInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdById: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -376,6 +390,7 @@ export type AttendanceUpdateInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day?: Prisma.AttendanceDayUpdateOneRequiredWithoutEntriesNestedInput
@@ -391,6 +406,7 @@ export type AttendanceUncheckedUpdateInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -405,6 +421,7 @@ export type AttendanceCreateManyInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdById: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -416,6 +433,7 @@ export type AttendanceUpdateManyMutationInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -428,6 +446,7 @@ export type AttendanceUncheckedUpdateManyInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -456,6 +475,7 @@ export type AttendanceCountOrderByAggregateInput = {
   breakMinutes?: Prisma.SortOrder
   source?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  voidedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -476,6 +496,7 @@ export type AttendanceMaxOrderByAggregateInput = {
   breakMinutes?: Prisma.SortOrder
   source?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  voidedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -489,6 +510,7 @@ export type AttendanceMinOrderByAggregateInput = {
   breakMinutes?: Prisma.SortOrder
   source?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  voidedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -614,6 +636,7 @@ export type AttendanceCreateWithoutCreatedByInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   day: Prisma.AttendanceDayCreateNestedOneWithoutEntriesInput
@@ -628,6 +651,7 @@ export type AttendanceUncheckedCreateWithoutCreatedByInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   corrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutAttendanceInput
@@ -670,6 +694,7 @@ export type AttendanceScalarWhereInput = {
   breakMinutes?: Prisma.IntFilter<"Attendance"> | number
   source?: Prisma.EnumAttendanceSourceFilter<"Attendance"> | $Enums.AttendanceSource
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
+  voidedAt?: Prisma.DateTimeNullableFilter<"Attendance"> | Date | string | null
   createdById?: Prisma.IntFilter<"Attendance"> | number
   createdAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Attendance"> | Date | string
@@ -681,6 +706,7 @@ export type AttendanceCreateWithoutDayInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutAttendanceEntriesInput
@@ -694,6 +720,7 @@ export type AttendanceUncheckedCreateWithoutDayInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdById: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -732,6 +759,7 @@ export type AttendanceCreateWithoutCorrectionsInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   day: Prisma.AttendanceDayCreateNestedOneWithoutEntriesInput
@@ -746,6 +774,7 @@ export type AttendanceUncheckedCreateWithoutCorrectionsInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdById: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -773,6 +802,7 @@ export type AttendanceUpdateWithoutCorrectionsInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day?: Prisma.AttendanceDayUpdateOneRequiredWithoutEntriesNestedInput
@@ -787,6 +817,7 @@ export type AttendanceUncheckedUpdateWithoutCorrectionsInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -800,6 +831,7 @@ export type AttendanceCreateManyCreatedByInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -810,6 +842,7 @@ export type AttendanceUpdateWithoutCreatedByInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   day?: Prisma.AttendanceDayUpdateOneRequiredWithoutEntriesNestedInput
@@ -824,6 +857,7 @@ export type AttendanceUncheckedUpdateWithoutCreatedByInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   corrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutAttendanceNestedInput
@@ -837,6 +871,7 @@ export type AttendanceUncheckedUpdateManyWithoutCreatedByInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -848,6 +883,7 @@ export type AttendanceCreateManyDayInput = {
   breakMinutes?: number
   source?: $Enums.AttendanceSource
   notes?: string | null
+  voidedAt?: Date | string | null
   createdById: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -859,6 +895,7 @@ export type AttendanceUpdateWithoutDayInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAttendanceEntriesNestedInput
@@ -872,6 +909,7 @@ export type AttendanceUncheckedUpdateWithoutDayInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -885,6 +923,7 @@ export type AttendanceUncheckedUpdateManyWithoutDayInput = {
   breakMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   source?: Prisma.EnumAttendanceSourceFieldUpdateOperationsInput | $Enums.AttendanceSource
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -929,6 +968,7 @@ export type AttendanceSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   breakMinutes?: boolean
   source?: boolean
   notes?: boolean
+  voidedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -946,6 +986,7 @@ export type AttendanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   breakMinutes?: boolean
   source?: boolean
   notes?: boolean
+  voidedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -961,6 +1002,7 @@ export type AttendanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   breakMinutes?: boolean
   source?: boolean
   notes?: boolean
+  voidedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -976,12 +1018,13 @@ export type AttendanceSelectScalar = {
   breakMinutes?: boolean
   source?: boolean
   notes?: boolean
+  voidedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AttendanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "attendanceDayId" | "checkIn" | "checkOut" | "breakMinutes" | "source" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["attendance"]>
+export type AttendanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "attendanceDayId" | "checkIn" | "checkOut" | "breakMinutes" | "source" | "notes" | "voidedAt" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["attendance"]>
 export type AttendanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   day?: boolean | Prisma.AttendanceDayDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1012,6 +1055,7 @@ export type $AttendancePayload<ExtArgs extends runtime.Types.Extensions.Internal
     breakMinutes: number
     source: $Enums.AttendanceSource
     notes: string | null
+    voidedAt: Date | null
     createdById: number
     createdAt: Date
     updatedAt: Date
@@ -1448,6 +1492,7 @@ export interface AttendanceFieldRefs {
   readonly breakMinutes: Prisma.FieldRef<"Attendance", 'Int'>
   readonly source: Prisma.FieldRef<"Attendance", 'AttendanceSource'>
   readonly notes: Prisma.FieldRef<"Attendance", 'String'>
+  readonly voidedAt: Prisma.FieldRef<"Attendance", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Attendance", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Attendance", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Attendance", 'DateTime'>

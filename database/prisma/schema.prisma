@@ -658,7 +658,7 @@ model Contract {
   currency           String           @db.Char(3)
   wageBasis          WageBasis        @default(MONTHLY)
   payFrequency       PayFrequency     @default(MONTHLY)
-  salaryStructureId  Int
+  salaryStructureId  Int?
   workingScheduleId  Int?
   terms              String?
   terminationReason  String?
@@ -670,7 +670,7 @@ model Contract {
   employee           Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
   department         Department       @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   jobPosition        JobPosition      @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
-  salaryStructure    SalaryStructure  @relation(fields: [salaryStructureId], references: [id], onDelete: Restrict)
+  salaryStructure    SalaryStructure? @relation(fields: [salaryStructureId], references: [id], onDelete: Restrict)
   workingSchedule    WorkingSchedule? @relation(fields: [workingScheduleId], references: [id], onDelete: Restrict)
   payslips           Payslip[]
 
@@ -796,6 +796,7 @@ model Attendance {
   breakMinutes    Int                    @default(0)
   source          AttendanceSource       @default(SELF_SERVICE)
   notes           String?
+  voidedAt        DateTime?              @db.Timestamptz(3)
   createdById     Int
   createdAt       DateTime               @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime               @updatedAt @db.Timestamptz(3)
