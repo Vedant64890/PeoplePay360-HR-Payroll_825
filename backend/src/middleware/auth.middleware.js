@@ -42,10 +42,10 @@ export async function authenticate(
       decoded.userId
     );
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(401).json({
         success: false,
-        message: "User no longer exists",
+        message: "Your account is unavailable. Contact an administrator.",
       });
     }
 

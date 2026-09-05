@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 import {
   errorHandler,
@@ -70,6 +71,8 @@ app.use(
 // ==========================================
 // 404
 // ==========================================
+
+app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

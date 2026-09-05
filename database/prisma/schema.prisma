@@ -1,10 +1,7 @@
 // PeoplePay360 HR & Payroll - PostgreSQL / Prisma 7.
 // PostgreSQL namespaces: auth, hr, attendance, leave, payroll, configuration.
 // Connection: backend/prisma.config.ts. Design and workflow rules: ../SCHEMA_GUIDE.md.
-// Money/leave use Decimal. Date-only periods are inclusive; instants are UTC.
-// Schedule times are local minutes after midnight in the schedule's IANA time zone.
-// USER and MANAGER roles preserve existing auth compatibility; map them to
-// EMPLOYEE and HR_MANAGER permissions respectively when implementing RBAC.
+
 
 generator client {
   provider = "prisma-client"

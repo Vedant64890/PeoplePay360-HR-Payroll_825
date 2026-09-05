@@ -11,6 +11,7 @@ import {
 import { generateToken } from "../lib/jwt.js";
 
 import AppError from "../utils/AppError.js";
+import prisma from "../lib/prisma.js";
 
 export async function registerUser({
   name,
@@ -44,7 +45,7 @@ export async function registerUser({
 export async function loginUser({
   email,
   password,
-}) {
+}, { adminOnly = false } = {}) {
   const user = await findUserByEmail(email);
 
   if (!user) {
@@ -65,6 +66,15 @@ export async function loginUser({
       401
     );
   }
+
+  if (!user.isActive) {
+    throw new AppError("Your account is disabled. Contact an administrator.", 403);
+  }
+  if (adminOnly && user.role !== "ADMIN") {
+    throw new AppError("This account does not have administrator access.", 403);
+  }
+
+  await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
 
   const token = generateToken(user.id);
 

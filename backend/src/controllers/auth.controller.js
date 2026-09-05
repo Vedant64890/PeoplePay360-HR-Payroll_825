@@ -38,10 +38,11 @@ export async function register(req, res, next) {
   }
 }
 
-export async function login(req, res, next) {
+async function completeLogin(req, res, next, adminOnly = false) {
   try {
     const { token, user } = await loginUser(
-      req.validatedBody
+      req.validatedBody,
+      { adminOnly }
     );
 
     const cookieName =
@@ -63,6 +64,9 @@ export async function login(req, res, next) {
     next(error);
   }
 }
+
+export const login = (req, res, next) => completeLogin(req, res, next);
+export const adminLogin = (req, res, next) => completeLogin(req, res, next, true);
 
 export function logout(req, res) {
   const cookieName =
