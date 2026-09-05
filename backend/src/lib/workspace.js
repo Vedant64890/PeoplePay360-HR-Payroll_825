@@ -38,7 +38,7 @@ export function scheduleDay(schedule, day) {
   const holiday = schedule?.holidays?.find(h => dayKey(h.date) === dayKey(day));
   const lines = (schedule?.lines || []).filter(l => l.day === weekdays[date(day).getUTCDay()]);
   const minutes = lines.reduce((n, l) => n + l.endMinute + l.endDayOffset * 1440 - l.startMinute - l.breakMinutes, 0);
-  return { lines, minutes: holiday ? 0 : minutes, holiday };
+  return { lines, minutes: holiday ? 0 : minutes, scheduledMinutes: minutes, holiday };
 }
 export async function applicableSchedule(tx, employeeId, day) {
   const contracts = await tx.contract.findMany({ where: { employeeId, status: { in: ["OPEN", "EXPIRED", "TERMINATED"] }, startDate: { lte: day }, AND: [{ OR: [{ endDate: null }, { endDate: { gte: day } }] }, { OR: [{ terminationDate: null }, { terminationDate: { gte: day } }] }] }, include: { workingSchedule: { include: { lines: true, holidays: true } } } });

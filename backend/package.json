@@ -8,6 +8,7 @@
   "dev": "tsx watch src/server.js",
   "start": "tsx src/server.js",
   "test:admin": "node --import tsx --test test/admin.test.js",
+  "test:workspace": "node --import tsx --test --test-concurrency=1 test/admin.test.js test/workspace.test.js",
   "admin:create": "node --import tsx scripts/create-admin.mjs",
 
   "prisma:format": "prisma format --config prisma.config.ts",

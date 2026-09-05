@@ -1,4 +1,5 @@
 import { Router } from "express";
+import workspaceRoutes from "./workspace.routes.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { authorizeRoles } from "../middleware/role.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -16,6 +17,7 @@ router.use((req, res, next) => {
   next();
 });
 const route = (handler) => async (req, res, next) => { try { await handler(req, res); } catch (error) { next(error); } };
+router.use("/workspace", workspaceRoutes);
 function query(schema, value) {
   const result = schema.safeParse(value);
   if (!result.success) {

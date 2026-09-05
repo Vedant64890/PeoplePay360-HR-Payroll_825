@@ -17,6 +17,19 @@ datasource db {
 // Enumerations
 // -----------------------------------------------------------------------------
 
+model WorkspaceSettings {
+  id               Int      @id @default(1)
+  organizationName String   @default("Your organization") @db.VarChar(150)
+  supportEmail     String?  @db.VarChar(254)
+  defaultCurrency  String   @default("INR") @db.Char(3)
+  timezone         String   @default("Asia/Kolkata") @db.VarChar(80)
+  reportMonths     Int      @default(6)
+  version          Int      @default(1)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+
+  @@schema("configuration")
+}
+
 enum UserRole {
   USER
   MANAGER
