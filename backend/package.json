@@ -1,0 +1,39 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+  "dev": "tsx watch src/server.js",
+  "start": "tsx src/server.js",
+
+  "prisma:format": "prisma format --config prisma.config.ts",
+  "prisma:validate": "prisma validate --config prisma.config.ts",
+  "prisma:push": "prisma db push --config prisma.config.ts",
+  "prisma:generate": "prisma generate --config prisma.config.ts",
+
+  "prisma:sync": "prisma format --config prisma.config.ts && prisma validate --config prisma.config.ts && prisma db push --config prisma.config.ts && prisma generate --config prisma.config.ts"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Backend API for Odoo Final Hackathon",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "^7.10.0",
+    "tsx": "^4.23.13"
+  }
+}

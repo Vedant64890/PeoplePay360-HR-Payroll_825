@@ -1,0 +1,45 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Next.js
+.next/
+**/.next/
+out/
+**/out/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env.test
+
+# Keep example env files
+!.env.example
+!**/.env.example
+
+# Prisma generated client
+app/backend/src/generated/prisma/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# Temporary
+*.tmp
+*.temp
+.cache/
