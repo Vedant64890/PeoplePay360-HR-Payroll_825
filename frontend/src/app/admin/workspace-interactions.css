@@ -149,6 +149,129 @@ html[data-pp-theme="dark"] .pp-root .pp-text-danger { color: #eca398; }
 .pp-hr-summary span { display: block; font-size: 12px; color: var(--pp-muted); }
 .pp-hr-summary strong { display: block; margin-top: 12px; font-size: 25px; }
 .pp-hr-chart { height: 285px; padding: 12px 20px; }
+
+/* ─── Payroll dashboard KPI cards: 4-per-row, consistent heights ─── */
+.pp-payroll-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.pp-payroll-metrics .pp-metric {
+  display: flex;
+  flex-direction: column;
+  min-height: 175px;
+  padding: 22px 22px 18px;
+  border-radius: 16px;
+  border: 1px solid #e5e9df;
+  border-left: 4px solid #e5e9df;
+  background: #fff;
+  box-shadow: 0 2px 12px #2d4e3508;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+.pp-payroll-metrics .pp-metric .pp-metric-top {
+  flex-shrink: 0;
+}
+.pp-payroll-metrics .pp-metric > strong {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -1.2px;
+  line-height: 1.15;
+  margin: 10px 0 0;
+}
+.pp-payroll-metrics .pp-metric > p {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 14px;
+  font-size: 12px;
+}
+/* Tone-based left border accents */
+.pp-payroll-metrics .pp-metric:has(.pp-tone-green) { border-left-color: #699d80; }
+.pp-payroll-metrics .pp-metric:has(.pp-tone-blue) { border-left-color: #7391a7; }
+.pp-payroll-metrics .pp-metric:has(.pp-tone-orange) { border-left-color: #d4a05a; }
+.pp-payroll-metrics .pp-metric:has(.pp-tone-violet) { border-left-color: #9883ad; }
+/* Stagger animation for all 8 cards */
+.pp-payroll-metrics .pp-metric:nth-child(5) { --pp-kpi-order: 4; }
+.pp-payroll-metrics .pp-metric:nth-child(6) { --pp-kpi-order: 5; }
+.pp-payroll-metrics .pp-metric:nth-child(7) { --pp-kpi-order: 6; }
+.pp-payroll-metrics .pp-metric:nth-child(8) { --pp-kpi-order: 7; }
+
+/* ─── Enhanced summary row for payroll status ─── */
+.pp-hr-dashboard .pp-hr-summary {
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.pp-hr-dashboard .pp-hr-summary > div {
+  border-radius: 14px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f9fbf7 0%, #f3f6ef 100%);
+  border: 1px solid #e5e9df;
+  box-shadow: 0 1px 6px #2d4e3505;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.pp-hr-dashboard .pp-hr-summary > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px #1937290d;
+}
+
+/* ─── Improved chart panels ─── */
+.pp-hr-dashboard .pp-overview-grid .pp-panel {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px #2d4e3508;
+  overflow: hidden;
+}
+.pp-hr-dashboard .pp-overview-grid .pp-panel-heading {
+  padding: 24px 24px 16px;
+}
+.pp-hr-dashboard .pp-hr-chart {
+  height: 300px;
+  padding: 14px 22px;
+}
+
+/* ─── Better payruns table panel ─── */
+.pp-hr-dashboard .pp-table {
+  font-size: 14px;
+}
+.pp-hr-dashboard .pp-table th {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Dark theme for payroll KPIs ─── */
+html[data-pp-theme="dark"] .pp-payroll-metrics .pp-metric {
+  background: var(--pp-surface);
+  border-color: var(--pp-border);
+  box-shadow: 0 2px 12px #00000015;
+}
+html[data-pp-theme="dark"] .pp-payroll-metrics .pp-metric:has(.pp-tone-green) { border-left-color: #699d80; }
+html[data-pp-theme="dark"] .pp-payroll-metrics .pp-metric:has(.pp-tone-blue) { border-left-color: #7dadc4; }
+html[data-pp-theme="dark"] .pp-payroll-metrics .pp-metric:has(.pp-tone-orange) { border-left-color: #d4a05a; }
+html[data-pp-theme="dark"] .pp-payroll-metrics .pp-metric:has(.pp-tone-violet) { border-left-color: #b09cc5; }
+html[data-pp-theme="dark"] .pp-hr-dashboard .pp-hr-summary > div {
+  background: linear-gradient(135deg, #1e2f26 0%, #1b2923 100%);
+  border-color: var(--pp-border);
+  box-shadow: 0 1px 6px #00000012;
+}
+
+/* ─── Payroll metrics responsive ─── */
+@media (max-width: 1200px) {
+  .pp-payroll-metrics { gap: 14px; }
+  .pp-payroll-metrics .pp-metric { min-height: 155px; padding: 18px 17px 14px; }
+  .pp-payroll-metrics .pp-metric > strong { font-size: 28px; }
+}
+@media (max-width: 980px) {
+  .pp-payroll-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp-payroll-metrics .pp-metric { min-height: 145px; }
+}
+@media (max-width: 480px) {
+  .pp-payroll-metrics { grid-template-columns: 1fr; gap: 12px; }
+  .pp-payroll-metrics .pp-metric { min-height: auto; padding: 16px; }
+}
 .pp-hr-employee-filter { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; font-size: 14px; flex-wrap: wrap; }
 .pp-hr-employee-filter button { margin-left: auto; }
 .pp-profile-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }

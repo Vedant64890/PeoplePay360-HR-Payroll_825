@@ -2,6 +2,7 @@ import {
   loginUser,
   registerUser,
 } from "../services/auth.service.js";
+import { sessionCookieName } from "../lib/session-cookie.js";
 
 function getCookieOptions() {
   const isProduction =
@@ -40,14 +41,12 @@ export async function register(req, res, next) {
 
 async function completeLogin(req, res, next, adminOnly = false, hrOnly = false) {
   try {
+    const cookieName = sessionCookieName(req);
+    res.setHeader("Cache-Control", "no-store");
     const { token, user } = await loginUser(
       req.validatedBody,
       { adminOnly, hrOnly }
     );
-
-    const cookieName =
-      process.env.JWT_COOKIE_NAME ||
-      "access_token";
 
     res.cookie(
       cookieName,
@@ -70,9 +69,8 @@ export const adminLogin = (req, res, next) => completeLogin(req, res, next, true
 export const hrLogin = (req, res, next) => completeLogin(req, res, next, false, true);
 
 export function logout(req, res) {
-  const cookieName =
-    process.env.JWT_COOKIE_NAME ||
-    "access_token";
+  const cookieName = sessionCookieName(req);
+  res.setHeader("Cache-Control", "no-store");
 
   res.clearCookie(cookieName, {
     httpOnly: true,

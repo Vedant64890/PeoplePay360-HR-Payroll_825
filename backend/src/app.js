@@ -42,6 +42,15 @@ app.use(
 
 app.use(cookieParser());
 
+// Tab-specific cookies are still cookie authentication: protect mutations
+// centrally, including login/logout, rather than relying on the legacy name.
+app.use((req, res, next) => {
+  if (req.get("X-Workspace-Session") !== undefined && !["GET", "HEAD", "OPTIONS"].includes(req.method) && req.get("Origin") !== (process.env.FRONTEND_URL || "http://localhost:3000")) {
+    return res.status(403).json({ success: false, message: "This request must come from the workspace application." });
+  }
+  next();
+});
+
 
 // ==========================================
 // HEALTH ROUTE

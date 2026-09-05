@@ -1,4 +1,5 @@
 import { verifyToken } from "../lib/jwt.js";
+import { sessionCookieName } from "../lib/session-cookie.js";
 
 import {
   findPublicUserById,
@@ -10,14 +11,12 @@ export async function authenticate(
   next
 ) {
   try {
-    const cookieName =
-      process.env.JWT_COOKIE_NAME ||
-      "access_token";
+    const cookieName = sessionCookieName(req);
 
     let token = req.cookies?.[cookieName];
 
     // Optional support for API clients/Postman.
-    if (!token) {
+    if (!token && !req.get("X-Workspace-Session")) {
       const authorization =
         req.headers.authorization;
 
