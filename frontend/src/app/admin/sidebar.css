@@ -1,0 +1,168 @@
+/* Shared sidebar palette. Keep transitions on paint and movement properties only. */
+.pp-root {
+  --pp-side-bg: #fcfdfb;
+  --pp-side-border: #dce5da;
+  --pp-side-text: #4c6253;
+  --pp-side-muted: #687d6d;
+  --pp-side-strong: #263f30;
+  --pp-side-hover: #edf3e9;
+  --pp-side-active: #e3efdc;
+  --pp-side-accent: #35714b;
+  --pp-side-tile: #f1f5ee;
+  --pp-side-shadow: 0 8px 32px #24432c08, inset 0 1px 0 #ffffff;
+  --pp-side-ease: cubic-bezier(.22, 1, .36, 1);
+}
+html[data-pp-theme="dark"] .pp-root {
+  --pp-side-bg: #18271f;
+  --pp-side-border: #354d3e;
+  --pp-side-text: #b7c9bb;
+  --pp-side-muted: #94ae9b;
+  --pp-side-strong: #e6f1e8;
+  --pp-side-hover: #233a2b;
+  --pp-side-active: #304c36;
+  --pp-side-accent: #b0d99e;
+  --pp-side-tile: #203329;
+  --pp-side-shadow: 0 12px 36px #00000024, inset 0 1px 0 #ffffff05;
+}
+
+.pp-root .pp-dashboard .pp-sidebar.pp-sidebar-enhanced {
+  padding: 26px 16px 12px;
+  background: var(--pp-side-bg);
+  border-color: var(--pp-side-border);
+  box-shadow: var(--pp-side-shadow);
+  color: var(--pp-side-text);
+  transition: width 420ms var(--pp-side-ease), transform 420ms var(--pp-side-ease),
+    background-color 320ms ease, border-color 320ms ease, box-shadow 320ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-brand { min-height: 42px; padding: 0 9px; gap: 8px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-brand { gap: 11px; font-size: 21px; color: var(--pp-side-strong); white-space: nowrap; min-width: 0; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-brand-mark { flex-shrink: 0; width: 31px; height: 33px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-brand > span:last-child { max-width: 180px; overflow: hidden; transition: max-width 420ms var(--pp-side-ease), opacity 180ms ease; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-brand small { color: var(--pp-side-muted); font-size: 8px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-workspace-picker {
+  min-height: 65px; margin: 23px 0 0; padding: 12px 10px; gap: 10px;
+  border-radius: 14px; background: var(--pp-side-tile); border-color: var(--pp-side-border); box-shadow: none;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-workspace-icon {
+  width: 34px; height: 36px; flex-shrink: 0; border-radius: 10px;
+  background: var(--pp-side-active); color: var(--pp-side-accent);
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-copy { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; transition: opacity 180ms ease; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-copy strong { color: var(--pp-side-strong); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-copy small { color: var(--pp-side-muted); font-size: 11px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-workspace-shield { flex-shrink: 0; color: var(--pp-side-muted); }
+.pp-root .pp-sidebar.pp-sidebar-enhanced > nav { margin-top: 20px; padding: 0 5px 6px 0; scroll-padding: 8px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-group + .pp-nav-group { margin-top: 20px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-label {
+  display: flex; align-items: center; height: 17px; padding: 0 12px; margin: 0 0 9px !important;
+  color: var(--pp-side-muted); font-size: 9px; font-weight: 650; letter-spacing: 1.65px; white-space: nowrap;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-label span { overflow: hidden; transition: opacity 160ms ease; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item {
+  position: relative; isolation: isolate; min-height: 44px; margin: 3px 0; padding: 5px 10px;
+  gap: 10px; border: 1px solid transparent; border-radius: 12px;
+  background: transparent; color: var(--pp-side-text); font-size: 13px !important; font-weight: 500;
+  transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item::before {
+  content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit;
+  background: var(--pp-side-active); opacity: 0; transform: scale(.96);
+  transition: opacity 260ms ease, transform 350ms var(--pp-side-ease), background-color 320ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item::after {
+  content: ""; position: absolute; left: 0; top: 13px; bottom: 13px; width: 3px; border-radius: 4px;
+  background: var(--pp-side-accent); opacity: 0; transform: scaleY(.35);
+  transition: opacity 250ms ease, transform 350ms var(--pp-side-ease);
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item > span { margin: 0; padding: 0; border-radius: 0; background: transparent; color: inherit; font-size: inherit; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-icon {
+  display: grid; place-items: center; width: 28px; height: 30px; flex-shrink: 0; border-radius: 8px;
+  transition: transform 320ms var(--pp-side-ease), background-color 260ms ease, color 260ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-icon svg { color: inherit; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 180ms ease; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-count {
+  min-width: 22px; padding: 1px 6px; border-radius: 6px; background: var(--pp-side-active);
+  color: var(--pp-side-accent); text-align: center; font-size: 10px; font-weight: 650; flex-shrink: 0;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-active { color: var(--pp-side-accent); font-weight: 600; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-active::before { opacity: 1; transform: scale(1); }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-active::after { opacity: 1; transform: scaleY(1); }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-active .pp-nav-icon { background: var(--pp-side-bg); }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-bottom { padding-top: 12px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-user { border: 0; padding: 17px 3px 13px; gap: 10px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-user .pp-avatar {
+  width: 35px; height: 35px; flex-shrink: 0; border-radius: 11px; background: var(--pp-side-active);
+  color: var(--pp-side-accent); font-size: 11px; font-weight: 650; border: 1px solid var(--pp-side-border);
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-user strong { max-width: none; font-size: 12px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-signout { color: var(--pp-side-muted); margin-left: auto; border-radius: 9px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-collapse {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 34px;
+  border-top: 1px solid var(--pp-side-border); border-radius: 0 0 8px 8px;
+  color: var(--pp-side-muted); font-size: 11px; white-space: nowrap;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-collapse svg { flex-shrink: 0; transition: transform 420ms var(--pp-side-ease); }
+.pp-root .pp-sidebar.pp-sidebar-enhanced :is(.pp-icon-button, .pp-sidebar-collapse, .pp-workspace-picker, .pp-avatar, .pp-brand) {
+  transition: color 260ms ease, background-color 320ms ease, border-color 320ms ease, box-shadow 260ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced :is(.pp-sidebar-copy strong, .pp-sidebar-copy small, .pp-nav-label, .pp-brand small, .pp-workspace-icon, .pp-workspace-shield) {
+  transition: color 260ms ease, background-color 320ms ease;
+}
+.pp-root .pp-sidebar.pp-sidebar-enhanced :is(button, a):focus-visible { outline: 2px solid var(--pp-side-accent); outline-offset: 2px; }
+.pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item:focus-visible { outline-offset: -2px; }
+.pp-root .pp-sidebar-scrim { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item:hover { color: var(--pp-side-strong); background: var(--pp-side-hover); }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-active:hover { color: var(--pp-side-accent); }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item:hover .pp-nav-icon { transform: translateX(2px); }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced :is(.pp-icon-button, .pp-sidebar-collapse):hover { background: var(--pp-side-hover); color: var(--pp-side-accent); }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-signout:hover { color: #b64d43; background: #b64d4312; }
+  html[data-pp-theme="dark"] .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-signout:hover { color: #efaea0; }
+}
+@media (min-width: 721px) {
+  .pp-root .pp-dashboard:has(.pp-sidebar.pp-sidebar-collapsed) { --pp-sidebar-width: 86px; }
+  .pp-root .pp-dashboard .pp-workspace-main { transition: margin-left 420ms var(--pp-side-ease), width 420ms var(--pp-side-ease); }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-brand { gap: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-brand > span:last-child { max-width: 0; opacity: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-workspace-picker { padding-left: 8px; padding-right: 8px; gap: 0; border-color: transparent; background: transparent; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed :is(.pp-sidebar-copy, .pp-workspace-shield, .pp-nav-text, .pp-nav-label span) { opacity: 0; width: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-workspace-shield { display: none; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed > nav { margin-right: -5px; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-nav-label { padding: 0 13px; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-nav-label::after { content: ""; width: 22px; height: 1px; background: var(--pp-side-border); }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-nav-item { gap: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-nav-count { position: absolute; top: 0; right: 0; min-width: 15px; padding: 0 3px; font-size: 8px; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-user { flex-wrap: wrap; justify-content: center; padding: 12px 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-user .pp-sidebar-copy { display: none; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-signout { margin-left: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-collapse { gap: 0; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-collapse span { display: none; }
+  .pp-root .pp-sidebar.pp-sidebar-collapsed .pp-sidebar-collapse svg { transform: rotate(180deg); }
+}
+@media (max-width: 720px) {
+  .pp-root .pp-dashboard .pp-sidebar.pp-sidebar-enhanced {
+    inset: 8px auto 8px 8px; width: min(310px, calc(100vw - 32px)); padding-top: 22px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)); border-radius: 21px;
+    transform: translateX(calc(-100% - 16px)); visibility: hidden;
+    transition: transform 420ms var(--pp-side-ease), visibility 0s 420ms,
+      background-color 320ms ease, border-color 320ms ease, box-shadow 320ms ease;
+  }
+  .pp-root .pp-dashboard .pp-sidebar.pp-sidebar-enhanced.pp-sidebar-open { transform: translateX(0); visibility: visible; transition-delay: 0s; }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-collapse { display: none; }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-sidebar-user { padding-bottom: 4px; }
+  .pp-root .pp-sidebar-scrim {
+    display: block; opacity: 0; visibility: hidden; pointer-events: none; background: #0b1e1580 !important; backdrop-filter: blur(5px);
+    transition: opacity 360ms ease, visibility 0s 420ms;
+  }
+  .pp-root .pp-sidebar-scrim-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item:active .pp-nav-icon { transform: scale(.93); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-root .pp-sidebar.pp-sidebar-enhanced, .pp-root .pp-sidebar.pp-sidebar-enhanced *, .pp-root .pp-sidebar.pp-sidebar-enhanced *::before,
+  .pp-root .pp-sidebar.pp-sidebar-enhanced *::after, .pp-root .pp-sidebar-scrim, .pp-root .pp-dashboard .pp-workspace-main { transition: none !important; animation: none !important; }
+  .pp-root .pp-sidebar.pp-sidebar-enhanced .pp-nav-item:hover .pp-nav-icon { transform: none; }
+}

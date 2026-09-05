@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend } from "chart.js";
 import { Bar, Line } from "react-chartjs-2";
-import { Activity, ArrowUpRight, CalendarDays, ChevronRight, Clock3, FileCheck2, LayoutDashboard, Leaf, LoaderCircle, LogOut, Menu, RefreshCw, ShieldCheck, Users, Wallet, X, Download } from "lucide-react";
+import { Activity, ArrowUpRight, CalendarDays, ChevronRight, Clock3, FileCheck2, LayoutDashboard, Leaf, LoaderCircle, Menu, RefreshCw, ShieldCheck, Users, Wallet, Download } from "lucide-react";
 import useDashboardRefresh from "@/components/admin/use-dashboard-refresh";
 import Brand from "@/components/admin/brand";
+import WorkspaceSidebar from "@/components/admin/workspace-sidebar";
 import WorkspaceModule from "@/components/admin/workspace-module";
 import { ThemeToggle, useTheme } from "@/components/admin/theme-provider";
 import { getCurrentUser, logoutUser } from "@/services/auth.service";
@@ -29,9 +30,8 @@ export default function PayrollDashboard() {
   const router = useRouter(), { resolved } = useTheme();
   const [user, setUser] = useState(null), [section, setSection] = useState("overview"), [month, setMonth] = useState(currentMonth), [currency, setCurrency] = useState("INR"), [department, setDepartment] = useState(""), [employeeType, setEmployeeType] = useState("");
   const [data, setData] = useState(null), [lookups, setLookups] = useState(null), [error, setError] = useState(""), [loading, setLoading] = useState(true), [revision, setRevision] = useState(0), [mobile, setMobile] = useState(false), [busy, setBusy] = useState(false), [profileName, setProfileName] = useState("");
-  const [employee, setEmployee] = useState(null), [scrolling, setScrolling] = useState(false), timer = useRef(null);
+  const [employee, setEmployee] = useState(null);
   useDashboardRefresh(setRevision);
-  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
     let active = true;
     getCurrentUser().then(({ user }) => { if (!active) return; if (!["ADMIN", "HR_PAYROLL_MANAGER", "HR_PAYROLL_USER"].includes(user.role)) { router.replace("/login"); return; } setUser(user); setProfileName(user.name); }).catch(e => { if (active) { setError(errorMessage(e)); if (e.response?.status === 401) router.replace("/login"); } });
@@ -74,14 +74,13 @@ export default function PayrollDashboard() {
     ["Contracts expiring", data.totals.contractsExpiring, "Contracts ending in the selected month", FileCheck2, "contracts", "orange"],
   ] : [];
   return <div className="pp-dashboard pp-hr-dashboard">
-    {mobile && <button className="pp-nav-scrim" aria-label="Close navigation" onClick={() => setMobile(false)} />}
-    <aside className={`pp-sidebar ${mobile ? "pp-sidebar-open" : ""}`}>
-      <div className="pp-sidebar-brand"><Brand light href="/payroll/dashboard" /><button className="pp-icon-button pp-mobile-close" aria-label="Close navigation" onClick={() => setMobile(false)}><X /></button></div>
-      <div className="pp-workspace-picker"><Wallet size={20} /><div><strong>{lookups?.settings.organizationName || "Your organization"}</strong><small>{role}</small></div></div>
-      <nav aria-label="Payroll navigation" className={scrolling ? "pp-nav-scrolling" : ""} onScroll={() => { setScrolling(true); clearTimeout(timer.current); timer.current = setTimeout(() => setScrolling(false), 900); }}>{groups.map(([group, items]) => <div key={group}><p className="pp-nav-label pp-nav-label-second">{group}</p>{items.map(([id, label, Icon]) => <button key={id} className={`pp-nav-item ${section === id ? "pp-nav-active" : ""}`} aria-current={section === id ? "page" : undefined} onClick={() => navigate(id)}><Icon size={19} />{label}</button>)}</div>)}</nav>
-      <div className="pp-sidebar-bottom"><div className="pp-sidebar-user"><span className="pp-avatar">{initials}</span><div><strong>{user.name}</strong><small>{role}</small></div><button aria-label="Sign out" disabled={busy} className="pp-icon-button" onClick={async () => { setBusy(true); try { await logoutUser(); router.replace("/login"); } catch (e) { setError(errorMessage(e)); setBusy(false); } }}><LogOut size={18} /></button></div></div>
-    </aside>
-    <div className="pp-workspace-main"><header className="pp-topbar"><div className="pp-topbar-location"><button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" onClick={() => setMobile(true)}><Menu /></button><span className="pp-topbar-mark"><Wallet /></span><div className="pp-topbar-location-text"><span className="pp-topbar-eyebrow">{role}</span><nav className="pp-breadcrumb" aria-label="Breadcrumb"><button className="pp-breadcrumb-home" onClick={() => navigate("overview")}>Workspace</button><ChevronRight size={15} /><strong>{labels[section] || "Schedule assignments"}</strong></nav></div></div><div className="pp-topbar-actions"><span className="pp-live-status"><span className="pp-dot" />Live payroll</span><ThemeToggle /><button className="pp-icon-button" title="My profile" onClick={() => navigate("profile")}><span className="pp-avatar">{initials}</span></button></div></header>
+    <WorkspaceSidebar
+      groups={groups} section={section === "assignments" ? "schedules" : section} onNavigate={navigate} mobileOpen={mobile} onMobileChange={setMobile}
+      organizationName={lookups?.settings.organizationName} workspaceLabel={role} navigationLabel="Payroll navigation"
+      homeHref="/payroll/dashboard" user={user} role={role} workspaceIcon={Wallet} signingOut={busy}
+      onSignOut={async () => { setBusy(true); try { await logoutUser(); router.replace("/login"); } catch (e) { setError(errorMessage(e)); setBusy(false); } }}
+    />
+    <div className="pp-workspace-main"><header className="pp-topbar"><div className="pp-topbar-location"><button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" aria-expanded={mobile} aria-controls="workspace-sidebar" onClick={() => setMobile(true)}><Menu /></button><span className="pp-topbar-mark"><Wallet /></span><div className="pp-topbar-location-text"><span className="pp-topbar-eyebrow">{role}</span><nav className="pp-breadcrumb" aria-label="Breadcrumb"><button className="pp-breadcrumb-home" onClick={() => navigate("overview")}>Workspace</button><ChevronRight size={15} /><strong>{labels[section] || "Schedule assignments"}</strong></nav></div></div><div className="pp-topbar-actions"><span className="pp-live-status"><span className="pp-dot" />Live payroll</span><ThemeToggle /><button className="pp-icon-button" title="My profile" onClick={() => navigate("profile")}><span className="pp-avatar">{initials}</span></button></div></header>
       <main className="pp-main-content"><div className="pp-page-heading"><div><p className="pp-eyebrow">PEOPLE, PAYROLL & PROGRESS</p><h1>{section === "overview" ? "Payroll overview" : labels[section] || "Schedule assignments"}<span className="pp-heading-dot">.</span></h1><p>{analytical ? "Monitor payroll, attendance, leave and workforce costs." : "Manage connected HR and payroll records."}</p></div>{analytical && <button className="pp-button pp-button-primary" onClick={() => navigate("payruns")}>Create payrun <ArrowUpRight size={18} /></button>}</div>
         {error && <div className="pp-error" role="alert">{error}<button onClick={refresh}>Retry</button></div>}
         {section !== "profile" && <div className="pp-filter-bar"><div className="pp-period-filter"><CalendarDays size={18} /><label htmlFor="payroll-month">Period</label><input id="payroll-month" type="month" min="2000-01" max="2099-12" value={month} onChange={e => { if (e.target.value) setMonth(e.target.value); }} /></div><div className="pp-report-filters">{analytical && <><label>Department<select value={department} onChange={e => setDepartment(e.target.value)}><option value="">All departments</option>{lookups?.departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label><label>Employee type<select value={employeeType} onChange={e => setEmployeeType(e.target.value)}><option value="">All types</option>{["FULL_TIME", "PART_TIME", "CONTRACT", "INTERN", "TEMPORARY"].map(t => <option key={t} value={t}>{human(t)}</option>)}</select></label></>}<label>Currency<select value={currency} onChange={e => setCurrency(e.target.value)}>{["INR", "USD", "EUR", "GBP", "AED", "SGD"].map(c => <option key={c}>{c}</option>)}</select></label><button className="pp-icon-button" aria-label="Refresh payroll" disabled={loading} onClick={refresh}><RefreshCw size={18} className={loading ? "pp-spin" : ""} /></button></div></div>}

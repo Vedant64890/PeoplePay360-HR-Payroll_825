@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, Bell, CalendarDays, Check, CheckCheck, ChevronLeft, ChevronRight, Clock3, LayoutDashboard, Leaf, LoaderCircle, LogOut, Menu, MoreHorizontal, Plus, RefreshCw, Search, Settings, ShieldCheck, Sparkles, Users, Wallet, X } from "lucide-react";
+import { Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, Bell, CalendarDays, Check, CheckCheck, ChevronLeft, ChevronRight, Clock3, LayoutDashboard, Leaf, LoaderCircle, Menu, MoreHorizontal, Plus, RefreshCw, Search, Settings, ShieldCheck, Users, Wallet, X } from "lucide-react";
 import WorkspaceModule from "@/components/admin/workspace-module";
 import WorkspaceReports from "@/components/admin/workspace-reports";
 import WorkspaceSettings from "@/components/admin/workspace-settings";
 import { ThemeToggle } from "@/components/admin/theme-provider";
 import useDashboardRefresh from "@/components/admin/use-dashboard-refresh";
 import Brand from "@/components/admin/brand";
+import WorkspaceSidebar from "@/components/admin/workspace-sidebar";
 import DeleteAccountDialog from "@/components/admin/delete-account-dialog";
 import RecordDialog, { roleLabels } from "@/components/admin/record-dialog";
 import { fetchWorkspace, fetchDashboard, fetchAccounts, fetchEmployees, errorMessage } from "@/services/admin.service";
@@ -71,8 +72,6 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [settings, setSettings] = useState(null);
-  const [navScrolling, setNavScrolling] = useState(false);
-  const navScrollTimer = useRef(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listLoading, setListLoading] = useState(false);
@@ -96,8 +95,6 @@ export default function AdminDashboardPage() {
     fetchWorkspace("settings").then(value => { if (active) { setSettings(value); setCurrency(value.defaultCurrency); } }).catch(() => {});
     return () => { active = false; };
   }, [user]);
-  useEffect(() => () => clearTimeout(navScrollTimer.current), []);
-  function onNavScroll() { setNavScrolling(true); clearTimeout(navScrollTimer.current); navScrollTimer.current = setTimeout(() => setNavScrolling(false), 900); }
   function settingsSaved(value) { setSettings(value); setCurrency(value.defaultCurrency); setToast("Workspace settings saved."); }
 
   const reportError = useCallback((failure) => {
@@ -168,18 +165,18 @@ export default function AdminDashboardPage() {
   const actions = <button className="pp-button pp-button-primary" onClick={() => setDialog({ kind: section === "users" ? "account" : "employee" })}><Plus size={17} />{section === "users" ? "Create account" : "Add employee"}</button>;
 
   return <div className="pp-dashboard">
-    {mobileNav && <button className="pp-nav-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)} />}
-    <aside className={`pp-sidebar ${mobileNav ? "pp-sidebar-open" : ""}`}>
-      <div className="pp-sidebar-brand"><Brand light /><button className="pp-icon-button pp-mobile-close" aria-label="Close navigation" onClick={() => setMobileNav(false)}><X size={20} /></button></div>
-      <div className="pp-workspace-picker"><span className="pp-workspace-icon"><Leaf size={18} /></span><div><strong>{settings?.organizationName || "Your organization"}</strong><small>Admin workspace</small></div><ShieldCheck size={16} /></div>
-      <nav aria-label="Admin navigation" className={navScrolling ? "pp-nav-scrolling" : ""} onScroll={onNavScroll}><p className="pp-nav-label">WORKSPACE</p>{navigation.slice(0, 10).map(({ id, label, icon: Icon }) => <button key={id} className={`pp-nav-item ${section === id ? "pp-nav-active" : ""}`} onClick={() => navigate(id)} aria-current={section === id ? "page" : undefined}><Icon size={19} strokeWidth={1.7} />{label}{id === "leave" && !!metric?.pendingLeave && <span>{metric.pendingLeave}</span>}</button>)}<p className="pp-nav-label pp-nav-label-second">ADMINISTRATION</p>{navigation.slice(10).map(({ id, label, icon: Icon }) => <button key={id} className={`pp-nav-item ${section === id ? "pp-nav-active" : ""}`} onClick={() => navigate(id)} aria-current={section === id ? "page" : undefined}><Icon size={19} strokeWidth={1.7} />{label}</button>)}</nav>
-      <div className="pp-sidebar-bottom"><div className="pp-sidebar-note"><Sparkles size={20} /><strong>People first. Always.</strong><p>Good work happens when your people have room to grow.</p></div><div className="pp-sidebar-user"><span className="pp-avatar pp-avatar-light">{initials(user.name)}</span><div><strong>{user.name}</strong><small>Administrator</small></div><button className="pp-icon-button" aria-label="Sign out" title="Sign out" disabled={signingOut} onClick={signOut}>{signingOut ? <LoaderCircle size={17} className="pp-spin" /> : <LogOut size={17} />}</button></div></div>
-    </aside>
+    <WorkspaceSidebar
+      groups={[["WORKSPACE", navigation.slice(0, 10).map(({ id, label, icon }) => [id, label, icon])], ["ADMINISTRATION", navigation.slice(10).map(({ id, label, icon }) => [id, label, icon])]]}
+      section={section} onNavigate={navigate} mobileOpen={mobileNav} onMobileChange={setMobileNav}
+      organizationName={settings?.organizationName} workspaceLabel="Admin workspace" navigationLabel="Admin navigation"
+      homeHref="/admin/dashboard" user={user} role="Administrator" onSignOut={signOut} signingOut={signingOut}
+      counts={{ leave: metric?.pendingLeave }}
+    />
 
     <div className="pp-workspace-main">
       <header className="pp-topbar">
         <div className="pp-topbar-location">
-          <button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" onClick={() => setMobileNav(true)}><Menu size={21} /></button>
+          <button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" aria-expanded={mobileNav} aria-controls="workspace-sidebar" onClick={() => setMobileNav(true)}><Menu size={21} /></button>
           <span className="pp-topbar-mark" aria-hidden="true"><LayoutDashboard size={21} strokeWidth={1.7} /></span>
           <div className="pp-topbar-location-text">
             <span className="pp-topbar-eyebrow">Admin workspace</span>

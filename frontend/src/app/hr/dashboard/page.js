@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, ArrowUpRight, Bell, CalendarDays, ChevronRight, Clock3, FileCheck2, LayoutDashboard, Leaf, LoaderCircle, LogOut, Menu, RefreshCw, ShieldCheck, Settings, Users, X } from "lucide-react";
+import { Activity, ArrowRight, ArrowUpRight, Bell, CalendarDays, ChevronRight, Clock3, FileCheck2, LayoutDashboard, Leaf, LoaderCircle, Menu, RefreshCw, ShieldCheck, Settings, Users, X } from "lucide-react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import useDashboardRefresh from "@/components/admin/use-dashboard-refresh";
 import Brand from "@/components/admin/brand";
+import WorkspaceSidebar from "@/components/admin/workspace-sidebar";
 import WorkspaceSettings from "@/components/admin/workspace-settings";
 import WorkspaceModule from "@/components/admin/workspace-module";
 import { ThemeToggle, useTheme } from "@/components/admin/theme-provider";
@@ -31,9 +32,7 @@ export default function HrDashboardPage() {
   const [user, setUser] = useState(null), [data, setData] = useState(null), [lookups, setLookups] = useState({ employees: [] });
   const [section, setSection] = useState("overview"), [month, setMonth] = useState(currentMonth), [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true), [error, setError] = useState(""), [revision, setRevision] = useState(0), [mobileNav, setMobileNav] = useState(false), [signingOut, setSigningOut] = useState(false);
-  const [navScrolling, setNavScrolling] = useState(false), navTimer = useRef(null);
   useDashboardRefresh(setRevision);
-  useEffect(() => () => clearTimeout(navTimer.current), []);
   const reportError = useCallback(e => { if (e.response?.status === 401) router.replace("/login"); else setError(errorMessage(e)); }, [router]);
   useEffect(() => {
     let active = true;
@@ -58,22 +57,16 @@ export default function HrDashboardPage() {
   const metric = data?.metrics;
   const chartText = resolved === "dark" ? "#a9bfb1" : "#7b897e";
   return <div className="pp-dashboard pp-hr-dashboard">
-    {mobileNav && <button className="pp-nav-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)} />}
-    <aside className={`pp-sidebar ${mobileNav ? "pp-sidebar-open" : ""}`}>
-      <div className="pp-sidebar-brand"><Brand light href="/hr/dashboard" /><button className="pp-icon-button pp-mobile-close" aria-label="Close navigation" onClick={() => setMobileNav(false)}><X size={20} /></button></div>
-      <div className="pp-workspace-picker"><span className="pp-workspace-icon"><Leaf size={18} /></span><div><strong>{data?.organizationName || "Your organization"}</strong><small>HR Manager workspace</small></div><ShieldCheck size={16} /></div>
-      <nav aria-label="HR Manager navigation" className={navScrolling ? "pp-nav-scrolling" : ""} onScroll={() => { setNavScrolling(true); clearTimeout(navTimer.current); navTimer.current = setTimeout(() => setNavScrolling(false), 900); }}>
-        <p className="pp-nav-label">HR MANAGER WORKSPACE</p>
-        {mainNav.map(([id, label, Icon]) => <button key={id} className={`pp-nav-item ${activeSection === id ? "pp-nav-active" : ""}`} aria-current={activeSection === id ? "page" : undefined} onClick={() => navigate(id)}><Icon size={19} strokeWidth={1.7} />{label}</button>)}
-        <p className="pp-nav-label pp-nav-label-second">TIME OFF</p>
-        {timeNav.map(([id, label, Icon]) => <button key={id} className={`pp-nav-item pp-hr-subnav ${section === id ? "pp-nav-active" : ""}`} aria-current={section === id ? "page" : undefined} onClick={() => navigate(id)}><Icon size={18} strokeWidth={1.7} />{label}{id === "leave" && !!metric?.pendingLeave && <span>{metric.pendingLeave}</span>}</button>)}
-        <button className={`pp-nav-item ${section === "settings" ? "pp-nav-active" : ""}`} aria-current={section === "settings" ? "page" : undefined} onClick={() => navigate("settings")}><Settings size={19} />Settings</button>
-      </nav>
-      <div className="pp-sidebar-bottom"><div className="pp-sidebar-user"><span className="pp-avatar pp-avatar-light">{initials(user.name)}</span><div><strong>{user.name}</strong><small>HR Manager</small></div><button className="pp-icon-button" aria-label="Sign out" disabled={signingOut} onClick={signOut}>{signingOut ? <LoaderCircle className="pp-spin" size={17} /> : <LogOut size={17} />}</button></div></div>
-    </aside>
+    <WorkspaceSidebar
+      groups={[["HR MANAGER WORKSPACE", mainNav], ["TIME OFF", timeNav], ["WORKSPACE SETTINGS", [["settings", "Settings", Settings]]]]}
+      section={activeSection} onNavigate={navigate} mobileOpen={mobileNav} onMobileChange={setMobileNav}
+      organizationName={data?.organizationName} workspaceLabel="HR Manager workspace" navigationLabel="HR Manager navigation"
+      homeHref="/hr/dashboard" user={user} role="HR Manager" onSignOut={signOut} signingOut={signingOut}
+      counts={{ leave: metric?.pendingLeave }}
+    />
     <div className="pp-workspace-main">
       <header className="pp-topbar">
-        <div className="pp-topbar-location"><button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" onClick={() => setMobileNav(true)}><Menu size={21} /></button><span className="pp-topbar-mark" aria-hidden="true"><LayoutDashboard size={21} /></span><div className="pp-topbar-location-text"><span className="pp-topbar-eyebrow">HR Manager workspace</span><nav className="pp-breadcrumb" aria-label="Breadcrumb"><button className="pp-breadcrumb-home" onClick={() => navigate("overview")}>Workspace</button><ChevronRight className="pp-breadcrumb-separator" size={13} /><strong aria-current="page" title={labels[section]}>{labels[section]}</strong></nav></div></div>
+        <div className="pp-topbar-location"><button className="pp-icon-button pp-mobile-menu" aria-label="Open navigation" aria-expanded={mobileNav} aria-controls="workspace-sidebar" onClick={() => setMobileNav(true)}><Menu size={21} /></button><span className="pp-topbar-mark" aria-hidden="true"><LayoutDashboard size={21} /></span><div className="pp-topbar-location-text"><span className="pp-topbar-eyebrow">HR Manager workspace</span><nav className="pp-breadcrumb" aria-label="Breadcrumb"><button className="pp-breadcrumb-home" onClick={() => navigate("overview")}>Workspace</button><ChevronRight className="pp-breadcrumb-separator" size={13} /><strong aria-current="page" title={labels[section]}>{labels[section]}</strong></nav></div></div>
         <div className="pp-topbar-actions"><span className="pp-live-status"><span className="pp-dot" /> HR workspace</span><div className="pp-topbar-tools"><ThemeToggle /><button className="pp-icon-button pp-activity-button" title="Review time-off requests" aria-label="Review time-off requests" onClick={() => navigate("leave")}><Bell size={19} /></button></div><span className="pp-topbar-divider" /><div className="pp-topbar-profile" title={user.email}><span className="pp-avatar">{initials(user.name)}</span><span className="pp-topbar-profile-text"><strong>{user.name}</strong><small>HR Manager</small></span></div></div>
       </header>
       <main className="pp-main-content">
