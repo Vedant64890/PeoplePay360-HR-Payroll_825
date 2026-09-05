@@ -1,0 +1,136 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Plus, X, LoaderCircle, Search, ChevronLeft, ChevronRight, Printer } from "lucide-react";
+import { fetchWorkspace, fetchWorkspaceRecord, saveWorkspaceRecord, workspaceAction, savePayslipInputs, errorMessage } from "@/services/admin.service";
+import { configs, tabs, display, valueAt, human } from "./workspace-config";
+
+const today = () => new Date().toLocaleDateString("en-CA");
+const labelFor = row => row.firstName ? `${row.employeeCode} · ${row.firstName} ${row.lastName}` : `${row.code ? `${row.code} · ` : ""}${row.name || row.title || row.email}`;
+const timeValue = minutes => `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+const minutesValue = value => { const [h, m] = value.split(":").map(Number); return h * 60 + m; };
+
+function Modal({ title, children, onClose, busy, wide = false }) {
+  const ref = useRef(null);
+  useEffect(() => { const dialog = ref.current; dialog.showModal(); return () => dialog.close(); }, []);
+  return <dialog ref={ref} className={`pp-dialog pp-module-dialog ${wide ? "pp-module-dialog-wide" : ""}`} aria-label={title} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}><div className="pp-dialog-heading"><h2>{title}</h2><button type="button" className="pp-icon-button pp-no-print" aria-label="Close dialog" onClick={onClose} disabled={busy}><X size={22} /></button></div>{children}</dialog>;
+}
+function RecordForm({ resource, record, lookups, onClose, onSaved }) {
+  const config = configs[resource];
+  const [form, setForm] = useState(() => {
+    const result = Object.fromEntries(config.fields.map(f => {
+      let value = record?.[f.key] ?? (f.key === "timezone" ? lookups.settings?.timezone : f.key === "currency" ? lookups.settings?.defaultCurrency : undefined) ?? f.default ?? (f.type === "checkbox" ? false : f.type === "date" && !f.optional ? today() : "");
+      if (f.type === "date" && value) value = value.slice(0, 10);
+      if (f.type === "datetime-local" && value) { const d = new Date(value); value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
+      return [f.key, value];
+    }));
+    if (resource === "attendance" && record) result.employeeId = record.day.employeeId;
+    result.lines = record?.lines?.map(({ day, sequence, startMinute, endMinute, endDayOffset, breakMinutes }) => ({ day, sequence, startMinute, endMinute, endDayOffset, breakMinutes })) || ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"].map(day => ({ day, sequence: 10, startMinute: 540, endMinute: 1080, endDayOffset: 0, breakMinutes: 60 }));
+    result.holidays = record?.holidays?.map(h => ({ name: h.name, date: h.date.slice(0, 10), isPaid: h.isPaid })) || [];
+    result.rules = record?.rules?.map(({ salaryRuleId, sequence, isActive }) => ({ salaryRuleId, sequence, isActive })) || [];
+    result.employeeIds = [];
+    return result;
+  });
+  const [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const [submissionKey] = useState(() => crypto.randomUUID());
+  const set = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
+  function updateLine(index, key, value) { set("lines", form.lines.map((line, i) => i === index ? { ...line, [key]: value } : line)); }
+  async function submit(event) {
+    event.preventDefault(); setBusy(true); setError("");
+    try {
+      const payload = {};
+      for (const f of config.fields) {
+        const value = form[f.key];
+        if (f.when && form[f.when[0]] !== f.when[1]) continue;
+        if (value === "" || value == null) { if (!f.optional) throw new Error(`Enter ${f.label.toLowerCase()}.`); if (!["reason", "hoursPerDay"].includes(f.key)) payload[f.key] = null; continue; }
+        payload[f.key] = ["number", "relation"].includes(f.type) ? Number(value) : f.type === "datetime-local" ? new Date(value).toISOString() : value;
+      }
+      if (config.arrays === "schedule") { payload.lines = form.lines; payload.holidays = form.holidays; }
+      if (config.arrays === "rules") payload.rules = form.rules;
+      if (config.arrays === "employees") { payload.employeeIds = form.employeeIds; payload.idempotencyKey = submissionKey; if (!form.employeeIds.length) throw new Error("Select at least one employee."); }
+      await saveWorkspaceRecord(resource, payload, record?.id ?? record?.code);
+      onSaved(`${config.singular} ${record ? "updated" : "created"}.`);
+    } catch (failure) { setError(failure.response ? errorMessage(failure) : failure.message); setBusy(false); }
+  }
+  return <Modal title={`${record ? "Edit" : "Add"} ${config.singular}`} onClose={onClose} busy={busy} wide><form className="pp-form" onSubmit={submit}><fieldset disabled={busy} className="pp-module-fieldset"><div className="pp-form-grid">{config.fields.filter(f => !f.when || form[f.when[0]] === f.when[1]).map(f => <div key={f.key} className={f.type === "textarea" ? "pp-field-full" : ""}>
+    <label htmlFor={`module-${f.key}`}>{f.label}{f.optional ? " (optional)" : ""}</label>
+    {f.type === "checkbox" ? <input id={`module-${f.key}`} type="checkbox" checked={!!form[f.key]} onChange={e => set(f.key, e.target.checked)} /> : ["select", "relation"].includes(f.type) ? <select id={`module-${f.key}`} value={form[f.key]} onChange={e => set(f.key, e.target.value)} required={!f.optional} disabled={resource === "attendance" && !!record && f.key === "employeeId"}><option value="">Choose {f.label.toLowerCase()}</option>{f.type === "select" ? f.options.map(option => <option key={option} value={option}>{human(option)}</option>) : <>{(lookups[f.source] || []).map(option => <option key={option.id} value={option.id}>{labelFor(option)}</option>)}{form[f.key] && !(lookups[f.source] || []).some(row => String(row.id) === String(form[f.key])) && <option value={form[f.key]}>Current selection #{form[f.key]}</option>}</>}</select> : f.type === "textarea" ? <textarea id={`module-${f.key}`} rows={3} value={form[f.key]} onChange={e => set(f.key, e.target.value)} /> : <input id={`module-${f.key}`} type={f.type === "money" ? "number" : f.type} step={f.type === "money" ? "0.0001" : f.type === "number" ? "1" : undefined} min={["money", "number"].includes(f.type) ? "0" : undefined} value={form[f.key]} required={!f.optional} onChange={e => set(f.key, e.target.value)} />}
+  </div>)}</div>
+  {config.help && <p className="pp-field-note">{config.help}</p>}
+  {config.arrays === "schedule" && <><h3 className="pp-module-subheading">Weekly shifts</h3><div className="pp-table-scroll"><table className="pp-table pp-edit-table"><thead><tr>{["Day", "Sequence", "Start", "End", "Next day", "Break min", ""].map((label, i) => <th key={i}>{label}</th>)}</tr></thead><tbody>{form.lines.map((line, i) => <tr key={i}><td><select aria-label={`Shift ${i + 1} day`} value={line.day} onChange={e => updateLine(i, "day", e.target.value)}>{["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map(day => <option key={day}>{day}</option>)}</select></td><td><input aria-label={`Shift ${i + 1} sequence`} type="number" min={1} value={line.sequence} onChange={e => updateLine(i, "sequence", +e.target.value)} /></td><td><input aria-label={`Shift ${i + 1} start`} type="time" required value={timeValue(line.startMinute)} onChange={e => updateLine(i, "startMinute", minutesValue(e.target.value))} /></td><td><input aria-label={`Shift ${i + 1} end`} type="time" required value={timeValue(line.endMinute)} onChange={e => updateLine(i, "endMinute", minutesValue(e.target.value))} /></td><td><input aria-label={`Shift ${i + 1} overnight`} type="checkbox" checked={!!line.endDayOffset} onChange={e => updateLine(i, "endDayOffset", e.target.checked ? 1 : 0)} /></td><td><input aria-label={`Shift ${i + 1} break`} type="number" min={0} value={line.breakMinutes} onChange={e => updateLine(i, "breakMinutes", +e.target.value)} /></td><td><button type="button" aria-label={`Remove shift ${i + 1}`} className="pp-icon-button" onClick={() => set("lines", form.lines.filter((_, n) => n !== i))}><X size={16} /></button></td></tr>)}</tbody></table></div><button type="button" className="pp-text-button" onClick={() => set("lines", [...form.lines, { day: "MONDAY", sequence: Math.max(0, ...form.lines.map(l => l.sequence)) + 10, startMinute: 540, endMinute: 1080, endDayOffset: 0, breakMinutes: 60 }])}>Add shift</button><h3 className="pp-module-subheading">Holidays</h3>{form.holidays.map((h, i) => <div className="pp-array-row" key={i}><input aria-label={`Holiday ${i + 1} name`} placeholder="Holiday name" required value={h.name} onChange={e => set("holidays", form.holidays.map((x, j) => i === j ? { ...x, name: e.target.value } : x))} /><input aria-label={`Holiday ${i + 1} date`} type="date" required value={h.date} onChange={e => set("holidays", form.holidays.map((x, j) => i === j ? { ...x, date: e.target.value } : x))} /><label><input type="checkbox" checked={h.isPaid} onChange={e => set("holidays", form.holidays.map((x, j) => i === j ? { ...x, isPaid: e.target.checked } : x))} /> Paid</label><button type="button" aria-label={`Remove holiday ${i + 1}`} onClick={() => set("holidays", form.holidays.filter((_, j) => j !== i))}><X size={16} /></button></div>)}<button type="button" className="pp-text-button" onClick={() => set("holidays", [...form.holidays, { name: "", date: today(), isPaid: true }])}>Add holiday</button></>}
+  {config.arrays === "rules" && <><h3 className="pp-module-subheading">Rules in calculation order</h3><p className="pp-field-note">Select rules and assign a unique sequence. A formula can reference earlier rules.</p>{lookups.rules?.map(rule => { const selected = form.rules.find(r => r.salaryRuleId === rule.id); return <div className="pp-array-row" key={rule.id}><label><input type="checkbox" checked={!!selected} onChange={e => set("rules", e.target.checked ? [...form.rules, { salaryRuleId: rule.id, sequence: Math.max(0, ...form.rules.map(r => r.sequence)) + 10, isActive: true }] : form.rules.filter(r => r.salaryRuleId !== rule.id))} /> {labelFor(rule)}</label>{selected && <input type="number" min={1} required aria-label={`Sequence for ${rule.code}`} value={selected.sequence} onChange={e => set("rules", form.rules.map(r => r.salaryRuleId === rule.id ? { ...r, sequence: +e.target.value } : r))} />}</div>; })}{!lookups.rules?.length && <p className="pp-field-note">Create salary rules first, then return to attach them.</p>}</>}
+  {config.arrays === "employees" && <><h3 className="pp-module-subheading">Select employees ({form.employeeIds.length})</h3><p className="pp-field-note">Only selected employees enter this payrun. Their contracts must match the structure and period.</p><div className="pp-employee-selection">{lookups.employees?.map(e => <label key={e.id}><input type="checkbox" checked={form.employeeIds.includes(e.id)} onChange={event => set("employeeIds", event.target.checked ? [...form.employeeIds, e.id] : form.employeeIds.filter(id => id !== e.id))} /> {labelFor(e)}</label>)}</div></>}
+  </fieldset>{error && <div className="pp-error" role="alert">{error}</div>}<div className="pp-dialog-actions"><button type="button" className="pp-button pp-button-outline" onClick={onClose} disabled={busy}>Cancel</button><button className="pp-button pp-button-primary" disabled={busy}>{busy && <LoaderCircle size={16} className="pp-spin" />}{busy ? "Saving…" : "Save"}</button></div></form></Modal>;
+}
+
+function ActionDialog({ resource, record, action, onClose, onSaved }) {
+  const [reason, setReason] = useState(""), [method, setMethod] = useState("BANK_TRANSFER"), [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  async function submit(event) {
+    event.preventDefault(); setBusy(true); setError("");
+    try { const result = await workspaceAction(resource, record.id, { action, ...(record.version ? { version: record.version } : {}), reason, ...(action === "pay" ? { method, externalReference: reference, idempotencyKey } : {}) }); onSaved(result.warnings?.length ? "Computation finished with warnings. Open the payrun to review them." : `${human(action)} completed.`); }
+    catch (e) { setError(errorMessage(e)); setBusy(false); }
+  }
+  return <Modal title={action === "pay" ? "Record completed payment" : `${human(action)} ${configs[resource].singular}`} onClose={onClose} busy={busy}><p>{action === "pay" ? "Use this after payment has been completed. It records the outstanding net amount for each payslip in this run." : action === "compute" ? "Calculate payslips from contracts, attendance, approved leave, and the ordered salary rules." : action === "validate" ? "Finalize the calculated payslips. Salary details become locked for this payrun." : `Apply this action to ${record.name || record.reference || record.employeeCode || "this record"}.`}</p><form className="pp-form" onSubmit={submit}>{action === "pay" && <><label htmlFor="payment-method">Payment method</label><select id="payment-method" value={method} onChange={e => setMethod(e.target.value)}>{["BANK_TRANSFER", "CASH", "CHEQUE", "OTHER"].map(m => <option key={m}>{m}</option>)}</select><label htmlFor="payment-reference">Payment reference</label><input id="payment-reference" required value={reference} onChange={e => setReference(e.target.value)} /></>}{["cancel", "refuse", "approve"].includes(action) && <><label htmlFor="action-reason">Reason {action === "approve" ? "(optional)" : ""}</label><textarea id="action-reason" required={action !== "approve"} value={reason} onChange={e => setReason(e.target.value)} /></>}{error && <div role="alert" className="pp-error">{error}</div>}<div className="pp-dialog-actions"><button type="button" className="pp-button pp-button-outline" disabled={busy} onClick={onClose}>Back</button><button className="pp-button pp-button-primary" disabled={busy}>{busy ? "Processing…" : action === "pay" ? "Record payment" : human(action)}</button></div></form></Modal>;
+}
+
+function RecordDetail({ resource, record, onClose, onSaved }) {
+  const [inputs, setInputs] = useState((record.inputs || []).map(({ code, amount, quantity, description }) => ({ code, amount, quantity, description })));
+  const [error, setError] = useState(""), [busy, setBusy] = useState(false);
+  async function saveInputs(event) { event.preventDefault(); setBusy(true); try { await savePayslipInputs(record.id, inputs); onSaved("Inputs saved. Recompute the payrun to update salary amounts."); } catch (e) { setError(errorMessage(e)); setBusy(false); } }
+  return <Modal title={`${configs[resource].singular}: ${record.name || record.number || record.reference || record.employeeCode || record.id}`} wide onClose={onClose} busy={busy}><div className="pp-detail-grid">{configs[resource].columns.map(([key, label]) => <div key={key}><span>{label}</span><strong>{display(valueAt(record, key), key)}</strong></div>)}</div>
+    {resource === "payslips" && <><h3 className="pp-module-subheading">Salary breakdown</h3><p>{record.employeeSnapshot ? `${record.employeeSnapshot.firstName} ${record.employeeSnapshot.lastName} · ${record.employeeSnapshot.employeeCode}` : "Not computed yet"}</p><div className="pp-table-scroll"><table className="pp-table"><thead><tr><th>Component</th><th>Effect</th><th>Quantity</th><th>Amount</th><th>Total ({record.currency})</th></tr></thead><tbody>{record.lines.filter(l => l.appearsOnPayslip).map(line => <tr key={line.id}><td>{line.name}<small>{line.code}</small></td><td>{human(line.effect)}</td><td>{Number(line.quantity)}</td><td>{display(line.amount, "netAmount")}</td><td>{display(line.total, "netAmount")}</td></tr>)}</tbody></table></div><div className="pp-detail-grid pp-salary-totals">{[["basicAmount", "Basic"], ["allowanceAmount", "Allowances"], ["grossAmount", "Gross"], ["deductionAmount", "Deductions"], ["netAmount", "Net pay"], ["employerCostAmount", "Employer cost"]].map(([key, label]) => <div key={key}><span>{label}</span><strong>{record.currency} {display(record[key], key)}</strong></div>)}</div><p className="pp-field-note">Scheduled days: {Number(record.scheduledDays)} · Worked days: {Number(record.workedDays).toFixed(2)} · Worked hours: {Number(record.workedHours).toFixed(2)}</p>{record.computationInputs?.proration && <p className="pp-field-note">{record.computationInputs.proration}</p>}
+    <h3 className="pp-module-subheading">Payment history</h3>{record.payments.length ? record.payments.map(p => <p key={p.id}>{p.currency} {display(p.amount, "netAmount")} · {human(p.method)} · {p.externalReference} · {human(p.status)}</p>) : <p className="pp-muted">No payments recorded.</p>}
+    {["DRAFT", "COMPUTED"].includes(record.status) && <form className="pp-form pp-no-print" onSubmit={saveInputs}><h3 className="pp-module-subheading">Variable inputs</h3>{inputs.map((input, i) => <div className="pp-array-row" key={i}>{["code", "description", "amount", "quantity"].map(key => <input key={key} aria-label={`Input ${i + 1} ${key}`} placeholder={human(key)} type={["amount", "quantity"].includes(key) ? "number" : "text"} min={0} step="0.0001" required={key !== "description"} value={input[key] || ""} onChange={e => setInputs(inputs.map((v, j) => i === j ? { ...v, [key]: e.target.value } : v))} />)}<button type="button" aria-label={`Remove input ${i + 1}`} onClick={() => setInputs(inputs.filter((_, j) => j !== i))}><X size={16} /></button></div>)}<button type="button" className="pp-text-button" onClick={() => setInputs([...inputs, { code: "", amount: "0", quantity: "1", description: "" }])}>Add input</button><button className="pp-button pp-button-primary" disabled={busy}>Save inputs</button></form>}
+    {!["DRAFT", "CANCELLED"].includes(record.status) && <button className="pp-button pp-button-outline pp-no-print" onClick={() => window.print()}><Printer size={16} />Print payslip</button>}</>}
+    {resource === "payruns" && <><h3 className="pp-module-subheading">Selected employees</h3>{record.employees.map(e => <p key={e.employeeId}>{labelFor(e.employee)} · {human(e.status)} {e.errorMessage && `— ${e.errorMessage}`}</p>)}<h3 className="pp-module-subheading">Payroll warnings</h3>{record.warnings.filter(w => w.status === "OPEN").map(w => <div className="pp-error" key={w.id}>{w.message}</div>)}{!record.warnings.some(w => w.status === "OPEN") && <p>No open warnings.</p>}<h3 className="pp-module-subheading">Payslips</h3>{record.payslips.map(p => <p key={p.id}>{labelFor(p.employee)} · {p.currency} {display(p.netAmount, "netAmount")} · {human(p.status)}</p>)}</>}
+    {resource === "schedules" && <><h3 className="pp-module-subheading">Shifts</h3>{record.lines.map(l => <p key={l.id}>{human(l.day)} · {timeValue(l.startMinute)}–{timeValue(l.endMinute)} {l.endDayOffset ? "(next day)" : ""} · {l.breakMinutes} minute break</p>)}</>}
+    {resource === "structures" && <><h3 className="pp-module-subheading">Rule order</h3>{record.rules.map(r => <p key={r.salaryRuleId}>{r.sequence}. {labelFor(r.salaryRule)} · {r.isActive ? "Active" : "Inactive"}</p>)}</>}
+    {record.approvals && <><h3 className="pp-module-subheading">Approval history</h3>{record.approvals.map(a => <p key={a.id}>Step {a.step} · {human(a.status)} · {display(a.decidedAt, "createdAt")} {a.comment && `· ${a.comment}`}</p>)}</>}
+    {record.corrections?.length > 0 && <><h3 className="pp-module-subheading">Correction history</h3>{record.corrections.map(c => <p key={c.id}>{display(c.createdAt, "createdAt")} · {c.reason}</p>)}</>}
+    {error && <div className="pp-error" role="alert">{error}</div>}
+  </Modal>;
+}
+
+function ResourceTable({ resource, month, currency, revision, onChange }) {
+  const config = configs[resource];
+  const [result, setResult] = useState({ items: [], total: 0, pageSize: 20 }), [lookups, setLookups] = useState({});
+  const [query, setQuery] = useState(""), [page, setPage] = useState(1), [refresh, setRefresh] = useState(0);
+  const [loading, setLoading] = useState(true), [error, setError] = useState(""), [notice, setNotice] = useState("");
+  const [modal, setModal] = useState(null), [opening, setOpening] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      setLoading(true); setError("");
+      try { const [records, options] = await Promise.all([fetchWorkspace(resource, { q: query, page, ...(["attendance", "leave", "payruns", "payslips"].includes(resource) ? { month } : {}), ...(["payruns", "payslips"].includes(resource) ? { currency } : {}) }), fetchWorkspace("lookups")]); if (active) { setResult(records); setLookups(options); } }
+      catch (e) { if (active) setError(errorMessage(e)); }
+      finally { if (active) setLoading(false); }
+    }, 180);
+    return () => { active = false; clearTimeout(timer); };
+  }, [resource, query, page, month, currency, refresh, revision]);
+  async function open(mode, record, action) {
+    setOpening(true); setError("");
+    try { const detail = await fetchWorkspaceRecord(resource, record.id ?? record.code); setModal({ mode, record: detail, action }); }
+    catch (e) { setError(errorMessage(e)); } finally { setOpening(false); }
+  }
+  function saved(message) { setModal(null); setNotice(message); setRefresh(v => v + 1); onChange?.(); }
+  function actions(row) {
+    const options = [];
+    if (config.workflow === "leave") { if (["SUBMITTED", "FIRST_APPROVED"].includes(row.status)) options.push("approve", "refuse"); if (!["CANCELLED", "REFUSED"].includes(row.status)) options.push("cancel"); }
+    if (config.workflow === "payroll") { if (["DRAFT", "COMPUTED"].includes(row.status)) options.push("compute"); if (row.status === "COMPUTED") options.push("validate"); if (["VALIDATED", "PARTIALLY_PAID"].includes(row.status)) options.push("pay"); if (["DRAFT", "COMPUTED", "VALIDATED"].includes(row.status)) options.push("cancel"); }
+    if (config.archive && row.isActive !== false && row.status !== "ARCHIVED") options.push("archive");
+    return options;
+  }
+  return <><section className="pp-panel pp-directory"><div className="pp-panel-heading"><div><h2>{config.title} <span className="pp-count">{result.total}</span></h2>{config.help && <p>{config.help}</p>}</div><div className="pp-module-tools"><div className="pp-search"><Search size={16} /><input aria-label={`Search ${config.title.toLowerCase()}`} placeholder="Search records…" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>{!config.noCreate && <button className="pp-button pp-button-primary" disabled={loading} onClick={() => setModal({ mode: "edit", record: null })}><Plus size={16} />Add {config.singular}</button>}</div></div>
+    {error && <div className="pp-error" role="alert">{error}<button className="pp-text-button" onClick={() => setRefresh(v => v + 1)}>Retry</button></div>}{notice && <p className="pp-module-notice" role="status">{notice}</p>}
+    {loading ? <div className="pp-loading"><LoaderCircle className="pp-spin" />Loading records…</div> : result.items.length ? <div className="pp-table-scroll"><table className="pp-table"><thead><tr>{config.columns.map(([key, label]) => <th key={key}>{label}</th>)}<th>Actions</th></tr></thead><tbody>{result.items.map(row => <tr key={row.id ?? row.code}>{config.columns.map(([key]) => <td key={key}>{display(valueAt(row, key), key)}</td>)}<td><div className="pp-row-actions"><button className="pp-text-button" disabled={opening} onClick={() => open("detail", row)}>View</button>{!config.noEdit && row.code !== "ADMIN" && <button className="pp-text-button" disabled={opening} onClick={() => open("edit", row)}>Edit</button>}{actions(row).map(action => <button key={action} className="pp-text-button" disabled={opening} onClick={() => open("action", row, action)}>{action === "pay" ? "Record payment" : human(action)}</button>)}</div></td></tr>)}</tbody></table></div> : <div className="pp-empty"><h3>{query ? "No matching records" : `No ${config.title.toLowerCase()} yet`}</h3><p>{config.noCreate ? "Records appear when the related workflow is completed." : `Add a ${config.singular} to get started.`}</p></div>}
+    <div className="pp-pagination"><span>{result.total} records</span><div><button className="pp-icon-button" aria-label="Previous records page" disabled={page <= 1 || loading} onClick={() => setPage(page - 1)}><ChevronLeft size={18} /></button><span>Page {page}</span><button className="pp-icon-button" aria-label="Next records page" disabled={page * result.pageSize >= result.total || loading} onClick={() => setPage(page + 1)}><ChevronRight size={18} /></button></div></div></section>
+    {modal?.mode === "edit" && <RecordForm resource={resource} record={modal.record} lookups={lookups} onClose={() => setModal(null)} onSaved={saved} />}{modal?.mode === "action" && <ActionDialog resource={resource} record={modal.record} action={modal.action} onClose={() => setModal(null)} onSaved={saved} />}{modal?.mode === "detail" && <RecordDetail resource={resource} record={modal.record} onClose={() => setModal(null)} onSaved={saved} />}
+  </>;
+}
+export default function WorkspaceModule({ section, month, currency, revision, onChange }) {
+  const choices = tabs[section] || [section], [selected, setSelected] = useState(choices[0]);
+  return <div className="pp-workspace-module">{choices.length > 1 && <div className="pp-module-tabs" role="tablist" aria-label="Section views">{choices.map(choice => <button key={choice} role="tab" aria-selected={selected === choice} className={selected === choice ? "pp-tab-active" : ""} onClick={() => setSelected(choice)}>{configs[choice].title}</button>)}</div>}<ResourceTable key={`${selected}:${month}:${currency}`} resource={selected} month={month} currency={currency} revision={revision} onChange={onChange} /></div>;
+}
+
