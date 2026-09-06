@@ -27,7 +27,7 @@ export async function getDashboard({ month, currency }) {
     prisma.attendanceDay.groupBy({ by: ["status"], where: { workDate: { gte: start, lt: end, lte: today } }, _count: { _all: true } }),
     prisma.leaveRequest.count({ where: { ...leaveWhere, status: { in: ["SUBMITTED", "FIRST_APPROVED"] } } }),
     prisma.leaveRequest.count({ where: { ...leaveWhere, status: "APPROVED" } }),
-    prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", paidAt: { gte: start, lt: end } }, _sum: { amount: true } }),
+    prisma.payrollPayment.aggregate({ where: { currency, status: "SUCCEEDED", payslip: { periodStart: { gte: start, lt: end } } }, _sum: { amount: true } }),
     prisma.$queryRaw`SELECT to_char("paidAt" AT TIME ZONE 'UTC', 'YYYY-MM') AS month, SUM(amount)::text AS total FROM "payroll"."PayrollPayment" WHERE status = 'SUCCEEDED' AND currency = ${currency} AND "paidAt" >= ${trendStart} AND "paidAt" < ${end} GROUP BY 1 ORDER BY 1`,
     prisma.payrun.findMany({ where: { period: { startDate: { lt: end }, endDate: { gte: start } } }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, name: true, reference: true, currency: true, status: true, createdAt: true, period: { select: { name: true, startDate: true, endDate: true } }, _count: { select: { payslips: true } } } }),
     prisma.leaveRequest.findMany({ where: leaveWhere, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, reference: true, status: true, startDate: true, endDate: true, duration: true, unit: true, employee: { select: { firstName: true, lastName: true } }, leaveType: { select: { name: true } } } }),

@@ -252,6 +252,7 @@ enum SalaryComputationMethod {
   FIXED
   PERCENTAGE
   FORMULA
+  INPUT
 
   @@schema("configuration")
 }
@@ -602,11 +603,58 @@ model Employee {
   payrunSelections    PayrunEmployee[]
   payslips            Payslip[]
   payrollWarnings     PayrollWarning[]
+  documents           EmployeeDocument[]
+  preferences         EmployeePreferences?
+  notificationReads   EmployeeNotificationRead[]
 
   @@index([departmentId, employeeType, status])
   @@index([managerId])
   @@index([jobPositionId])
   @@index([status, hireDate])
+  @@schema("hr")
+}
+
+/// Private self-service files. Content is only served through an ownership-checked API.
+model EmployeeDocument {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  title      String   @db.VarChar(150)
+  category   String   @db.VarChar(30)
+  fileName   String   @db.VarChar(180)
+  mimeType   String   @db.VarChar(80)
+  byteSize   Int
+  content    Bytes
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, createdAt])
+  @@schema("hr")
+}
+
+model EmployeePreferences {
+  employeeId          Int      @id
+  theme               String   @default("system") @db.VarChar(10)
+  timeFormat          String   @default("12h") @db.VarChar(3)
+  weekStartsOn        Int      @default(1)
+  defaultSection      String   @default("overview") @db.VarChar(30)
+  attendanceReminders Boolean  @default(true)
+  leaveUpdates        Boolean  @default(true)
+  payrollUpdates      Boolean  @default(true)
+  documentUpdates     Boolean  @default(true)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(3)
+  employee            Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@schema("hr")
+}
+
+/// A source key includes its status timestamp so a later decision becomes unread again.
+model EmployeeNotificationRead {
+  employeeId Int
+  eventKey   String   @db.VarChar(180)
+  readAt     DateTime @default(now()) @db.Timestamptz(3)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@id([employeeId, eventKey])
   @@schema("hr")
 }
 

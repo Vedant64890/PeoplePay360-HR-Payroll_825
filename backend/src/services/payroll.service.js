@@ -30,7 +30,7 @@ export function calculateRules(memberships, values) {
     let amount = D(), quantity = D(1);
     if (enabled) {
       quantity = rule.quantityFormula ? expression(rule.quantityFormula, context) : D(1);
-      amount = rule.computationMethod === "FIXED" ? D(rule.fixedAmount) : rule.computationMethod === "PERCENTAGE" ? expression(rule.percentageBase, context).mul(rule.percentageRate).div(100) : expression(rule.formula, context);
+      amount = rule.computationMethod === "FIXED" ? D(rule.fixedAmount) : rule.computationMethod === "PERCENTAGE" ? expression(rule.percentageBase, context).mul(rule.percentageRate).div(100) : rule.computationMethod === "INPUT" ? (context[rule.code] || D(0)) : expression(rule.formula, context);
     }
     const total = amount.mul(quantity).toDecimalPlaces(4);
     if (total.lt(0) || quantity.lt(0) || total.gte("1000000000000000")) fail(`Rule ${rule.code} produces an invalid amount. Use a positive deduction with Deduction effect.`);

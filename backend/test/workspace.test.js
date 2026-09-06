@@ -35,7 +35,7 @@ test("connected administrator HR and payroll workflows", { timeout: 180000 }, as
     const root = "/admin/workspace/";
     const create = async (name, payload, collection) => {
       if (name === "employees" && !payload.userId) {
-        const account = await prisma.user.create({ data: { name: `${payload.firstName} ${payload.lastName}`, email: `${payload.employeeCode.toLowerCase()}@example.test`, password: await hashPassword(password), role: "EMPLOYEE" } });
+        const account = await prisma.user.create({ data: { name: `${payload.firstName} ${payload.lastName}`, email: `${payload.employeeCode.toLowerCase()}-employee@example.test`, password: await hashPassword(password), role: "EMPLOYEE" } });
         ids.users.push(account.id); payload = { ...payload, userId: account.id };
       }
       const r = await request(root + name, "POST", payload); assert.equal(r.status, 201, JSON.stringify(r.data)); if (collection) ids[collection].push(r.data.data.id); return r.data.data; };

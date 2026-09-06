@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import { getSettings } from "./settings.service.js";
 import { employeeAccountFilter, requireEmployeeAccount } from "./employee-account.service.js";
+import { assignmentAttendanceHistory, saveScheduleAssignment } from "./schedule-assignment.service.js";
 import { audit, date, dayKey, fail, json, lockEmployee, validateSchedule, expression, D } from "../lib/workspace.js";
 
 const person = { select: { id: true, firstName: true, lastName: true, employeeCode: true } };
@@ -59,6 +60,7 @@ export async function detailResource(name, id) {
   const item = await prisma[config.model].findUnique({ where: { [config.key || "id"]: id }, include: { ...config.include, ...extra } });
   if (!item) fail("Record not found.", 404);
   if (name === "employees" && !await prisma.employee.count({ where: { id, ...employeeAccountFilter } })) fail("Employee workspace account not found.", 404);
+  if (name === "assignments") item.attendanceHistory = await assignmentAttendanceHistory(prisma, item);
   return json(item);
 }
 function dates(data) {
@@ -66,7 +68,7 @@ function dates(data) {
   return data;
 }
 async function validateRelations(tx, name, data, id, before) {
-  if (["employees", "contracts", "assignments"].includes(name)) {
+  if (["employees", "contracts"].includes(name)) {
     if (name !== "employees" || id) await lockEmployee(tx, name === "employees" ? id : data.employeeId);
     if (data.jobPositionId) { const pos = await tx.jobPosition.findUnique({ where: { id: data.jobPositionId } }); if (!pos || (pos.departmentId && pos.departmentId !== data.departmentId)) fail("Job position must belong to the selected department."); }
   }
@@ -98,13 +100,6 @@ async function validateRelations(tx, name, data, id, before) {
       if (candidates.some(c => (!c.endDate || c.endDate >= data.startDate) && (!c.terminationDate || c.terminationDate >= data.startDate))) fail("Approved contracts for this employee cannot overlap.", 409);
     }
   }
-  if (name === "assignments") {
-    if (before && before.employeeId !== data.employeeId) fail("Keep the same employee when editing a schedule assignment.", 409);
-    if (before && await tx.attendanceDay.count({ where: { employeeId: before.employeeId, workDate: { gte: before.startDate, ...(before.endDate ? { lte: before.endDate } : {}) } } })) fail("This assignment is part of attendance history. Create a new dated assignment.", 409);
-    if (!(await tx.workingSchedule.findUnique({ where: { id: data.workingScheduleId } }))?.isActive) fail("Choose an active working schedule.");
-    const overlaps = await tx.employeeScheduleAssignment.count({ where: { id: { not: id || 0 }, employeeId: data.employeeId, ...(data.endDate ? { startDate: { lte: data.endDate } } : {}), OR: [{ endDate: null }, { endDate: { gte: data.startDate } }] } });
-    if (overlaps) fail("Schedule assignments cannot overlap.", 409);
-  }
   if (name === "schedules") {
     validateSchedule(data.lines);
     if (id && (await tx.contract.count({ where: { workingScheduleId: id } }) || await tx.employeeScheduleAssignment.count({ where: { workingScheduleId: id } }) || await tx.attendanceDay.count({ where: { workingScheduleId: id } }))) fail("This schedule is in use. Create a new schedule version to preserve history.", 409);
@@ -132,6 +127,7 @@ export async function saveResource(name, input, actorId, id, { hrOnly = false } 
   if (config.readonly || config.workflow) fail("Use this record's workflow action.", 405);
   if (name === "roles" && (!id || id === "ADMIN")) fail("The administrator role is fixed; edit another existing role.", 409);
   return prisma.$transaction(async tx => {
+    if (name === "assignments") return saveScheduleAssignment(tx, input, actorId, id);
     const before = id ? await tx[config.model].findUnique({ where: { [config.key || "id"]: id } }) : null;
     if (id && !before) fail("Record not found.", 404);
     const data = dates({ ...input });

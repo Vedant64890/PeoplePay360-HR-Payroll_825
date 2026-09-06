@@ -8,7 +8,7 @@ import prisma from "../src/lib/prisma.js";
 import { hashPassword } from "../src/lib/password.js";
 
 test("employee directories follow Employee workspace accounts", { timeout: 60000 }, async t => {
-  const tag = `ACCT${Date.now()}`, password = randomUUID(), userIds = [], employeeIds = [];
+  const tag = `acct${Date.now()}`, password = randomUUID(), userIds = [], employeeIds = [];
   let server;
   try {
     const hash = await hashPassword(password);

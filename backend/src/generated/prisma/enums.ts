@@ -253,7 +253,8 @@ export type SalaryCategoryType = (typeof SalaryCategoryType)[keyof typeof Salary
 export const SalaryComputationMethod = {
   FIXED: 'FIXED',
   PERCENTAGE: 'PERCENTAGE',
-  FORMULA: 'FORMULA'
+  FORMULA: 'FORMULA',
+  INPUT: 'INPUT'
 } as const
 
 export type SalaryComputationMethod = (typeof SalaryComputationMethod)[keyof typeof SalaryComputationMethod]

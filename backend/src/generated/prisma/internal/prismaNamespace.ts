@@ -406,6 +406,9 @@ export const ModelName = {
   Department: 'Department',
   JobPosition: 'JobPosition',
   Employee: 'Employee',
+  EmployeeDocument: 'EmployeeDocument',
+  EmployeePreferences: 'EmployeePreferences',
+  EmployeeNotificationRead: 'EmployeeNotificationRead',
   EmployeeBankAccount: 'EmployeeBankAccount',
   EmploymentHistory: 'EmploymentHistory',
   Contract: 'Contract',
@@ -458,7 +461,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "workspaceSettings" | "user" | "passwordReset" | "role" | "permission" | "rolePermission" | "department" | "jobPosition" | "employee" | "employeeBankAccount" | "employmentHistory" | "contract" | "workingSchedule" | "workingScheduleLine" | "scheduleHoliday" | "employeeScheduleAssignment" | "attendanceDay" | "attendance" | "attendanceCorrection" | "attendanceException" | "leaveType" | "leaveAllocation" | "leaveAllocationApproval" | "leaveRequest" | "leaveRequestDay" | "leaveRequestApproval" | "leaveAllocationConsumption" | "salaryRuleCategory" | "salaryStructure" | "salaryRule" | "salaryStructureRule" | "salaryRuleDependency" | "payrollPeriod" | "payrun" | "payrunEmployee" | "payslip" | "payslipLine" | "payslipWorkedTime" | "payslipInput" | "payrollWarning" | "payrollPayment" | "payslipDocument" | "payslipDeliveryBatch" | "payslipDelivery" | "payslipDeliveryAttempt" | "auditLog"
+    modelProps: "workspaceSettings" | "user" | "passwordReset" | "role" | "permission" | "rolePermission" | "department" | "jobPosition" | "employee" | "employeeDocument" | "employeePreferences" | "employeeNotificationRead" | "employeeBankAccount" | "employmentHistory" | "contract" | "workingSchedule" | "workingScheduleLine" | "scheduleHoliday" | "employeeScheduleAssignment" | "attendanceDay" | "attendance" | "attendanceCorrection" | "attendanceException" | "leaveType" | "leaveAllocation" | "leaveAllocationApproval" | "leaveRequest" | "leaveRequestDay" | "leaveRequestApproval" | "leaveAllocationConsumption" | "salaryRuleCategory" | "salaryStructure" | "salaryRule" | "salaryStructureRule" | "salaryRuleDependency" | "payrollPeriod" | "payrun" | "payrunEmployee" | "payslip" | "payslipLine" | "payslipWorkedTime" | "payslipInput" | "payrollWarning" | "payrollPayment" | "payslipDocument" | "payslipDeliveryBatch" | "payslipDelivery" | "payslipDeliveryAttempt" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1125,6 +1128,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.EmployeeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EmployeeCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmployeeDocument: {
+      payload: Prisma.$EmployeeDocumentPayload<ExtArgs>
+      fields: Prisma.EmployeeDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeeDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeeDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeeDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeeDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.EmployeeDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.EmployeeDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.EmployeeDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmployeeDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.EmployeeDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        update: {
+          args: Prisma.EmployeeDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeeDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeeDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmployeeDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmployeeDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeeDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeDocument>
+        }
+        groupBy: {
+          args: Prisma.EmployeeDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeeDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmployeePreferences: {
+      payload: Prisma.$EmployeePreferencesPayload<ExtArgs>
+      fields: Prisma.EmployeePreferencesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeePreferencesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeePreferencesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeePreferencesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeePreferencesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        findMany: {
+          args: Prisma.EmployeePreferencesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>[]
+        }
+        create: {
+          args: Prisma.EmployeePreferencesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        createMany: {
+          args: Prisma.EmployeePreferencesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmployeePreferencesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>[]
+        }
+        delete: {
+          args: Prisma.EmployeePreferencesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        update: {
+          args: Prisma.EmployeePreferencesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeePreferencesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeePreferencesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmployeePreferencesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmployeePreferencesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeePreferencesPayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeePreferencesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeePreferences>
+        }
+        groupBy: {
+          args: Prisma.EmployeePreferencesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeePreferencesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeePreferencesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeePreferencesCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmployeeNotificationRead: {
+      payload: Prisma.$EmployeeNotificationReadPayload<ExtArgs>
+      fields: Prisma.EmployeeNotificationReadFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeeNotificationReadFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeeNotificationReadFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeeNotificationReadFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeeNotificationReadFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        findMany: {
+          args: Prisma.EmployeeNotificationReadFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>[]
+        }
+        create: {
+          args: Prisma.EmployeeNotificationReadCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        createMany: {
+          args: Prisma.EmployeeNotificationReadCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmployeeNotificationReadCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>[]
+        }
+        delete: {
+          args: Prisma.EmployeeNotificationReadDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        update: {
+          args: Prisma.EmployeeNotificationReadUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeeNotificationReadDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeeNotificationReadUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmployeeNotificationReadUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmployeeNotificationReadUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeNotificationReadPayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeeNotificationReadAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeNotificationRead>
+        }
+        groupBy: {
+          args: Prisma.EmployeeNotificationReadGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeNotificationReadGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeeNotificationReadCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeNotificationReadCountAggregateOutputType> | number
         }
       }
     }
@@ -4045,6 +4270,46 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
+export const EmployeeDocumentScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  title: 'title',
+  category: 'category',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  byteSize: 'byteSize',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type EmployeeDocumentScalarFieldEnum = (typeof EmployeeDocumentScalarFieldEnum)[keyof typeof EmployeeDocumentScalarFieldEnum]
+
+
+export const EmployeePreferencesScalarFieldEnum = {
+  employeeId: 'employeeId',
+  theme: 'theme',
+  timeFormat: 'timeFormat',
+  weekStartsOn: 'weekStartsOn',
+  defaultSection: 'defaultSection',
+  attendanceReminders: 'attendanceReminders',
+  leaveUpdates: 'leaveUpdates',
+  payrollUpdates: 'payrollUpdates',
+  documentUpdates: 'documentUpdates',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeePreferencesScalarFieldEnum = (typeof EmployeePreferencesScalarFieldEnum)[keyof typeof EmployeePreferencesScalarFieldEnum]
+
+
+export const EmployeeNotificationReadScalarFieldEnum = {
+  employeeId: 'employeeId',
+  eventKey: 'eventKey',
+  readAt: 'readAt'
+} as const
+
+export type EmployeeNotificationReadScalarFieldEnum = (typeof EmployeeNotificationReadScalarFieldEnum)[keyof typeof EmployeeNotificationReadScalarFieldEnum]
+
+
 export const EmployeeBankAccountScalarFieldEnum = {
   id: 'id',
   employeeId: 'employeeId',
@@ -4916,6 +5181,20 @@ export type ListEnumEmployeeStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+/**
  * Reference to a field of type 'EmploymentEventType'
  */
 export type EnumEmploymentEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmploymentEventType'>
@@ -5592,6 +5871,9 @@ export type GlobalOmitConfig = {
   department?: Prisma.DepartmentOmit
   jobPosition?: Prisma.JobPositionOmit
   employee?: Prisma.EmployeeOmit
+  employeeDocument?: Prisma.EmployeeDocumentOmit
+  employeePreferences?: Prisma.EmployeePreferencesOmit
+  employeeNotificationRead?: Prisma.EmployeeNotificationReadOmit
   employeeBankAccount?: Prisma.EmployeeBankAccountOmit
   employmentHistory?: Prisma.EmploymentHistoryOmit
   contract?: Prisma.ContractOmit

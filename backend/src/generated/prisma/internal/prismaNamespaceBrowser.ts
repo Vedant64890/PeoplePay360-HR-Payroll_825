@@ -60,6 +60,9 @@ export const ModelName = {
   Department: 'Department',
   JobPosition: 'JobPosition',
   Employee: 'Employee',
+  EmployeeDocument: 'EmployeeDocument',
+  EmployeePreferences: 'EmployeePreferences',
+  EmployeeNotificationRead: 'EmployeeNotificationRead',
   EmployeeBankAccount: 'EmployeeBankAccount',
   EmploymentHistory: 'EmploymentHistory',
   Contract: 'Contract',
@@ -253,6 +256,46 @@ export const EmployeeScalarFieldEnum = {
 } as const
 
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
+
+
+export const EmployeeDocumentScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  title: 'title',
+  category: 'category',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  byteSize: 'byteSize',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type EmployeeDocumentScalarFieldEnum = (typeof EmployeeDocumentScalarFieldEnum)[keyof typeof EmployeeDocumentScalarFieldEnum]
+
+
+export const EmployeePreferencesScalarFieldEnum = {
+  employeeId: 'employeeId',
+  theme: 'theme',
+  timeFormat: 'timeFormat',
+  weekStartsOn: 'weekStartsOn',
+  defaultSection: 'defaultSection',
+  attendanceReminders: 'attendanceReminders',
+  leaveUpdates: 'leaveUpdates',
+  payrollUpdates: 'payrollUpdates',
+  documentUpdates: 'documentUpdates',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeePreferencesScalarFieldEnum = (typeof EmployeePreferencesScalarFieldEnum)[keyof typeof EmployeePreferencesScalarFieldEnum]
+
+
+export const EmployeeNotificationReadScalarFieldEnum = {
+  employeeId: 'employeeId',
+  eventKey: 'eventKey',
+  readAt: 'readAt'
+} as const
+
+export type EmployeeNotificationReadScalarFieldEnum = (typeof EmployeeNotificationReadScalarFieldEnum)[keyof typeof EmployeeNotificationReadScalarFieldEnum]
 
 
 export const EmployeeBankAccountScalarFieldEnum = {

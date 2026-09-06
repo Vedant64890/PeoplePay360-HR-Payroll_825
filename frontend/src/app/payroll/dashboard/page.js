@@ -60,18 +60,18 @@ export default function PayrollDashboard() {
   const options = { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { labels: { color: textColor, usePointStyle: true } } }, scales: { x: { ticks: { color: textColor } }, y: { beginAtZero: true, ticks: { color: textColor } } } };
   const metrics = data?.metrics;
   const cards = metrics ? [
-    ["Total payroll", money(metrics.totalPayroll), "Computed net salary", Wallet, "payruns", "green"],
-    ["Employees paid", metrics.employeesPaid, `${money(metrics.totalPaid)} recorded payments`, Users, "payslips", "blue"],
-    ["Pending payroll", money(metrics.pendingPayroll), `${metrics.pendingPayslips} unpaid or draft payslips`, Clock3, "payruns", "orange"],
-    ["Current payroll cycle", month, `${metrics.currentCycles} open payruns`, CalendarDays, "payruns", "violet"],
-    ["Total deductions", money(metrics.totalDeductions), "Computed payslip deductions", FileCheck2, "payslips", "orange"],
-    ["Total bonuses", money(metrics.totalBonuses), "Earning rules with BONUS in the code", Wallet, "rules", "green"],
-    ["Payslips generated", metrics.payslipsGenerated, "For the selected payroll period", FileCheck2, "payslips", "blue"],
-    ["Average net salary", money(metrics.averageSalary), "Per computed payslip", Activity, "reports", "violet"],
-    ["Approved time off", `${Number(data.totals.approvedLeaveDays)} days`, `${data.totals.pendingLeaveRequests} requests pending`, Leaf, "leave", "green"],
-    ["Attendance health", data.totals.recordedAttendanceRate == null ? "—" : `${data.totals.recordedAttendanceRate}%`, `${data.totals.lateDays} late days · ${data.totals.manualEdits} corrections`, Activity, "attendance", "blue"],
-    ["Current workforce", data.totals.currentEmployees, "Active employment in this selection", Users, "employees", "violet"],
-    ["Contracts expiring", data.totals.contractsExpiring, "Contracts ending in the selected month", FileCheck2, "contracts", "orange"],
+    ["Total payroll", Number(metrics.totalPayroll) > 0 ? money(metrics.totalPayroll) : "—", "Computed net salary", Wallet, "payruns", "green"],
+    ["Employees paid", metrics.employeesPaid || "—", Number(metrics.totalPaid) > 0 ? `${money(metrics.totalPaid)} recorded payments` : "No payments recorded", Users, "payslips", "blue"],
+    ["Pending payroll", Number(metrics.pendingPayroll) > 0 ? money(metrics.pendingPayroll) : "—", metrics.pendingPayslips ? `${metrics.pendingPayslips} unpaid or draft payslips` : "No pending payslips", Clock3, "payruns", "orange"],
+    ["Current payroll cycle", month, metrics.currentCycles ? `${metrics.currentCycles} open payruns` : "No open payruns", CalendarDays, "payruns", "violet"],
+    ["Total deductions", Number(metrics.totalDeductions) > 0 ? money(metrics.totalDeductions) : "—", "Computed payslip deductions", FileCheck2, "payslips", "orange"],
+    ["Total bonuses", Number(metrics.totalBonuses) > 0 ? money(metrics.totalBonuses) : "—", "Earning rules with BONUS in the code", Wallet, "rules", "green"],
+    ["Payslips generated", metrics.payslipsGenerated || "—", "For the selected payroll period", FileCheck2, "payslips", "blue"],
+    ["Average net salary", Number(metrics.averageSalary) > 0 ? money(metrics.averageSalary) : "—", "Per computed payslip", Activity, "reports", "violet"],
+    ["Approved time off", Number(data.totals.approvedLeaveDays) > 0 ? `${Number(data.totals.approvedLeaveDays)} days` : "—", data.totals.pendingLeaveRequests ? `${data.totals.pendingLeaveRequests} requests pending` : "No pending requests", Leaf, "leave", "green"],
+    ["Attendance health", data.totals.recordedAttendanceRate == null ? "—" : `${data.totals.recordedAttendanceRate}%`, data.totals.recordedAttendanceRate == null ? "No recorded days" : `${data.totals.lateDays} late days · ${data.totals.manualEdits} corrections`, Activity, "attendance", "blue"],
+    ["Current workforce", data.totals.currentEmployees || "—", "Active employment in this selection", Users, "employees", "violet"],
+    ["Contracts expiring", data.totals.contractsExpiring || "—", "Contracts ending in the selected month", FileCheck2, "contracts", "orange"],
   ] : [];
   return <div className="pp-dashboard pp-hr-dashboard">
     <WorkspaceSidebar

@@ -66,6 +66,21 @@ export type JobPosition = Prisma.JobPositionModel
  */
 export type Employee = Prisma.EmployeeModel
 /**
+ * Model EmployeeDocument
+ * Private self-service files. Content is only served through an ownership-checked API.
+ */
+export type EmployeeDocument = Prisma.EmployeeDocumentModel
+/**
+ * Model EmployeePreferences
+ * 
+ */
+export type EmployeePreferences = Prisma.EmployeePreferencesModel
+/**
+ * Model EmployeeNotificationRead
+ * A source key includes its status timestamp so a later decision becomes unread again.
+ */
+export type EmployeeNotificationRead = Prisma.EmployeeNotificationReadModel
+/**
  * Model EmployeeBankAccount
  * 
  */

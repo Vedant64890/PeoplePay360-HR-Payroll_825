@@ -562,13 +562,12 @@ Self-service portal:
 
 ### Employee Self-Service
 
-| Method | Endpoint                          | Description              |
-|:-------|:----------------------------------|:-------------------------|
-| GET    | `/api/employee/dashboard`         | Employee dashboard       |
-| POST   | `/api/employee/clock`             | Check in / check out     |
-| POST   | `/api/employee/leave`             | Submit leave request     |
-| POST   | `/api/employee/leave/:id/cancel`  | Withdraw leave request   |
-| PUT    | `/api/employee/profile`           | Update contact info      |
+The complete employee workspace includes dashboard, profile, attendance, schedule, time off, leave balances, contacts, contracts, payroll, payslips, documents, notifications and settings.
+
+See [Employee Module](EMPLOYEE_MODULE.md) for the feature matrix, architecture, database setup, complete API reference and verification instructions.
+
+For an existing database, run `npm run employee:setup` from `backend/` to install private document storage, preferences and notification receipts.
+
 
 ---
 
